@@ -70,10 +70,14 @@ class LiveUserItem {
 
   LiveUserItem.fromJson(Map<String, dynamic> json) {
     face = json['face'];
-    isReserveRecall = json['is_reserve_recall'];
+    isReserveRecall = json['is_reserve_recall'] is int
+        ? json['is_reserve_recall'] == 1
+        : json['is_reserve_recall'];
     jumpUrl = json['jump_url'];
-    mid = json['mid'];
-    roomId = json['room_id'];
+    mid = json['mid'] is String ? int.tryParse(json['mid']) : json['mid'];
+    roomId = json['room_id'] is String
+        ? int.tryParse(json['room_id'])
+        : json['room_id'];
     title = json['title'];
     uname = json['uname'];
   }
@@ -97,9 +101,13 @@ class UpItem {
 
   UpItem.fromJson(Map<String, dynamic> json) {
     face = json['face'];
-    hasUpdate = json['has_update'];
-    isReserveRecall = json['is_reserve_recall'];
-    mid = json['mid'];
+    hasUpdate = json['has_update'] is int
+        ? json['has_update'] == 1
+        : json['has_update'];
+    isReserveRecall = json['is_reserve_recall'] is int
+        ? json['is_reserve_recall'] == 1
+        : json['is_reserve_recall'];
+    mid = json['mid'] is String ? int.tryParse(json['mid']) : json['mid'];
     uname = json['uname'];
   }
 }
@@ -117,7 +125,7 @@ class MyInfo {
 
   MyInfo.fromJson(Map<String, dynamic> json) {
     face = json['face'];
-    mid = json['mid'];
+    mid = json['mid'] is String ? int.tryParse(json['mid']) : json['mid'];
     name = json['name'];
   }
 }

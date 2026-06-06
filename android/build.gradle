@@ -1,27 +1,65 @@
-buildscript {
-    ext.kotlin_version = '1.9.0'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 allprojects {
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         google()
         mavenCentral()
     }
 }
 
 rootProject.buildDir = '../build'
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
+
+subprojects {
+    afterEvaluate {
+        if (project.hasProperty('android')) {
+            project.android {
+                compileSdkVersion 34
+                if (namespace == null || namespace.isEmpty()) {
+                    namespace project.group
+                }
+            }
+        }
+    }
+}
+
+// 修复旧插件 AndroidManifest.xml 中 package 属性的兼容性问题
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android.sourceSets.all { sourceSet ->
+                if (sourceSet.manifest.srcFile.exists()) {
+                    def manifestFile = sourceSet.manifest.srcFile
+                    def manifestText = manifestFile.text
+                    // 移除 AndroidManifest.xml 中的 package 属性（AGP 7.0+ 不再支持）
+                    def cleanedManifest = manifestText.replaceAll(/<manifest[^>]*\spackage="[^"]*"/, { String match ->
+                        match.replaceAll(/\spackage="[^"]*"/, '')
+                    })
+                    if (manifestText != cleanedManifest) {
+                        manifestFile.write(cleanedManifest)
+                        println "Fixed deprecated package attribute in ${manifestFile}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 修复旧插件将警告视为错误的问题（Java 17 下 source/target 8 已过时）
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.tasks.withType(JavaCompile) {
+                options.compilerArgs.removeAll(['-Werror'])
+            }
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(':app')
 }

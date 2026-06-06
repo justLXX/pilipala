@@ -17,7 +17,12 @@ class MemberArticleDataModel {
         .map<MemberArticleItemModel>((e) => MemberArticleItemModel.fromJson(e))
         .toList();
     offset = json['offset'];
-    updateNum = json['update_num'];
+    final rawUpdateNum = json['update_num'];
+    if (rawUpdateNum is String) {
+      updateNum = int.tryParse(rawUpdateNum);
+    } else {
+      updateNum = rawUpdateNum as int?;
+    }
   }
 }
 

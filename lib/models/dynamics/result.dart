@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:pilipala/utils/parse_utils.dart';
 
 class DynamicsDataModel {
   DynamicsDataModel({
@@ -11,7 +12,8 @@ class DynamicsDataModel {
   String? offset;
 
   DynamicsDataModel.fromJson(Map<String, dynamic> json) {
-    hasMore = json['has_more'];
+    hasMore =
+        json['has_more'] is int ? json['has_more'] == 1 : json['has_more'];
     items = json['items']
         .map<DynamicItemModel>((e) => DynamicItemModel.fromJson(e))
         .toList();
@@ -43,7 +45,7 @@ class DynamicItemModel {
     modules = ItemModulesModel.fromJson(json['modules']);
     orig = json['orig'] != null ? ItemOrigModel.fromJson(json['orig']) : null;
     type = json['type'];
-    visible = json['visible'];
+    visible = json['visible'] is int ? json['visible'] == 1 : json['visible'];
   }
 }
 
@@ -67,7 +69,7 @@ class ItemOrigModel {
     isStr = json['is_str'];
     modules = ItemModulesModel.fromJson(json['modules']);
     type = json['type'];
-    visible = json['visible'];
+    visible = json['visible'] is int ? json['visible'] == 1 : json['visible'];
   }
 }
 
@@ -137,14 +139,17 @@ class ModuleAuthorModel {
 
   ModuleAuthorModel.fromJson(Map<String, dynamic> json) {
     face = json['face'];
-    following = json['following'];
+    following =
+        json['following'] is int ? json['following'] == 1 : json['following'];
     jumpUrl = json['jump_url'];
     label = json['label'];
-    mid = json['mid'];
+    mid = json['mid'] is String ? int.tryParse(json['mid']) : json['mid'];
     name = json['name'];
     pubAction = json['pub_action'];
     pubTime = json['pub_time'];
-    pubTs = json['pub_ts'] == 0 ? null : json['pub_ts'];
+    pubTs = json['pub_ts'] == 0 || json['pub_ts'] == '0'
+        ? null
+        : (json['pub_ts'] is String ? int.tryParse(json['pub_ts']) : json['pub_ts']);
     type = json['type'];
     vip = json['vip'];
   }
@@ -244,17 +249,27 @@ class Vote {
   int? voteId;
 
   Vote.fromJson(Map<String, dynamic> json) {
-    choiceCnt = json['choice_cnt'];
+    choiceCnt = json['choice_cnt'] is String
+        ? int.tryParse(json['choice_cnt'])
+        : json['choice_cnt'];
     share = json['share'];
-    defaultShare = json['default_share'];
+    defaultShare = json['default_share'] is String
+        ? int.tryParse(json['default_share'])
+        : json['default_share'];
     endTime = json['end_time'] is int
         ? json['end_time']
-        : int.parse(json['end_time']);
-    joinNum = json['join_num'];
-    status = json['status'];
-    type = json['type'];
-    uid = json['uid'];
-    voteId = json['vote_id'];
+        : int.tryParse(json['end_time'].toString());
+    joinNum = json['join_num'] is String
+        ? int.tryParse(json['join_num'])
+        : json['join_num'];
+    status = json['status'] is int
+        ? json['status']
+        : int.tryParse(json['status'].toString());
+    type = json['type'] is String ? int.tryParse(json['type']) : json['type'];
+    uid = json['uid'] is String ? int.tryParse(json['uid']) : json['uid'];
+    voteId = json['vote_id'] is String
+        ? int.tryParse(json['vote_id'])
+        : json['vote_id'];
   }
 }
 
@@ -286,7 +301,9 @@ class Ugc {
     headText = json['head_text'];
     idStr = json['id_str'];
     jumpUrl = json['jump_url'];
-    multiLine = json['multi_line'];
+    multiLine = json['multi_line'] is int
+        ? json['multi_line'] == 1
+        : json['multi_line'];
     title = json['title'];
   }
 }
@@ -321,13 +338,18 @@ class Reserve {
     desc1 = json['desc1'];
     desc2 = json['desc2'];
     jumpUrl = json['jump_url'];
-    reserveTotal = json['reserve_total'];
-    rid = json['rid'];
-    state = json['state'];
-    state = json['state'];
-    stype = json['stype'];
+    reserveTotal = json['reserve_total'] is String
+        ? int.tryParse(json['reserve_total'])
+        : json['reserve_total'];
+    rid = json['rid'] is String ? int.tryParse(json['rid']) : json['rid'];
+    state =
+        json['state'] is String ? int.tryParse(json['state']) : json['state'];
+    stype =
+        json['stype'] is String ? int.tryParse(json['stype']) : json['stype'];
     title = json['title'];
-    upMid = json['up_mid'];
+    upMid = json['up_mid'] is String
+        ? int.tryParse(json['up_mid'])
+        : json['up_mid'];
   }
 }
 
@@ -473,7 +495,7 @@ class DynamicTopicModel {
   String? name;
 
   DynamicTopicModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = json['id'] is String ? int.tryParse(json['id']) : json['id'];
     jumpUrl = json['jump_url'];
     name = json['name'];
   }
@@ -496,7 +518,7 @@ class DynamicArchiveModel {
     this.seasonId,
   });
 
-  int? aid;
+  String? aid;
   Map? badge;
   String? bvid;
   String? cover;
@@ -511,18 +533,22 @@ class DynamicArchiveModel {
   int? seasonId;
 
   DynamicArchiveModel.fromJson(Map<String, dynamic> json) {
-    aid = json['aid'] is String ? int.parse(json['aid']) : json['aid'];
+    aid = json['aid']?.toString();
     badge = json['badge'];
     bvid = json['bvid'] ?? json['epid'].toString() ?? ' ';
     cover = json['cover'];
-    disablePreview = json['disable_preview'];
+    disablePreview = json['disable_preview'] is String
+        ? int.tryParse(json['disable_preview'])
+        : json['disable_preview'];
     durationText = json['duration_text'];
     jumpUrl = json['jump_url'];
     stat = json['stat'] != null ? Stat.fromJson(json['stat']) : null;
     title = json['title'];
-    type = json['type'];
-    epid = json['epid'];
-    seasonId = json['season_id'];
+    type = json['type'] is String ? int.tryParse(json['type']) : json['type'];
+    epid = json['epid'] is String ? int.tryParse(json['epid']) : json['epid'];
+    seasonId = json['season_id'] is String
+        ? int.tryParse(json['season_id'])
+        : json['season_id'];
   }
 }
 
@@ -536,7 +562,7 @@ class DynamicDrawModel {
   List<DynamicDrawItemModel>? items;
 
   DynamicDrawModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = json['id'] is String ? int.tryParse(json['id']) : json['id'];
     // ignore: prefer_null_aware_operators
     items = json['items'] != null
         ? json['items']
@@ -607,7 +633,7 @@ class RichTextNodeItem {
     origText = json['orig_text'];
     text = json['text'];
     type = json['type'];
-    rid = json['rid'];
+    rid = json['rid']?.toString();
   }
 }
 
@@ -625,9 +651,11 @@ class Emoji {
   int? type;
   Emoji.fromJson(Map<String, dynamic> json) {
     iconUrl = json['icon_url'];
-    size = json['size'].toDouble();
+    size = json['size'] is num
+        ? json['size'].toDouble()
+        : double.tryParse(json['size'].toString());
     text = json['text'];
-    type = json['type'];
+    type = json['type'] is String ? int.tryParse(json['type']) : json['type'];
   }
 }
 
@@ -657,9 +685,16 @@ class OpusPicsModel {
   String? url;
 
   OpusPicsModel.fromJson(Map<String, dynamic> json) {
-    width = json['width'];
-    height = json['height'];
-    size = json['size'] != null ? json['size'].toInt() : 0;
+    width =
+        json['width'] is String ? int.tryParse(json['width']) : json['width'];
+    height = json['height'] is String
+        ? int.tryParse(json['height'])
+        : json['height'];
+    size = json['size'] != null
+        ? (json['size'] is String
+            ? int.tryParse(json['size'])
+            : json['size'].toInt())
+        : 0;
     src = json['src'];
     url = json['url'];
   }
@@ -679,11 +714,16 @@ class DynamicDrawItemModel {
   List? tags;
   int? width;
   DynamicDrawItemModel.fromJson(Map<String, dynamic> json) {
-    height = json['height'];
-    size = json['size'].toInt();
+    height = json['height'] is String
+        ? int.tryParse(json['height'])
+        : json['height'];
+    size = json['size'] is String
+        ? int.tryParse(json['size'])
+        : json['size'].toInt();
     src = json['src'];
     tags = json['tags'];
-    width = json['width'];
+    width =
+        json['width'] is String ? int.tryParse(json['width']) : json['width'];
   }
 }
 
@@ -712,18 +752,28 @@ class DynamicLiveModel {
     if (json['content'] != null) {
       Map<String, dynamic> data = jsonDecode(json['content']);
 
-      type = data['type'];
+      type = data['type'] is String ? int.tryParse(data['type']) : data['type'];
       Map livePlayInfo = data['live_play_info'];
-      uid = livePlayInfo['uid'];
+      uid = livePlayInfo['uid'] is String
+          ? int.tryParse(livePlayInfo['uid'])
+          : livePlayInfo['uid'];
       parentAreaName = livePlayInfo['parent_area_name'];
-      roomId = livePlayInfo['room_id'];
+      roomId = livePlayInfo['room_id'] is String
+          ? int.tryParse(livePlayInfo['room_id'])
+          : livePlayInfo['room_id'];
       liveId = livePlayInfo['live_id'];
-      liveStatus = livePlayInfo['live_status'];
+      liveStatus = livePlayInfo['live_status'] is String
+          ? int.tryParse(livePlayInfo['live_status'])
+          : livePlayInfo['live_status'];
       cover = livePlayInfo['cover'];
-      online = livePlayInfo['online'];
+      online = livePlayInfo['online'] is String
+          ? int.tryParse(livePlayInfo['online'])
+          : livePlayInfo['online'];
       areaName = livePlayInfo['area_name'];
       title = livePlayInfo['title'];
-      liveStartTime = livePlayInfo['live_start_time'];
+      liveStartTime = livePlayInfo['live_start_time'] is String
+          ? int.tryParse(livePlayInfo['live_start_time'])
+          : livePlayInfo['live_start_time'];
       watchedShow = livePlayInfo['watched_show'];
     }
   }
@@ -757,10 +807,14 @@ class DynamicLive2Model {
     cover = json['cover'];
     descFirst = json['desc_first'];
     descSecond = json['desc_second'];
-    id = json['id'];
+    id = json['id'] is String ? int.tryParse(json['id']) : json['id'];
     jumpUrl = json['jump_url'];
-    liveState = json['liv_state'];
-    reserveType = json['reserve_type'];
+    liveState = json['liv_state'] is String
+        ? int.tryParse(json['liv_state'])
+        : json['liv_state'];
+    reserveType = json['reserve_type'] is String
+        ? int.tryParse(json['reserve_type'])
+        : json['reserve_type'];
     title = json['title'];
   }
 }
@@ -796,7 +850,8 @@ class Comment {
 
   Comment.fromJson(Map<String, dynamic> json) {
     count = json['count'] == 0 ? null : json['count'].toString();
-    forbidden = json['forbidden'];
+    forbidden =
+        json['forbidden'] is int ? json['forbidden'] == 1 : json['forbidden'];
   }
 }
 
@@ -807,7 +862,8 @@ class ForWard {
 
   ForWard.fromJson(Map<String, dynamic> json) {
     count = json['count'] == 0 ? null : json['count'].toString();
-    forbidden = json['forbidden'];
+    forbidden =
+        json['forbidden'] is int ? json['forbidden'] == 1 : json['forbidden'];
   }
 }
 
@@ -825,8 +881,9 @@ class Like {
 
   Like.fromJson(Map<String, dynamic> json) {
     count = json['count'] == 0 ? null : json['count'].toString();
-    forbidden = json['forbidden'];
-    status = json['status'];
+    forbidden =
+        json['forbidden'] is int ? json['forbidden'] == 1 : json['forbidden'];
+    status = json['status'] is int ? json['status'] == 1 : json['status'];
   }
 }
 

@@ -414,9 +414,14 @@ class VideoIntroController extends GetxController {
   Future changeSeasonOrbangu(
     String bvid,
     int cid,
-    int? aid,
+    dynamic aid,
     String? cover,
   ) async {
+    // 将 String 类型的 aid 转换为 int
+    int? aidInt;
+    if (aid != null) {
+      aidInt = aid is String ? int.tryParse(aid) : aid;
+    }
     // 重新获取视频资源
     final VideoDetailController videoDetailCtr =
         Get.find<VideoDetailController>(tag: heroTag);
@@ -429,7 +434,7 @@ class VideoIntroController extends GetxController {
 
     videoDetailCtr
       ..bvid = bvid
-      ..oid.value = aid ?? IdUtils.bv2av(bvid)
+      ..oid.value = aidInt ?? IdUtils.bv2av(bvid)
       ..cid.value = cid
       ..danmakuCid.value = cid
       ..cover.value = cover ?? ''
@@ -442,7 +447,7 @@ class VideoIntroController extends GetxController {
       /// 未渲染回复组件时可能异常
       final VideoReplyController videoReplyCtr =
           Get.find<VideoReplyController>(tag: heroTag);
-      videoReplyCtr.aid = aid;
+      videoReplyCtr.aid = aid is String ? int.tryParse(aid) : aid;
       videoReplyCtr.queryReplyList(type: 'init');
     } catch (_) {}
     this.bvid = bvid;
@@ -526,7 +531,7 @@ class VideoIntroController extends GetxController {
       }
     }
     final String rBvid = isPages ? bvid : episodes[nextIndex].bvid;
-    final int rAid = isPages ? IdUtils.bv2av(bvid) : episodes[nextIndex].aid!;
+    final dynamic rAid = isPages ? IdUtils.bv2av(bvid) : episodes[nextIndex].aid;
     changeSeasonOrbangu(rBvid, cid, rAid, cover);
   }
 

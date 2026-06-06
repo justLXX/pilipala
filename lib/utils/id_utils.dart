@@ -11,8 +11,16 @@ class IdUtils {
   static const data =
       'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
 
-  /// av转bv
-  static String av2bv(int aid) {
+  /// av转bv，支持 int 和 String 类型的 aid
+  static String av2bv(dynamic aid) {
+    int aidInt;
+    if (aid is String) {
+      aidInt = int.parse(aid);
+    } else if (aid is int) {
+      aidInt = aid;
+    } else {
+      throw ArgumentError('aid must be int or String');
+    }
     List<String> bytes = [
       'B',
       'V',

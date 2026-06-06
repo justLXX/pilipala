@@ -5,7 +5,9 @@ import 'package:pilipala/models/common/reply_type.dart';
 import 'package:pilipala/models/video/reply/item.dart';
 
 class VideoReplyReplyController extends GetxController {
-  VideoReplyReplyController(this.aid, this.rpid, this.replyType);
+  VideoReplyReplyController(dynamic aid, this.rpid, this.replyType) {
+    this.aid = aid is String ? int.tryParse(aid) : aid;
+  }
   final ScrollController scrollController = ScrollController();
   // 视频aid 请求时使用的oid
   int? aid;

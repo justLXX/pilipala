@@ -211,7 +211,7 @@ class DynamicsController extends GetxController {
       case 'DYNAMIC_TYPE_UGC_SEASON':
         DynamicArchiveModel ugcSeason =
             item.modules.moduleDynamic.major.ugcSeason;
-        int aid = ugcSeason.aid!;
+        String? aid = ugcSeason.aid!;
         String bvid = IdUtils.av2bv(aid);
         String cover = ugcSeason.cover!;
         int cid = await SearchHttp.ab2c(bvid: bvid);

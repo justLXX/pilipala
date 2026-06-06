@@ -643,7 +643,7 @@ class VideoDetailController extends GetxController
       /// 未渲染回复组件时可能异常
       final VideoReplyController videoReplyCtr =
           Get.find<VideoReplyController>(tag: heroTag);
-      videoReplyCtr.aid = aidVal;
+      videoReplyCtr.aid = aidVal is String ? int.tryParse(aidVal) : aidVal;
       videoReplyCtr.queryReplyList(type: 'init');
     } catch (_) {}
     videoIntroCtr.lastPlayCid.value = cidVal;

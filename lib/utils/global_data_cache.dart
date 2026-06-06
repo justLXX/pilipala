@@ -55,8 +55,16 @@ class GlobalDataCache {
 
   // 异步初始化方法
   Future<void> initialize() async {
-    imgQuality = await setting.get(SettingBoxKey.defaultPicQa,
-        defaultValue: 10); // 设置全局变量
+    var picQualityValue = await setting.get(SettingBoxKey.defaultPicQa,
+        defaultValue: 10);
+    // 处理从 String 转换的情况（旧数据可能是 String 类型）
+    if (picQualityValue is String) {
+      imgQuality = int.tryParse(picQualityValue) ?? 10;
+    } else if (picQualityValue is int) {
+      imgQuality = picQualityValue;
+    } else {
+      imgQuality = 10;
+    }
     fullScreenGestureMode = FullScreenGestureMode.values[setting.get(
         SettingBoxKey.fullScreenGestureMode,
         defaultValue: FullScreenGestureMode.values.last.index) as int];

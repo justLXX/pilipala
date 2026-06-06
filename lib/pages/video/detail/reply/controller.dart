@@ -10,10 +10,12 @@ import 'package:pilipala/utils/storage.dart';
 
 class VideoReplyController extends GetxController {
   VideoReplyController(
-    this.aid,
+    dynamic aid,
     this.rpid,
     this.replyLevel,
-  );
+  ) {
+    this.aid = aid is String ? int.tryParse(aid) : aid;
+  }
   // 视频aid 请求时使用的oid
   int? aid;
   // 层级 2为楼中楼

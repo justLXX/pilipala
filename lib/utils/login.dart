@@ -32,8 +32,10 @@ class LoginUtils {
       DynamicsController dynamicsCtr = Get.find<DynamicsController>();
       dynamicsCtr.userLogin.value = status;
 
-      MediaController mediaCtr = Get.find<MediaController>();
-      mediaCtr.userLogin.value = status;
+      if (Get.isRegistered<MediaController>()) {
+        MediaController mediaCtr = Get.find<MediaController>();
+        mediaCtr.userLogin.value = status;
+      }
     } catch (err) {
       SmartDialog.showToast('refreshLoginStatus error: ${err.toString()}');
     }
@@ -84,8 +86,10 @@ class LoginUtils {
           final HomeController homeCtr = Get.find<HomeController>();
           homeCtr.updateLoginStatus(true);
           homeCtr.userFace.value = result['data'].face;
-          final MediaController mediaCtr = Get.find<MediaController>();
-          mediaCtr.mid = result['data'].mid;
+          if (Get.isRegistered<MediaController>()) {
+            final MediaController mediaCtr = Get.find<MediaController>();
+            mediaCtr.mid = result['data'].mid;
+          }
           await LoginUtils.refreshLoginStatus(true);
         } catch (err) {
           SmartDialog.show(builder: (BuildContext context) {

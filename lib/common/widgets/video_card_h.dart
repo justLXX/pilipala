@@ -42,7 +42,7 @@ class VideoCardH extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int aid = videoItem.aid;
+    final dynamic aid = videoItem.aid;
     final String bvid = videoItem.bvid;
     String type = 'video';
     try {
