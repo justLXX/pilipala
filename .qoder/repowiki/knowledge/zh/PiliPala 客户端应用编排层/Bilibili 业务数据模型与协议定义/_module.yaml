@@ -1,0 +1,20 @@
+schema_version: 1
+module_path: app/shared_models
+title: Bilibili 业务数据模型与协议定义
+scope:
+    - lib/models/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/shared_common
+    - path: app/feature_video
+    - path: app/feature_home
+    - path: app/feature_user
+    - path: app/feature_search
+    - path: app/feature_media
+    - path: app/feature_login
+    - path: app/core_infrastructure
+    - path: app/tests
+    - path: app/legacy_pages
+    - path: app/feature_main
+    - path: app/plugins

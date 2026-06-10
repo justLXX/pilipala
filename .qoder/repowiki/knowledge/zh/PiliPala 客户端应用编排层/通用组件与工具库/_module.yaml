@@ -1,0 +1,21 @@
+schema_version: 1
+module_path: app/shared_common
+title: 通用组件与工具库
+scope:
+    - lib/common/
+    - lib/shared/
+    - lib/utils/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/core_infrastructure
+    - path: app/shared_models
+    - path: app/feature_video
+    - path: app/feature_home
+    - path: app/feature_user
+    - path: app/feature_search
+    - path: app/feature_media
+    - path: app/feature_login
+    - path: app/plugins
+    - path: app/legacy_pages
+    - path: app/feature_main

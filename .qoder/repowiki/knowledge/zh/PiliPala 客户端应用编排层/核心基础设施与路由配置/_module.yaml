@@ -1,0 +1,25 @@
+schema_version: 1
+module_path: app/core_infrastructure
+title: 核心基础设施与路由配置
+scope:
+    - lib/core/
+    - lib/http/
+    - lib/router/
+    - lib/services/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/shared_common
+    - path: app/feature_login
+    - path: app/feature_video
+    - path: app/feature_home
+    - path: app/feature_user
+    - path: app/feature_search
+    - path: app/feature_media
+    - path: app/shared_models
+    - path: app/tests
+    - path: app/legacy_pages
+    - path: android_platform
+    - path: ios_platform
+    - path: desktop_platforms
+    - path: app/feature_main

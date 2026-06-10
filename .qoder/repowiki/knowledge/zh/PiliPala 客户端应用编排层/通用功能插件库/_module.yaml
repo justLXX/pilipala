@@ -1,0 +1,19 @@
+schema_version: 1
+module_path: app/plugins
+title: 通用功能插件库
+scope:
+    - lib/plugin/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/feature_video
+    - path: app/legacy_pages
+    - path: app/feature_home
+    - path: app/shared_common
+    - path: app/tests
+    - path: app/feature_user
+    - path: app/feature_search
+    - path: app/feature_media
+    - path: app/feature_main
+    - path: app/feature_login
+    - path: app/shared_models

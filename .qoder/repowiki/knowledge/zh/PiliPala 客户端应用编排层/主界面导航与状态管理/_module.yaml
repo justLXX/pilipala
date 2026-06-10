@@ -1,0 +1,20 @@
+schema_version: 1
+module_path: app/feature_main
+title: 主界面导航与状态管理
+scope:
+    - lib/features/main/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/feature_home
+    - path: app/feature_media
+    - path: app/feature_video
+    - path: app/feature_user
+    - path: app/feature_search
+    - path: app/feature_login
+    - path: app/legacy_pages
+    - path: app/tests
+    - path: app/plugins
+    - path: app/core_infrastructure
+    - path: app/shared_models
+    - path: app/shared_common

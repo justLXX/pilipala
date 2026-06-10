@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: ios_platform
+title: iOS 平台原生配置与入口
+scope:
+    - ios/
+source_files: []
+depends_on: []
+related_to:
+    - path: android_platform
+    - path: desktop_platforms
+    - path: app/core_infrastructure

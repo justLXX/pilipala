@@ -1,0 +1,19 @@
+schema_version: 1
+module_path: app/feature_video
+title: 视频详情与播放功能模块
+scope:
+    - lib/features/video/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/feature_home
+    - path: app/feature_media
+    - path: app/legacy_pages
+    - path: app/feature_search
+    - path: app/plugins
+    - path: app/feature_user
+    - path: app/feature_main
+    - path: app/core_infrastructure
+    - path: app/shared_models
+    - path: app/shared_common
+    - path: app/tests

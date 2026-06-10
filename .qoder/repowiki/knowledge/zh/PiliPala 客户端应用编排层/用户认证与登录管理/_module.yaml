@@ -1,0 +1,17 @@
+schema_version: 1
+module_path: app/feature_login
+title: 用户认证与登录管理
+scope:
+    - lib/features/login/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/feature_user
+    - path: app/feature_media
+    - path: app/core_infrastructure
+    - path: app/shared_models
+    - path: app/shared_common
+    - path: app/feature_main
+    - path: app/legacy_pages
+    - path: app/tests
+    - path: app/plugins

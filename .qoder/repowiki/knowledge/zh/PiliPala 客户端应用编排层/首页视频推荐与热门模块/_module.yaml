@@ -1,0 +1,19 @@
+schema_version: 1
+module_path: app/feature_home
+title: 首页视频推荐与热门模块
+scope:
+    - lib/features/home/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/feature_video
+    - path: app/feature_search
+    - path: app/legacy_pages
+    - path: app/feature_main
+    - path: app/feature_user
+    - path: app/core_infrastructure
+    - path: app/shared_models
+    - path: app/shared_common
+    - path: app/plugins
+    - path: app/feature_media
+    - path: app/tests

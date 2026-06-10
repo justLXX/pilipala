@@ -1,0 +1,357 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: zh-CN
+branch: main
+exported_at: "2026-06-10T00:10:13Z"
+modules:
+    "":
+        dir_name: PiliPala 跨平台 Flutter 应用根模块
+        title: PiliPala 跨平台 Flutter 应用根模块
+        scope:
+            - README.md
+            - .gitignore
+            - .flutter-plugins
+            - .flutter-plugins-dependencies
+            - .metadata
+            - CLAUDE.md
+            - LICENSE
+            - analysis_options.yaml
+            - pubspec.lock
+            - pubspec.yaml
+            - temp.json
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    android_platform:
+        dir_name: Android 应用壳与构建配置
+        title: Android 应用壳与构建配置
+        scope:
+            - android/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: ios_platform
+            - path: desktop_platforms
+            - path: app/core_infrastructure
+    app:
+        dir_name: PiliPala 客户端应用编排层
+        title: PiliPala 客户端应用编排层
+        scope:
+            - lib/
+            - test/
+        source_files: []
+        children:
+            - app/tests
+            - app/legacy_pages
+            - app/core_infrastructure
+            - app/feature_login
+            - app/feature_main
+            - app/feature_media
+            - app/feature_video
+            - app/shared_common
+            - app/shared_models
+            - app/feature_search
+            - app/plugins
+            - app/feature_user
+            - app/feature_home
+        depends_on: []
+        related_to: []
+    app/core_infrastructure:
+        dir_name: 核心基础设施与路由配置
+        title: 核心基础设施与路由配置
+        scope:
+            - lib/core/
+            - lib/http/
+            - lib/router/
+            - lib/services/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/shared_common
+            - path: app/feature_login
+            - path: app/feature_video
+            - path: app/feature_home
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_media
+            - path: app/shared_models
+            - path: app/tests
+            - path: app/legacy_pages
+            - path: android_platform
+            - path: ios_platform
+            - path: desktop_platforms
+            - path: app/feature_main
+    app/feature_home:
+        dir_name: 首页视频推荐与热门模块
+        title: 首页视频推荐与热门模块
+        scope:
+            - lib/features/home/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_video
+            - path: app/feature_search
+            - path: app/legacy_pages
+            - path: app/feature_main
+            - path: app/feature_user
+            - path: app/core_infrastructure
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/plugins
+            - path: app/feature_media
+            - path: app/tests
+    app/feature_login:
+        dir_name: 用户认证与登录管理
+        title: 用户认证与登录管理
+        scope:
+            - lib/features/login/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_user
+            - path: app/feature_media
+            - path: app/core_infrastructure
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/feature_main
+            - path: app/legacy_pages
+            - path: app/tests
+            - path: app/plugins
+    app/feature_main:
+        dir_name: 主界面导航与状态管理
+        title: 主界面导航与状态管理
+        scope:
+            - lib/features/main/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_home
+            - path: app/feature_media
+            - path: app/feature_video
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_login
+            - path: app/legacy_pages
+            - path: app/tests
+            - path: app/plugins
+            - path: app/core_infrastructure
+            - path: app/shared_models
+            - path: app/shared_common
+    app/feature_media:
+        dir_name: 媒体库功能模块
+        title: 媒体库功能模块
+        scope:
+            - lib/features/media/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_video
+            - path: app/feature_main
+            - path: app/feature_user
+            - path: app/feature_login
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/core_infrastructure
+            - path: app/feature_search
+            - path: app/feature_home
+            - path: app/legacy_pages
+            - path: app/tests
+            - path: app/plugins
+    app/feature_search:
+        dir_name: 搜索功能模块
+        title: 搜索功能模块
+        scope:
+            - lib/features/search/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_home
+            - path: app/feature_video
+            - path: app/feature_user
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/core_infrastructure
+            - path: app/feature_main
+            - path: app/feature_media
+            - path: app/legacy_pages
+            - path: app/tests
+            - path: app/plugins
+    app/feature_user:
+        dir_name: 用户资料与互动管理
+        title: 用户资料与互动管理
+        scope:
+            - lib/features/user/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_login
+            - path: app/feature_media
+            - path: app/feature_home
+            - path: app/feature_video
+            - path: app/feature_search
+            - path: app/feature_main
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/core_infrastructure
+            - path: app/legacy_pages
+            - path: app/tests
+            - path: app/plugins
+    app/feature_video:
+        dir_name: 视频详情与播放功能模块
+        title: 视频详情与播放功能模块
+        scope:
+            - lib/features/video/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_home
+            - path: app/feature_media
+            - path: app/legacy_pages
+            - path: app/feature_search
+            - path: app/plugins
+            - path: app/feature_user
+            - path: app/feature_main
+            - path: app/core_infrastructure
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/tests
+    app/legacy_pages:
+        dir_name: 页面视图与业务逻辑层
+        title: 页面视图与业务逻辑层
+        scope:
+            - lib/pages/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_home
+            - path: app/feature_video
+            - path: app/plugins
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_media
+            - path: app/feature_login
+            - path: app/feature_main
+            - path: app/shared_models
+            - path: app/shared_common
+            - path: app/core_infrastructure
+            - path: app/tests
+    app/plugins:
+        dir_name: 通用功能插件库
+        title: 通用功能插件库
+        scope:
+            - lib/plugin/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/feature_video
+            - path: app/legacy_pages
+            - path: app/feature_home
+            - path: app/shared_common
+            - path: app/tests
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_media
+            - path: app/feature_main
+            - path: app/feature_login
+            - path: app/shared_models
+    app/shared_common:
+        dir_name: 通用组件与工具库
+        title: 通用组件与工具库
+        scope:
+            - lib/common/
+            - lib/shared/
+            - lib/utils/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/core_infrastructure
+            - path: app/shared_models
+            - path: app/feature_video
+            - path: app/feature_home
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_media
+            - path: app/feature_login
+            - path: app/plugins
+            - path: app/legacy_pages
+            - path: app/feature_main
+    app/shared_models:
+        dir_name: Bilibili 业务数据模型与协议定义
+        title: Bilibili 业务数据模型与协议定义
+        scope:
+            - lib/models/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/shared_common
+            - path: app/feature_video
+            - path: app/feature_home
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_media
+            - path: app/feature_login
+            - path: app/core_infrastructure
+            - path: app/tests
+            - path: app/legacy_pages
+            - path: app/feature_main
+            - path: app/plugins
+    app/tests:
+        dir_name: 测试基础设施与单元验证
+        title: 测试基础设施与单元验证
+        scope:
+            - test/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: app/core_infrastructure
+            - path: app/shared_models
+            - path: app/feature_home
+            - path: app/feature_video
+            - path: app/feature_user
+            - path: app/feature_search
+            - path: app/feature_media
+            - path: app/feature_login
+            - path: app/feature_main
+            - path: app/legacy_pages
+            - path: app/plugins
+    desktop_platforms:
+        dir_name: 桌面平台原生宿主层
+        title: 桌面平台原生宿主层
+        scope:
+            - linux/
+            - macos/
+            - windows/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: android_platform
+            - path: ios_platform
+            - path: app/core_infrastructure
+    ios_platform:
+        dir_name: iOS 平台原生配置与入口
+        title: iOS 平台原生配置与入口
+        scope:
+            - ios/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: android_platform
+            - path: desktop_platforms
+            - path: app/core_infrastructure

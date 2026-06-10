@@ -1,0 +1,20 @@
+schema_version: 1
+module_path: app/feature_media
+title: 媒体库功能模块
+scope:
+    - lib/features/media/
+source_files: []
+depends_on: []
+related_to:
+    - path: app/feature_video
+    - path: app/feature_main
+    - path: app/feature_user
+    - path: app/feature_login
+    - path: app/shared_models
+    - path: app/shared_common
+    - path: app/core_infrastructure
+    - path: app/feature_search
+    - path: app/feature_home
+    - path: app/legacy_pages
+    - path: app/tests
+    - path: app/plugins

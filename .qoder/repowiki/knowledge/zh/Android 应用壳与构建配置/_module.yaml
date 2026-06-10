@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: android_platform
+title: Android 应用壳与构建配置
+scope:
+    - android/
+source_files: []
+depends_on: []
+related_to:
+    - path: ios_platform
+    - path: desktop_platforms
+    - path: app/core_infrastructure
