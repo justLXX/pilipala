@@ -107,7 +107,9 @@ class DynamicsController extends GetxController {
     page = 1;
     initialValue.value = value;
     await queryFollowDynamic();
-    scrollController.jumpTo(0);
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(0);
+    }
   }
 
   pushDetail(item, floor, {action = 'all'}) async {
@@ -267,6 +269,7 @@ class DynamicsController extends GetxController {
 
   // 返回顶部并刷新
   void animateToTop() async {
+    if (!scrollController.hasClients) return;
     if (scrollController.offset >=
         MediaQuery.of(Get.context!).size.height * 5) {
       scrollController.jumpTo(0);

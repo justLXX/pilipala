@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' show Random;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -15,6 +16,7 @@ import '../utils/storage.dart';
 import '../utils/utils.dart';
 import 'api.dart';
 import 'constants.dart';
+import 'api_log_interceptor.dart';
 import 'interceptor.dart';
 
 class Request {
@@ -181,7 +183,7 @@ class Request {
     // );
 
     /// 设置代理
-    if (enableSystemProxy) {
+    if (!kIsWeb && enableSystemProxy) {
       dio.httpClientAdapter = IOHttpClientAdapter(
         createHttpClient: () {
           final HttpClient client = HttpClient();
@@ -200,12 +202,8 @@ class Request {
     //添加拦截器
     dio.interceptors.add(ApiInterceptor());
 
-    // 日志拦截器 输出请求、响应内容
-    dio.interceptors.add(LogInterceptor(
-      request: false,
-      requestHeader: false,
-      responseHeader: false,
-    ));
+    // API 日志拦截器 输出每个接口的请求结果
+    dio.interceptors.add(ApiLogInterceptor());
 
     dio.transformer = BackgroundTransformer();
     dio.options.validateStatus = (int? status) {
@@ -311,7 +309,7 @@ class Request {
   String headerUa({type = 'mob'}) {
     String headerUa = '';
     if (type == 'mob') {
-      if (Platform.isIOS) {
+      if (!kIsWeb && Platform.isIOS) {
         headerUa =
             'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Mobile/15E148 Safari/604.1';
       } else {

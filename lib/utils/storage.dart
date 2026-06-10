@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pilipala/models/user/info.dart';
@@ -11,9 +12,13 @@ class GStrorage {
   static late final Box<dynamic> video;
 
   static Future<void> init() async {
-    final Directory dir = await getApplicationSupportDirectory();
-    final String path = dir.path;
-    await Hive.initFlutter('$path/hive');
+    if (kIsWeb) {
+      // web 平台直接使用 Hive.initFlutter（内部使用 IndexedDB）
+      await Hive.initFlutter();
+    } else {
+      final Directory dir = await getApplicationSupportDirectory();
+      await Hive.initFlutter('${dir.path}/hive');
+    }
     regAdapter();
     // 登录用户信息
     userInfo = await Hive.openBox(

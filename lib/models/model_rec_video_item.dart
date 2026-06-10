@@ -31,6 +31,9 @@ class RecVideoItemModel {
   int? isFollowed;
   String? rcmdReason;
 
+  /// Alias for [id], for compatibility with VideoCardH/V widgets.
+  int? get aid => id;
+
   RecVideoItemModel.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     bvid = json["bvid"];
@@ -58,6 +61,10 @@ class Stat {
   int? view;
   int? like;
   int? danmu;
+
+  /// Alias for [danmu], for compatibility with VideoCardH widget.
+  int? get danmaku => danmu;
+
   Stat.fromJson(Map<String, dynamic> json) {
     // 无需在model中转换以保留原始数据，在view层处理即可
     view = json["view"];

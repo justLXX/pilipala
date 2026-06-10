@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -83,7 +85,7 @@ class VideoCardH extends StatelessWidget {
         videoItem,
         SmartDialog.dismiss,
       ),
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.fromLTRB(
             StyleString.safeSpace, 5, StyleString.safeSpace, 5),
         child: LayoutBuilder(
@@ -94,14 +96,15 @@ class VideoCardH extends StatelessWidget {
                         MediaQuery.textScalerOf(context).scale(1.0)) /
                 2;
             return Container(
-              constraints: const BoxConstraints(minHeight: 88),
-              height: width / StyleString.aspectRatio,
+              constraints:
+                  BoxConstraints(minHeight: max(88.0, width / StyleString.aspectRatio)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  AspectRatio(
-                    aspectRatio: StyleString.aspectRatio,
+                  SizedBox(
+                    width: width,
+                    height: width / StyleString.aspectRatio,
                     child: LayoutBuilder(
                       builder: (BuildContext context,
                           BoxConstraints boxConstraints) {
@@ -193,6 +196,7 @@ class VideoContent extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(10, 0, 6, 0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (source == 'normal' || source == 'later') ...[
@@ -206,9 +210,8 @@ class VideoContent extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ] else ...[
-              RichText(
-                maxLines: 2,
-                text: TextSpan(
+              Text.rich(
+                TextSpan(
                   children: [
                     for (final i in videoItem.titleList) ...[
                       TextSpan(
@@ -224,9 +227,10 @@ class VideoContent extends StatelessWidget {
                     ]
                   ],
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
-            const Spacer(),
             // if (videoItem.rcmdReason != null &&
             //     videoItem.rcmdReason.content != '')
             //   Container(

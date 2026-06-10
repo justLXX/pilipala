@@ -1,7 +1,7 @@
 // final _loggerFactory =
 
 import 'dart:io';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -18,11 +18,9 @@ class PiliLogger extends Logger {
   @override
   void log(Level level, dynamic message,
       {Object? error, StackTrace? stackTrace, DateTime? time}) async {
-    if (level == Level.error) {
+    if (level == Level.error && !kIsWeb) {
       String dir = (await getApplicationDocumentsDirectory()).path;
-      // 创建logo文件
       final String filename = p.join(dir, ".pili_logs");
-      // 添加至文件末尾
       await File(filename).writeAsString(
         "**${DateTime.now()}** \n $message \n $stackTrace",
         mode: FileMode.writeOnlyAppend,
@@ -43,6 +41,7 @@ Future<File> getLogsPath() async {
 }
 
 Future<bool> clearLogs() async {
+  if (kIsWeb) return true;
   String dir = (await getApplicationDocumentsDirectory()).path;
   final String filename = p.join(dir, ".pili_logs");
   final file = File(filename);

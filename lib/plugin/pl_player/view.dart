@@ -109,24 +109,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _.videoPlayerController!.playOrPause();
   }
 
-  void doubleTapFuc(String type) {
-    if (!enableQuickDouble) {
-      onDoubleTapCenter();
-      return;
-    }
-    switch (type) {
-      case 'left':
-        // 双击左边区域 👈
-        onDoubleTapSeekBackward();
-        break;
-      case 'center':
-        onDoubleTapCenter();
-        break;
-      case 'right':
-        // 双击右边区域 👈
-        onDoubleTapSeekForward();
-        break;
-    }
+  void doubleTapFuc() {
+    onDoubleTapCenter();
   }
 
   @override
@@ -588,18 +572,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               if (_.videoType == 'live' || _.controlsLock.value) {
                 return;
               }
-              final double totalWidth = MediaQuery.sizeOf(context).width;
-              final double tapPosition = details.localPosition.dx;
-              final double sectionWidth = totalWidth / 3;
-              String type = 'left';
-              if (tapPosition < sectionWidth) {
-                type = 'left';
-              } else if (tapPosition < sectionWidth * 2) {
-                type = 'center';
-              } else {
-                type = 'right';
-              }
-              doubleTapFuc(type);
+              doubleTapFuc();
             },
             onLongPressStart: (LongPressStartDetails detail) {
               feedBack();

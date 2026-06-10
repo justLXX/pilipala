@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:pilipala/features/home/data/video_repository.dart'
+    as features_repo;
+import 'package:pilipala/features/home/presentation/home_controller.dart'
+    as features_home;
 import 'package:pilipala/models/common/dynamic_badge_mode.dart';
 import 'package:pilipala/pages/dynamics/index.dart';
-import 'package:pilipala/pages/home/index.dart';
 import 'package:pilipala/pages/media/index.dart';
 import 'package:pilipala/pages/rank/index.dart';
 import 'package:pilipala/utils/event_bus.dart';
@@ -22,7 +25,7 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   final MainController _mainController = Get.put(MainController());
-  late HomeController _homeController;
+  features_home.HomeController? _featuresHomeController;
   RankController? _rankController;
   DynamicsController? _dynamicController;
   MediaController? _mediaController;
@@ -45,20 +48,6 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     feedBack();
     _mainController.pageController.jumpToPage(value);
     var currentPage = _mainController.pages[value];
-    if (currentPage is HomePage) {
-      if (_homeController.flag) {
-        // 单击返回顶部 双击并刷新
-        if (DateTime.now().millisecondsSinceEpoch - _lastSelectTime! < 500) {
-          _homeController.onRefresh();
-        } else {
-          _homeController.animateToTop();
-        }
-        _lastSelectTime = DateTime.now().millisecondsSinceEpoch;
-      }
-      _homeController.flag = true;
-    } else {
-      _homeController.flag = false;
-    }
 
     if (currentPage is RankPage) {
       if (_rankController!.flag) {
@@ -97,7 +86,9 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   }
 
   void controllerInit() {
-    _homeController = Get.put(HomeController());
+    // 注册 features 层依赖，供新版首页使用
+    Get.put(features_repo.VideoRepository());
+    _featuresHomeController = Get.put(features_home.HomeController());
     if (_mainController.pagesIds.contains(1)) {
       _rankController = Get.put(RankController());
     }
@@ -110,21 +101,25 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void dispose() async {
-    await GStrorage.close();
+  void dispose() {
+    // Note: Do NOT close GStrorage here as it's needed throughout app lifecycle.
+    // GStrorage.close() should only be called when the app is terminating.
     EventBus().off(EventName.loginEvent);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Box localCache = GStrorage.localCache;
+    // Safely access localCache, skip if box is closed
+    final Box localCache = GStrorage.localCache;
     double statusBarHeight = MediaQuery.of(context).padding.top;
     double sheetHeight = MediaQuery.sizeOf(context).height -
         MediaQuery.of(context).padding.top -
         MediaQuery.sizeOf(context).width * 9 / 16;
-    localCache.put('sheetHeight', sheetHeight);
-    localCache.put('statusBarHeight', statusBarHeight);
+    if (localCache.isOpen) {
+      localCache.put('sheetHeight', sheetHeight);
+      localCache.put('statusBarHeight', statusBarHeight);
+    }
     return PopScope(
       canPop: false,
       onPopInvoked: (bool didPop) async {

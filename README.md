@@ -119,6 +119,27 @@ QQ 频道: https://pd.qq.com/s/365esodk3
   - [x] 自动全屏
 - [ ] 等等
 
+## 架构迁移状态
+
+项目正在从传统的 `pages/` 扁平结构迁移到 `features/` 三层架构（data/domain/presentation）。
+
+### 当前进度
+
+| 指标 | 状态 | 说明 |
+|------|------|------|
+| 已迁移模块 | 6个 | home, video, search, user, media, login |
+| ✅ **已完成模块** | **4个** | **home, video, search, user 达到100%完成度** |
+| 待迁移模块 | 49个 | 其中5个有Spec，44个无Spec |
+| 路由接入 | 4/6 | media 和 login 模块未注册路由 |
+| 依赖注入 | ❌ | 核心服务已注册，feature 层未连接 |
+| ✅ CSRF Token | ✅ 已修复 | 所有POST请求可正常携带token |
+
+### 迁移策略
+
+1. **优先级排序**：P0 热门排行 → P1 动态/直播/消息 → P2 设置/媒体库子模块
+2. **迁移步骤**：创建三层结构 → 迁移逻辑 → 注册路由和DI → 清理旧代码
+3. **详细进度**：见 [架构文档](docs/spec/architecture/01-overview.md) 第7节
+
 ## 下载
 
 可以通过右侧 Releases 进行下载或拉取代码到本地进行编译

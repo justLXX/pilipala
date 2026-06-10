@@ -11,7 +11,7 @@ Box videoStorage = GStrorage.video;
 Box userInfoCache = GStrorage.userInfo;
 
 class GlobalDataCache {
-  late int imgQuality;
+  int imgQuality = 50;
   late FullScreenGestureMode fullScreenGestureMode;
   late bool enablePlayerControlAnimation;
   late List<String> actionTypeSort;
@@ -55,8 +55,8 @@ class GlobalDataCache {
 
   // 异步初始化方法
   Future<void> initialize() async {
-    var picQualityValue = await setting.get(SettingBoxKey.defaultPicQa,
-        defaultValue: 10);
+    var picQualityValue =
+        await setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
     // 处理从 String 转换的情况（旧数据可能是 String 类型）
     if (picQualityValue is String) {
       imgQuality = int.tryParse(picQualityValue) ?? 10;

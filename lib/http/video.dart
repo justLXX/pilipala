@@ -122,6 +122,15 @@ class VideoHttp {
         List<int> blackMidsList =
             setting.get(SettingBoxKey.blackMidsList, defaultValue: [-1]);
         for (var i in res.data['data']['list']) {
+          // 过滤推广/广告视频
+          if (i['is_ad'] == true ||
+              i['is_ad'] == 1 ||
+              i['ad_type'] != null ||
+              i['goto'] == 'ad' ||
+              i['goto'] == 'ad_av' ||
+              i['goto'] == 'ad_web') {
+            continue;
+          }
           if (!blackMidsList.contains(i['owner']['mid'])) {
             list.add(HotVideoItemModel.fromJson(i));
           }

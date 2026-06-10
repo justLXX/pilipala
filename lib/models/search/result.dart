@@ -2,9 +2,11 @@ import 'package:pilipala/utils/em.dart';
 import 'package:pilipala/utils/utils.dart';
 
 class SearchVideoModel {
-  SearchVideoModel({this.list});
+  SearchVideoModel({this.list, this.numPages});
   List<SearchVideoItemModel>? list;
+  int? numPages;
   SearchVideoModel.fromJson(Map<String, dynamic> json) {
+    numPages = json['numPages'];
     list = json['result'] == null
         ? []
         : json['result']

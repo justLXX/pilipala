@@ -12,7 +12,7 @@ import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/reply.dart';
 import 'package:pilipala/models/common/reply_type.dart';
 import 'package:pilipala/models/video/reply/item.dart';
-import 'package:pilipala/pages/main/index.dart';
+import 'package:pilipala/features/main/presentation/main_controller.dart';
 import 'package:pilipala/pages/video/detail/index.dart';
 import 'package:pilipala/pages/video/detail/reply_new/index.dart';
 import 'package:pilipala/plugin/pl_gallery/index.dart';

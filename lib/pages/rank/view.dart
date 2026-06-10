@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/utils/feed_back.dart';
+import 'package:universal_platform/universal_platform.dart';
 import './controller.dart';
 
 class RankPage extends StatefulWidget {
@@ -40,7 +41,7 @@ class _RankPageState extends State<RankPage>
         toolbarHeight: 0,
         elevation: 0,
         backgroundColor: Colors.transparent,
-        systemOverlayStyle: Platform.isAndroid
+        systemOverlayStyle: (!kIsWeb && UniversalPlatform.isAndroid)
             ? SystemUiOverlayStyle(
                 statusBarIconBrightness:
                     Theme.of(context).brightness == Brightness.dark

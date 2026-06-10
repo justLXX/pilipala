@@ -1,4 +1,6 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_platform/universal_platform.dart';
+import 'package:media_kit/media_kit.dart';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
@@ -10,37 +12,45 @@ import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/common/widgets/custom_toast.dart';
+import 'package:pilipala/core/di/dependency_injection.dart';
+import 'package:pilipala/features/search/presentation/search_page.dart';
+import 'package:pilipala/features/video/presentation/video_detail_page.dart';
 import 'package:pilipala/http/init.dart';
 import 'package:pilipala/models/common/color_type.dart';
 import 'package:pilipala/models/common/theme_type.dart';
-import 'package:pilipala/pages/search/index.dart';
-import 'package:pilipala/pages/video/detail/index.dart';
 import 'package:pilipala/router/app_pages.dart';
-import 'package:pilipala/pages/main/view.dart';
+import 'package:pilipala/features/main/presentation/main_page.dart'
+    as features_main;
 import 'package:pilipala/services/service_locator.dart';
 import 'package:pilipala/utils/app_scheme.dart';
 import 'package:pilipala/utils/data.dart';
 import 'package:pilipala/utils/global_data_cache.dart';
 import 'package:pilipala/utils/storage.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:pilipala/utils/recommend_filter.dart';
 import 'package:catcher_2/catcher_2.dart';
 import './services/loggeer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+  if (!kIsWeb) {
+    MediaKit.ensureInitialized();
+  }
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   await GStrorage.init();
-  clearLogs();
+  if (!kIsWeb) {
+    clearLogs();
+  }
   Request();
   await Request.setCookie();
 
-  // 异常捕获 logo记录
+  // 初始化依赖注入
+  DependencyInjection.init();
+
+  // 异常捕获日志记录
   final Catcher2Options releaseConfig = Catcher2Options(
     SilentReportMode(),
-    [FileHandler(await getLogsPath())],
+    kIsWeb ? [ConsoleHandler()] : [FileHandler(await getLogsPath())],
   );
 
   Catcher2(
@@ -51,7 +61,7 @@ void main() async {
   );
 
   // 小白条、导航栏沉浸
-  if (Platform.isAndroid) {
+  if (!kIsWeb && UniversalPlatform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     if (androidInfo.version.sdkInt >= 29) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -63,7 +73,9 @@ void main() async {
     ));
   }
 
-  PiliSchame.init();
+  if (!kIsWeb) {
+    PiliSchame.init();
+  }
   await GlobalDataCache().initialize();
 }
 
@@ -89,7 +101,7 @@ class MyApp extends StatelessWidget {
         setting.get(SettingBoxKey.defaultTextScale, defaultValue: 1.0);
 
     // 强制设置高帧率
-    if (Platform.isAndroid) {
+    if (!kIsWeb && UniversalPlatform.isAndroid) {
       try {
         late List modes;
         FlutterDisplayMode.supported.then((value) {
@@ -105,7 +117,7 @@ class MyApp extends StatelessWidget {
       } catch (_) {}
     }
 
-    if (Platform.isAndroid) {
+    if (!kIsWeb && UniversalPlatform.isAndroid) {
       return AndroidApp(
         brandColor: brandColor,
         isDynamicColor: isDynamicColor,
@@ -251,7 +263,7 @@ class BuildMainApp extends StatelessWidget {
       supportedLocales: const [Locale("zh", "CN"), Locale("en", "US")],
       fallbackLocale: const Locale("zh", "CN"),
       getPages: Routes.getPages,
-      home: const MainApp(),
+      home: const features_main.MainApp(),
       builder: (BuildContext context, Widget? child) {
         return FlutterSmartDialog(
           toastBuilder: (String msg) => CustomToast(msg: msg),

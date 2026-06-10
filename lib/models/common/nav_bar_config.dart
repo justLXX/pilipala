@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../pages/dynamics/index.dart';
-import '../../pages/home/index.dart';
-import '../../pages/media/index.dart';
-import '../../pages/rank/index.dart';
+import '../../features/home/presentation/home_page.dart' as features;
+import '../../features/media/presentation/media_page.dart' as features_media;
+import '../../features/dynamics/presentation/dynamics_page.dart' as features_dynamics;
+import '../../features/rank/presentation/rank_page.dart' as features_rank;
 
 List defaultNavigationBars = [
   {
@@ -18,7 +18,7 @@ List defaultNavigationBars = [
     ),
     'label': "首页",
     'count': 0,
-    'page': const HomePage(),
+    'page': const features.HomePage(),
   },
   {
     'id': 1,
@@ -32,7 +32,7 @@ List defaultNavigationBars = [
     ),
     'label': "排行榜",
     'count': 0,
-    'page': const RankPage(),
+    'page': const features_rank.RankPage(),
   },
   {
     'id': 2,
@@ -46,7 +46,7 @@ List defaultNavigationBars = [
     ),
     'label': "动态",
     'count': 0,
-    'page': const DynamicsPage(),
+    'page': const features_dynamics.DynamicsPage(),
   },
   {
     'id': 3,
@@ -60,6 +60,6 @@ List defaultNavigationBars = [
     ),
     'label': "媒体库",
     'count': 0,
-    'page': const MediaPage(),
+    'page': const features_media.MediaPage(),
   }
 ];

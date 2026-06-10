@@ -68,6 +68,7 @@ class VideoDetailData {
   bool? needJumpBv;
   String? epId;
   List<Staff>? staff;
+  ReqUser? reqUser;
 
   VideoDetailData({
     this.bvid,
@@ -105,6 +106,7 @@ class VideoDetailData {
     this.needJumpBv,
     this.epId,
     this.staff,
+    this.reqUser,
   });
 
   VideoDetailData.fromJson(Map<String, dynamic> json) {
@@ -160,6 +162,7 @@ class VideoDetailData {
     staff = json["staff"] != null
         ? List<Staff>.from(json["staff"]!.map((e) => Staff.fromJson(e)))
         : null;
+    reqUser = json['req_user'] != null ? ReqUser.fromJson(json['req_user']) : null;
   }
 
   String resolveEpId(url) {
@@ -210,6 +213,7 @@ class VideoDetailData {
         "honor_reply": honorReply?.toJson(),
         "like_icon": likeIcon,
         "need_jump_bv": needJumpBv,
+        "req_user": reqUser?.toJson(),
       };
 }
 
@@ -701,5 +705,27 @@ class Vip {
   Vip.fromJson(Map<String, dynamic> json) {
     type = json['type'];
     status = json['status'];
+  }
+}
+
+class ReqUser {
+  int? like;
+  int? favorite;
+  int? coin;
+
+  ReqUser({this.like, this.favorite, this.coin});
+
+  ReqUser.fromJson(Map<String, dynamic> json) {
+    like = json['like'];
+    favorite = json['favorite'];
+    coin = json['coin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['like'] = like;
+    data['favorite'] = favorite;
+    data['coin'] = coin;
+    return data;
   }
 }

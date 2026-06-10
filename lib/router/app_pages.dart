@@ -16,8 +16,8 @@ import 'package:pilipala/pages/setting/pages/logs.dart';
 
 import '../pages/about/index.dart';
 import '../pages/blacklist/index.dart';
-import '../pages/dynamics/detail/index.dart';
-import '../pages/dynamics/index.dart';
+// 动态已迁移至 features/dynamics
+// 动态详情已迁移至 features/dynamics
 import '../pages/fan/index.dart';
 import '../pages/fav/index.dart';
 import '../pages/fav_detail/index.dart';
@@ -26,20 +26,18 @@ import '../pages/follow/index.dart';
 import '../pages/history/index.dart';
 import '../pages/history_search/index.dart';
 import '../pages/home/index.dart';
-import '../pages/hot/index.dart';
 import '../pages/html/index.dart';
 import '../pages/later/index.dart';
 import '../pages/live_room/view.dart';
-import '../pages/login/index.dart';
+// 旧版登录页保留供参考，路由已切换到 features/login
+// import '../pages/login/index.dart';
 import '../pages/media/index.dart';
-import '../pages/member/index.dart';
 import '../pages/member_archive/index.dart';
 import '../pages/member_coin/index.dart';
 import '../pages/member_dynamics/index.dart';
 import '../pages/member_like/index.dart';
 import '../pages/member_search/index.dart';
 import '../pages/member_seasons/index.dart';
-import '../pages/search/index.dart';
 import '../pages/search_result/index.dart';
 import '../pages/setting/extra_setting.dart';
 import '../pages/setting/index.dart';
@@ -57,23 +55,91 @@ import '../pages/setting/privacy_setting.dart';
 import '../pages/setting/style_setting.dart';
 import '../pages/subscription/index.dart';
 import '../pages/subscription_detail/index.dart';
-import '../pages/video/detail/index.dart';
 import '../pages/video/detail/reply_reply/index.dart';
 import '../pages/webview/index.dart';
 import '../pages/whisper/index.dart';
 import '../pages/whisper_detail/index.dart';
 import '../utils/storage.dart';
 
+// 新重构 features 页面 (使用别名避免命名冲突)
+import 'package:pilipala/features/home/presentation/home_page.dart'
+    as features_home;
+import 'package:pilipala/features/home/presentation/hot_page.dart'
+    as features_hot;
+import 'package:pilipala/features/login/presentation/login_page.dart'
+    as features_login;
+import 'package:pilipala/features/main/presentation/main_page.dart'
+    as features_main;
+import 'package:pilipala/features/video/presentation/video_detail_page.dart'
+    as features_video;
+import 'package:pilipala/features/search/presentation/search_page.dart'
+    as features_search;
+import 'package:pilipala/features/user/presentation/member_page.dart'
+    as features_member;
+import 'package:pilipala/features/dynamics/presentation/dynamics_page.dart'
+    as features_dynamics;
+import 'package:pilipala/features/dynamics/presentation/dynamic_detail_page.dart'
+    as features_dynamic_detail;
+import '../router/bindings.dart';
+
 Box<dynamic> setting = GStrorage.setting;
 
 class Routes {
   static final List<GetPage<dynamic>> getPages = [
-    // 首页(推荐)
+    // ===== 使用新重构 features 页面的路由 =====
+
+    // 首页(推荐) - 新重构版本
+    CustomGetPage(
+      name: '/home',
+      page: () => const features_home.HomePage(),
+      binding: HomeBinding(),
+    ),
+    // 热门 - 新重构版本
+    CustomGetPage(
+      name: '/hot',
+      page: () => const features_hot.HotPage(),
+      binding: HomeBinding(),
+    ),
+    // 视频详情 - 新重构版本
+    CustomGetPage(
+      name: '/video',
+      page: () => const features_video.VideoDetailPage(),
+      binding: VideoDetailBinding(),
+    ),
+    // 搜索页面 - 新重构版本
+    CustomGetPage(
+      name: '/search',
+      page: () => const features_search.SearchPage(),
+      binding: SearchBinding(),
+    ),
+    // 用户中心 - 新重构版本
+    CustomGetPage(
+      name: '/member',
+      page: () => const features_member.MemberPage(),
+      binding: UserBinding(),
+    ),
+    // 登录页面 - 新重构版本
+    CustomGetPage(
+      name: '/loginPage',
+      page: () => const features_login.LoginPage(),
+      binding: LoginBinding(),
+    ),
+    // 动态 - 新重构版本
+    CustomGetPage(
+      name: '/dynamics',
+      page: () => const features_dynamics.DynamicsPage(),
+      binding: DynamicsBinding(),
+    ),
+    // 动态详情 - 新重构版本
+    CustomGetPage(
+      name: '/dynamicDetail',
+      page: () => const features_dynamic_detail.DynamicDetailPage(),
+    ),
+
+    // ===== 以下为旧路由，保持不变 =====
+
+    // 首页(推荐) - 旧版 (兼容)
     CustomGetPage(name: '/', page: () => const HomePage()),
-    // 热门
-    CustomGetPage(name: '/hot', page: () => const HotPage()),
-    // 视频详情
-    CustomGetPage(name: '/video', page: () => const VideoDetailPage()),
     //
     CustomGetPage(name: '/webview', page: () => const WebviewPage()),
     // 设置
@@ -88,23 +154,16 @@ class Routes {
     CustomGetPage(name: '/later', page: () => const LaterPage()),
     // 历史记录
     CustomGetPage(name: '/history', page: () => const HistoryPage()),
-    // 搜索页面
-    CustomGetPage(name: '/search', page: () => const SearchPage()),
-    // 搜索结果
+    // 搜索结果 (旧版)
     CustomGetPage(name: '/searchResult', page: () => const SearchResultPage()),
-    // 动态
-    CustomGetPage(name: '/dynamics', page: () => const DynamicsPage()),
-    // 动态详情
-    CustomGetPage(
-        name: '/dynamicDetail', page: () => const DynamicDetailPage()),
+    // 动态 - 已迁移至 features/dynamics（见上方新路由）
+    // 动态详情 - 已迁移至 features/dynamics（见上方新路由）
     // 关注
     CustomGetPage(name: '/follow', page: () => const FollowPage()),
     // 粉丝
     CustomGetPage(name: '/fan', page: () => const FansPage()),
     // 直播详情
     CustomGetPage(name: '/liveRoom', page: () => const LiveRoomPage()),
-    // 用户中心
-    CustomGetPage(name: '/member', page: () => const MemberPage()),
     CustomGetPage(name: '/memberSearch', page: () => const MemberSearchPage()),
     // 二级回复
     CustomGetPage(
@@ -146,8 +205,7 @@ class Routes {
     // 私信详情
     CustomGetPage(
         name: '/whisperDetail', page: () => const WhisperDetailPage()),
-    // 登录页面
-    CustomGetPage(name: '/loginPage', page: () => const LoginPage()),
+    // 登录页面 - 已迁移至 features/login（见上方新路由）
     // 用户动态
     CustomGetPage(
         name: '/memberDynamics', page: () => const MemberDynamicsPage()),
@@ -204,6 +262,7 @@ class CustomGetPage extends GetPage<dynamic> {
     required super.name,
     required super.page,
     this.fullscreen,
+    super.binding,
     super.transitionDuration,
   }) : super(
           curve: Curves.linear,
