@@ -72,26 +72,33 @@
 
 | 问题 | 影响范围 | 说明 |
 |------|----------|------|
-| 依赖注入未连接 | 全部 6 个 features 模块 | `core/di/dependency_injection.dart` 只注册了 `ApiClient`、`StorageService`、`ThemeService`，各模块的 Repository/UseCase/Controller 均未注册到 GetX |
-| 底部导航栏未切换 | home, media (以及 dynamics, rank) | `nav_bar_config.dart` 和 `main/view.dart` 仍导入旧 `pages/` 路径，底部 4 个 Tab 使用的是旧 Controller |
-| CSRF token 未实现 | home, media, user, video | `VideoRepository`、`MediaRepository`、`UserRepository` 中的 `_getCsrf()` 均返回空字符串，POST 请求（点赞、收藏等）无法正常工作 |
-| 旧代码未清理 | 全部 6 个 features 模块 | `lib/pages/` 中对应的旧代码仍保留，与 `features/` 新代码并存 |
+| 旧代码未清理 | 全部 9 个 features 模块 | `lib/pages/` 中对应的旧代码仍保留，与 `features/` 新代码并存 |
+
+### 已解决的问题
+
+| 问题 | 解决说明 |
+|------|----------|
+| ✅ 依赖注入未连接 | `router/bindings.dart` 已注册所有 9 个模块的 Repository/UseCase/Controller |
+| ✅ 底部导航栏未切换 | `nav_bar_config.dart` 已全面指向 features/ 模块（home, rank, dynamics, media） |
+| ✅ CSRF token 未实现 | 所有 POST 请求已正常携带 token |
 
 ## 功能模块列表
 
 ### 迁移进度总结
 
 **当前状态**：
-- ✅ 已迁移模块：6个（home, video, search, user, media, login）
-- ✅ **已完成模块：4个（home, video, search, user）达到100%完成度**
-- ⏳ 待迁移模块：49个（其中5个有Spec，44个无Spec）
-- 📁 总文件数：40个 Dart 文件在 features 目录
-- 🚧 路由接入：4个模块已接入，2个模块未注册
+- ✅ 已迁移模块：9个（home, video, search, user, media, login, dynamics, rank, main）
+- ✅ **已完成模块：6个（home, video, search, user, dynamics, rank）达到或接近100%完成度**
+- ⏳ 待迁移模块：~40个（其中2个有Spec，~38个无Spec）
+- 📁 总文件数：~50个 Dart 文件在 features 目录
+- 🚧 路由接入：7个模块已接入路由，2个模块通过底部导航直接使用
 - ✅ CSRF Token：已修复，所有POST请求可正常携带token
+- ✅ 依赖注入：所有模块已通过 `router/bindings.dart` 注册到 GetX
+- ✅ 底部导航栏：已全面切换到 features/ 模块
 
 ### 已重构模块 (lib/features/)
 
-采用 data/domain/presentation 三层架构重构的模块。**全部 6 个模块当前 0 error**（仅存在 unused import/field 等 warning）：
+采用 data/domain/presentation 三层架构重构的模块。**全部 9 个模块当前 0 error**（仅存在 unused import/field 等 warning）：
 
 | 模块 | 路径 | 完成度 | 文件数 | 路由接入 | 说明 |
 |------|------|--------|--------|----------|------|
@@ -99,8 +106,11 @@
 | 视频详情 | `features/video/` | ✅ 100% | 7 | ✅ `/video` | ✅ CSRF已修复；点赞/收藏API已调用；三层结构完整 |
 | 搜索 | `features/search/` | ✅ 100% | 8 | ✅ `/search` | ✅ Controller命名已修复为`PiliSearchController`；搜索结果UI已添加 |
 | 用户中心 | `features/user/` | ✅ 100% | 9 | ✅ `/member` | ✅ coins/likes/seasons widgets已集成；三层结构完整 |
-| 媒体库 | `features/media/` | ~65% | 5 | ❌ 未注册 | 三层结构完整，模型/API 已修正；收藏 tab 空实现；子路由未注册 |
-| 登录 | `features/login/` | ~45% | 4 | ❌ 未注册 | 三层结构但无 UI；SMS/QR 登录 UseCase 缺失；token 持久化 TODO |
+| 动态 | `features/dynamics/` | ✅ 95% | ~20 | ✅ `/dynamics` `/dynamicDetail` | ✅ 三层结构完整；13个widgets+详情页+转发/点赞；Binding已注册 |
+| 排行榜 | `features/rank/` | ✅ 90% | 5 | ✅ 底部导航(id:1) | ✅ 三层结构完整；全站排行榜+分区排行；Binding已注册 |
+| App Shell | `features/main/` | ✅ 90% | 3 | ✅ 主框架入口 | ✅ MainPage+MainController；底部4Tab全部指向features/模块 |
+| 媒体库 | `features/media/` | ~65% | 5 | ❌ 路由未注册 | 三层结构完整，模型/API 已修正；收藏 tab 空实现；子路由未注册 |
+| 登录 | `features/login/` | ~45% | 4 | ✅ `/loginPage` | 三层结构但无 UI；SMS/QR 登录 UseCase 缺失；token 持久化 TODO |
 
 ### 待迁移模块 — 有 Spec (lib/pages/)
 
@@ -108,11 +118,11 @@
 
 | 模块 | pages/ 路径 | 优先级 | 建议归入 | 说明 |
 |------|-------------|--------|----------|------|
-| 热门排行 | `pages/hot/` + `pages/rank/` | P0 | `features/home/` | 热门已在 home 中，排行榜（rank）待迁入 |
-| 动态 | `pages/dynamics/` (+detail, up_dynamic, widgets) | P1 | `features/dynamics/` | 复杂模块：3 controller + 13 widgets |
 | 直播 | `pages/live/` + `pages/live_room/` | P1 | `features/live/` | 含 WebSocket 弹幕、播放器集成 |
 | 消息 | `pages/message/` + `pages/whisper/` + `pages/whisper_detail/` | P1 | `features/message/` | 通知 + 私信，含空实现 controller (at/) |
 | 设置 | `pages/setting/` (+pages/, widgets/) | P2 | `features/setting/` | 以 Hive 读写为主，无 HTTP API 依赖 |
+
+> **已迁移说明**：热门排行（`pages/hot/` + `pages/rank/`）已分别迁移至 `features/home/`（HotPage）和 `features/rank/`（独立模块）。动态（`pages/dynamics/`）已迁移至 `features/dynamics/`。
 
 ### 待迁移模块 — 无 Spec (lib/pages/)
 
@@ -120,13 +130,13 @@
 
 | 建议归入 | 模块 |
 |----------|------|
-| **home** | `rcmd/` |
+| **home** | `rcmd/`（推荐页已在 features/home 中，此目录待清理） |
 | **user** | `fan/`, `follow/`, `follow_search/`, `member_archive/`, `member_article/`, `member_coin/`, `member_dynamics/`, `member_like/`, `member_search/`, `member_seasons/`, `mine/` |
 | **media** | `fav/`, `fav_detail/`, `fav_edit/`, `fav_search/`, `history/`, `history_search/`, `later/`, `subscription/`, `subscription_detail/` |
 | **message** | `emote/`, `whisper/`, `whisper_detail/` |
 | **video** | `danmaku/`, `dlna/` |
 | **独立模块** | `about/`, `bangumi/`, `blacklist/`, `html/`, `opus/`, `read/`, `webview/` |
-| **基础设施** | `main/`（App Shell，主框架页面） |
+| **基础设施** | `main/`（旧版 App Shell，已被 features/main 替代） |
 
 ### 已修复的类型/API 映射记录
 

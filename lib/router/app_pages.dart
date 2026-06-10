@@ -6,10 +6,11 @@ import 'package:hive/hive.dart';
 import 'package:pilipala/pages/fav_edit/index.dart';
 import 'package:pilipala/pages/follow_search/view.dart';
 import 'package:pilipala/pages/member_article/index.dart';
-import 'package:pilipala/pages/message/at/index.dart';
-import 'package:pilipala/pages/message/like/index.dart';
-import 'package:pilipala/pages/message/reply/index.dart';
-import 'package:pilipala/pages/message/system/index.dart';
+// 旧版消息页面保留供参考，路由已切换到 features/message
+// import 'package:pilipala/pages/message/at/index.dart';
+// import 'package:pilipala/pages/message/like/index.dart';
+// import 'package:pilipala/pages/message/reply/index.dart';
+// import 'package:pilipala/pages/message/system/index.dart';
 import 'package:pilipala/pages/opus/index.dart';
 import 'package:pilipala/pages/read/index.dart';
 import 'package:pilipala/pages/setting/pages/logs.dart';
@@ -28,10 +29,12 @@ import '../pages/history_search/index.dart';
 import '../pages/home/index.dart';
 import '../pages/html/index.dart';
 import '../pages/later/index.dart';
-import '../pages/live_room/view.dart';
+// 旧版直播保留供参考，路由已切换到 features/live
+// import '../pages/live_room/view.dart';
 // 旧版登录页保留供参考，路由已切换到 features/login
 // import '../pages/login/index.dart';
-import '../pages/media/index.dart';
+// 旧版媒体库保留供参考，路由已切换到 features/media
+// import '../pages/media/index.dart';
 import '../pages/member_archive/index.dart';
 import '../pages/member_coin/index.dart';
 import '../pages/member_dynamics/index.dart';
@@ -40,7 +43,8 @@ import '../pages/member_search/index.dart';
 import '../pages/member_seasons/index.dart';
 import '../pages/search_result/index.dart';
 import '../pages/setting/extra_setting.dart';
-import '../pages/setting/index.dart';
+// 旧版设置保留供参考，路由已切换到 features/setting
+// import '../pages/setting/index.dart';
 import '../pages/setting/pages/action_menu_set.dart';
 import '../pages/setting/pages/color_select.dart';
 import '../pages/setting/pages/display_mode.dart';
@@ -57,8 +61,9 @@ import '../pages/subscription/index.dart';
 import '../pages/subscription_detail/index.dart';
 import '../pages/video/detail/reply_reply/index.dart';
 import '../pages/webview/index.dart';
-import '../pages/whisper/index.dart';
-import '../pages/whisper_detail/index.dart';
+// 旧版私信保留供参考，路由已切换到 features/message
+// import '../pages/whisper/index.dart';
+// import '../pages/whisper_detail/index.dart';
 import '../utils/storage.dart';
 
 // 新重构 features 页面 (使用别名避免命名冲突)
@@ -80,6 +85,26 @@ import 'package:pilipala/features/dynamics/presentation/dynamics_page.dart'
     as features_dynamics;
 import 'package:pilipala/features/dynamics/presentation/dynamic_detail_page.dart'
     as features_dynamic_detail;
+import 'package:pilipala/features/media/presentation/media_page.dart'
+    as features_media;
+import 'package:pilipala/features/live/presentation/live_page.dart'
+    as features_live;
+import 'package:pilipala/features/live/presentation/live_room_page.dart'
+    as features_live_room;
+import 'package:pilipala/features/message/presentation/whisper/whisper_page.dart'
+    as features_whisper;
+import 'package:pilipala/features/message/presentation/whisper_detail/whisper_detail_page.dart'
+    as features_whisper_detail;
+import 'package:pilipala/features/message/presentation/reply/message_reply_page.dart'
+    as features_message_reply;
+import 'package:pilipala/features/message/presentation/at/message_at_page.dart'
+    as features_message_at;
+import 'package:pilipala/features/message/presentation/like/message_like_page.dart'
+    as features_message_like;
+import 'package:pilipala/features/message/presentation/system/message_system_page.dart'
+    as features_message_system;
+import 'package:pilipala/features/setting/presentation/setting_page.dart'
+    as features_setting;
 import '../router/bindings.dart';
 
 Box<dynamic> setting = GStrorage.setting;
@@ -135,6 +160,66 @@ class Routes {
       name: '/dynamicDetail',
       page: () => const features_dynamic_detail.DynamicDetailPage(),
     ),
+    // 媒体库 - 新重构版本
+    CustomGetPage(
+      name: '/media',
+      page: () => const features_media.MediaPage(),
+      binding: MediaBinding(),
+    ),
+    // 直播列表 - 新重构版本
+    CustomGetPage(
+      name: '/live',
+      page: () => const features_live.LivePage(),
+      binding: LiveBinding(),
+    ),
+    // 直播间 - 新重构版本
+    CustomGetPage(
+      name: '/liveRoom',
+      page: () => const features_live_room.LiveRoomPage(),
+      binding: LiveRoomBinding(),
+    ),
+    // 消息(私信列表) - 新重构版本
+    CustomGetPage(
+      name: '/whisper',
+      page: () => const features_whisper.WhisperPage(),
+      binding: WhisperBinding(),
+    ),
+    // 私信详情 - 新重构版本
+    CustomGetPage(
+      name: '/whisperDetail',
+      page: () => const features_whisper_detail.WhisperDetailPage(),
+      binding: WhisperDetailBinding(),
+    ),
+    // 回复我的 - 新重构版本
+    CustomGetPage(
+      name: '/messageReply',
+      page: () => const features_message_reply.MessageReplyPage(),
+      binding: MessageReplyBinding(),
+    ),
+    // @我的 - 新重构版本
+    CustomGetPage(
+      name: '/messageAt',
+      page: () => const features_message_at.MessageAtPage(),
+      binding: MessageAtBinding(),
+    ),
+    // 收到的赞 - 新重构版本
+    CustomGetPage(
+      name: '/messageLike',
+      page: () => const features_message_like.MessageLikePage(),
+      binding: MessageLikeBinding(),
+    ),
+    // 系统通知 - 新重构版本
+    CustomGetPage(
+      name: '/messageSystem',
+      page: () => const features_message_system.MessageSystemPage(),
+      binding: MessageSystemBinding(),
+    ),
+    // 设置 - 新重构版本
+    CustomGetPage(
+      name: '/setting',
+      page: () => const features_setting.SettingPage(),
+      binding: SettingBinding(),
+    ),
 
     // ===== 以下为旧路由，保持不变 =====
 
@@ -142,10 +227,9 @@ class Routes {
     CustomGetPage(name: '/', page: () => const HomePage()),
     //
     CustomGetPage(name: '/webview', page: () => const WebviewPage()),
-    // 设置
-    CustomGetPage(name: '/setting', page: () => const SettingPage()),
-    //
-    CustomGetPage(name: '/media', page: () => const MediaPage()),
+    // 设置 - 已迁移至 features/setting（见上方新路由）
+    // CustomGetPage(name: '/setting', page: () => const SettingPage()),
+    // 媒体库 - 已迁移至 features/media（见上方新路由）
     //
     CustomGetPage(name: '/fav', page: () => const FavPage()),
     //
@@ -162,8 +246,7 @@ class Routes {
     CustomGetPage(name: '/follow', page: () => const FollowPage()),
     // 粉丝
     CustomGetPage(name: '/fan', page: () => const FansPage()),
-    // 直播详情
-    CustomGetPage(name: '/liveRoom', page: () => const LiveRoomPage()),
+    // 直播详情 - 已迁移至 features/live（见上方新路由）
     CustomGetPage(name: '/memberSearch', page: () => const MemberSearchPage()),
     // 二级回复
     CustomGetPage(
@@ -200,11 +283,11 @@ class Routes {
     CustomGetPage(name: '/playSpeedSet', page: () => const PlaySpeedPage()),
     // 收藏搜索
     CustomGetPage(name: '/favSearch', page: () => const FavSearchPage()),
-    // 消息页面
-    CustomGetPage(name: '/whisper', page: () => const WhisperPage()),
-    // 私信详情
-    CustomGetPage(
-        name: '/whisperDetail', page: () => const WhisperDetailPage()),
+    // 消息页面 - 已迁移至 features/message（见上方新路由）
+    // CustomGetPage(name: '/whisper', page: () => const WhisperPage()),
+    // 私信详情 - 已迁移至 features/message（见上方新路由）
+    // CustomGetPage(
+    //     name: '/whisperDetail', page: () => const WhisperDetailPage()),
     // 登录页面 - 已迁移至 features/login（见上方新路由）
     // 用户动态
     CustomGetPage(
@@ -236,15 +319,15 @@ class Routes {
     // 操作菜单
     CustomGetPage(
         name: '/actionMenuSet', page: () => const ActionMenuSetPage()),
-    // 回复我的
-    CustomGetPage(name: '/messageReply', page: () => const MessageReplyPage()),
-    // @我的
-    CustomGetPage(name: '/messageAt', page: () => const MessageAtPage()),
-    // 收到的赞
-    CustomGetPage(name: '/messageLike', page: () => const MessageLikePage()),
-    // 系统通知
-    CustomGetPage(
-        name: '/messageSystem', page: () => const MessageSystemPage()),
+    // 回复我的 - 已迁移至 features/message（见上方新路由）
+    // CustomGetPage(name: '/messageReply', page: () => const MessageReplyPage()),
+    // @我的 - 已迁移至 features/message（见上方新路由）
+    // CustomGetPage(name: '/messageAt', page: () => const MessageAtPage()),
+    // 收到的赞 - 已迁移至 features/message（见上方新路由）
+    // CustomGetPage(name: '/messageLike', page: () => const MessageLikePage()),
+    // 系统通知 - 已迁移至 features/message（见上方新路由）
+    // CustomGetPage(
+    //     name: '/messageSystem', page: () => const MessageSystemPage()),
     // 收藏夹编辑
     CustomGetPage(name: '/favEdit', page: () => const FavEditPage()),
 

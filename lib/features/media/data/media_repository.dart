@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:pilipala/core/network/api_client.dart';
 import 'package:pilipala/http/api.dart';
+import 'package:pilipala/http/init.dart';
 import 'package:pilipala/models/user/fav_folder.dart';
 import 'package:pilipala/models/user/fav_detail.dart';
 import 'package:pilipala/models/video/later.dart';
@@ -137,7 +138,6 @@ class MediaRepository {
 
   /// Get CSRF token for POST requests.
   Future<String> _getCsrf() async {
-    // TODO: Implement CSRF token retrieval
-    return '';
+    return await Request.getCsrf();
   }
 }

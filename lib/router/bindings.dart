@@ -24,6 +24,21 @@ import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart
 import 'package:pilipala/features/rank/data/rank_repository.dart' as rank_repo;
 import 'package:pilipala/features/rank/domain/rank_use_cases.dart';
 import 'package:pilipala/features/rank/presentation/rank_controller.dart' as rank_ctrl;
+import 'package:pilipala/features/live/data/live_repository.dart' as live_repo;
+import 'package:pilipala/features/live/domain/live_use_cases.dart';
+import 'package:pilipala/features/live/presentation/live_controller.dart' as live_ctrl;
+import 'package:pilipala/features/live/presentation/live_room_controller.dart' as live_room_ctrl;
+import 'package:pilipala/features/message/data/message_repository.dart' as msg_repo;
+import 'package:pilipala/features/message/domain/message_use_cases.dart';
+import 'package:pilipala/features/message/presentation/whisper/whisper_controller.dart' as whisper_ctrl;
+import 'package:pilipala/features/message/presentation/whisper_detail/whisper_detail_controller.dart' as whisper_detail_ctrl;
+import 'package:pilipala/features/message/presentation/reply/message_reply_controller.dart' as reply_ctrl;
+import 'package:pilipala/features/message/presentation/at/message_at_controller.dart' as at_ctrl;
+import 'package:pilipala/features/message/presentation/like/message_like_controller.dart' as like_ctrl;
+import 'package:pilipala/features/message/presentation/system/message_system_controller.dart' as system_ctrl;
+import 'package:pilipala/features/setting/data/setting_repository.dart' as setting_repo;
+import 'package:pilipala/features/setting/domain/setting_use_cases.dart';
+import 'package:pilipala/features/setting/presentation/setting_controller.dart' as setting_ctrl;
 
 /// Bindings for the home feature route.
 class HomeBinding extends Bindings {
@@ -99,6 +114,8 @@ class MediaBinding extends Bindings {
     Get.lazyPut<GetHistoryUseCase>(() => GetHistoryUseCase());
     Get.lazyPut<GetFavFoldersUseCase>(() => GetFavFoldersUseCase());
     Get.lazyPut<GetFavFolderDetailUseCase>(() => GetFavFolderDetailUseCase());
+    Get.lazyPut<AddToWatchLaterUseCase>(() => AddToWatchLaterUseCase());
+    Get.lazyPut<RemoveFromWatchLaterUseCase>(() => RemoveFromWatchLaterUseCase());
     Get.lazyPut<media_ctrl.MediaController>(() => media_ctrl.MediaController());
   }
 }
@@ -124,5 +141,109 @@ class RankBinding extends Bindings {
     Get.lazyPut<rank_repo.RankRepository>(() => rank_repo.RankRepository());
     Get.lazyPut<GetRankVideoListUseCase>(() => GetRankVideoListUseCase());
     Get.lazyPut<rank_ctrl.RankController>(() => rank_ctrl.RankController());
+  }
+}
+
+/// Bindings for the live feature route.
+class LiveBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<live_repo.LiveRepository>(() => live_repo.LiveRepository());
+    Get.lazyPut<GetLiveListUseCase>(() => GetLiveListUseCase());
+    Get.lazyPut<GetFollowingLiveUseCase>(() => GetFollowingLiveUseCase());
+    Get.lazyPut<live_ctrl.LiveController>(() => live_ctrl.LiveController());
+  }
+}
+
+/// Bindings for the live room feature route.
+class LiveRoomBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<live_repo.LiveRepository>(() => live_repo.LiveRepository());
+    Get.lazyPut<GetRoomInfoUseCase>(() => GetRoomInfoUseCase());
+    Get.lazyPut<GetRoomInfoH5UseCase>(() => GetRoomInfoH5UseCase());
+    Get.lazyPut<GetDanmakuInfoUseCase>(() => GetDanmakuInfoUseCase());
+    Get.lazyPut<SendDanmakuUseCase>(() => SendDanmakuUseCase());
+    Get.lazyPut<LiveRoomEntryUseCase>(() => LiveRoomEntryUseCase());
+    Get.lazyPut<live_room_ctrl.LiveRoomController>(() => live_room_ctrl.LiveRoomController());
+  }
+}
+
+/// Bindings for the whisper (message list) feature route.
+class WhisperBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<msg_repo.MessageRepository>(() => msg_repo.MessageRepository());
+    Get.lazyPut<GetSessionListUseCase>(() => GetSessionListUseCase());
+    Get.lazyPut<GetAccountListUseCase>(() => GetAccountListUseCase());
+    Get.lazyPut<GetUnreadCountUseCase>(() => GetUnreadCountUseCase());
+    Get.lazyPut<whisper_ctrl.WhisperController>(() => whisper_ctrl.WhisperController());
+  }
+}
+
+/// Bindings for the whisper detail feature route.
+class WhisperDetailBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<msg_repo.MessageRepository>(() => msg_repo.MessageRepository());
+    Get.lazyPut<GetSessionMsgUseCase>(() => GetSessionMsgUseCase());
+    Get.lazyPut<AckSessionMsgUseCase>(() => AckSessionMsgUseCase());
+    Get.lazyPut<SendMsgUseCase>(() => SendMsgUseCase());
+    Get.lazyPut<RemoveSessionUseCase>(() => RemoveSessionUseCase());
+    Get.lazyPut<whisper_detail_ctrl.WhisperDetailController>(() => whisper_detail_ctrl.WhisperDetailController());
+  }
+}
+
+/// Bindings for the message reply feature route.
+class MessageReplyBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<msg_repo.MessageRepository>(() => msg_repo.MessageRepository());
+    Get.lazyPut<GetReplyNotificationsUseCase>(() => GetReplyNotificationsUseCase());
+    Get.lazyPut<reply_ctrl.MessageReplyController>(() => reply_ctrl.MessageReplyController());
+  }
+}
+
+/// Bindings for the message at feature route.
+class MessageAtBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<at_ctrl.MessageAtController>(() => at_ctrl.MessageAtController());
+  }
+}
+
+/// Bindings for the message like feature route.
+class MessageLikeBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<msg_repo.MessageRepository>(() => msg_repo.MessageRepository());
+    Get.lazyPut<GetLikeNotificationsUseCase>(() => GetLikeNotificationsUseCase());
+    Get.lazyPut<like_ctrl.MessageLikeController>(() => like_ctrl.MessageLikeController());
+  }
+}
+
+/// Bindings for the message system feature route.
+class MessageSystemBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<msg_repo.MessageRepository>(() => msg_repo.MessageRepository());
+    Get.lazyPut<GetSystemNotificationsUseCase>(() => GetSystemNotificationsUseCase());
+    Get.lazyPut<GetSystemAccountNotificationsUseCase>(() => GetSystemAccountNotificationsUseCase());
+    Get.lazyPut<MarkSystemReadUseCase>(() => MarkSystemReadUseCase());
+    Get.lazyPut<system_ctrl.MessageSystemController>(() => system_ctrl.MessageSystemController());
+  }
+}
+
+/// Bindings for the setting feature route.
+class SettingBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<setting_repo.SettingRepository>(() => setting_repo.SettingRepository());
+    Get.lazyPut<GetSettingInitDataUseCase>(() => GetSettingInitDataUseCase());
+    Get.lazyPut<LogoutUseCase>(() => LogoutUseCase());
+    Get.lazyPut<ToggleFeedBackUseCase>(() => ToggleFeedBackUseCase());
+    Get.lazyPut<SetDynamicBadgeModeUseCase>(() => SetDynamicBadgeModeUseCase());
+    Get.lazyPut<SetDefaultHomePageUseCase>(() => SetDefaultHomePageUseCase());
+    Get.lazyPut<setting_ctrl.SettingController>(() => setting_ctrl.SettingController());
   }
 }

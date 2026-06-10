@@ -96,3 +96,33 @@ class GetFavFolderDetailUseCase {
     throw Exception(response.msg ?? 'Failed to load favorite folder detail');
   }
 }
+
+/// Use case for adding a video to watch later.
+class AddToWatchLaterUseCase {
+  final MediaRepository _repository;
+
+  AddToWatchLaterUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required String bvid}) async {
+    final response = await _repository.addToWatchLater(bvid: bvid);
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to add to watch later');
+    }
+  }
+}
+
+/// Use case for removing a video from watch later.
+class RemoveFromWatchLaterUseCase {
+  final MediaRepository _repository;
+
+  RemoveFromWatchLaterUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required String bvid}) async {
+    final response = await _repository.removeFromWatchLater(bvid: bvid);
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to remove from watch later');
+    }
+  }
+}

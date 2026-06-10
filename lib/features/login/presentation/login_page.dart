@@ -15,7 +15,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final LoginController _loginCtr = Get.put(LoginController());
+  final LoginController _loginCtr = Get.find<LoginController>();
 
   @override
   void dispose() {
