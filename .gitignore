@@ -59,6 +59,9 @@ linked_*.ds
 unlinked.ds
 unlinked_spec.ds
 
+# Vendored dependency overrides
+media_kit_libs_android_video/
+
 # Obfuscation related
 app.*.map.json
 

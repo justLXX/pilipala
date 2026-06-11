@@ -29,6 +29,10 @@ class MediaController extends GetxController {
   final RxString _error = ''.obs;
   final RxInt _selectedTab = 0.obs;
 
+  // Login state (set by LoginUtils on login/logout)
+  RxBool userLogin = false.obs;
+  int? mid;
+
   // Getters
   List<MediaVideoItemModel> get watchLaterList => _watchLaterList;
   List<HisListItem> get historyList => _historyList;

@@ -13,7 +13,8 @@ import 'package:pilipala/pages/member_article/index.dart';
 // import 'package:pilipala/pages/message/system/index.dart';
 import 'package:pilipala/pages/opus/index.dart';
 import 'package:pilipala/pages/read/index.dart';
-import 'package:pilipala/pages/setting/pages/logs.dart';
+// 设置子页面 - 已迁移至 features/setting
+// import '../pages/setting/pages/logs.dart';
 
 import '../pages/about/index.dart';
 import '../pages/blacklist/index.dart';
@@ -42,21 +43,20 @@ import '../pages/member_like/index.dart';
 import '../pages/member_search/index.dart';
 import '../pages/member_seasons/index.dart';
 import '../pages/search_result/index.dart';
-import '../pages/setting/extra_setting.dart';
-// 旧版设置保留供参考，路由已切换到 features/setting
-// import '../pages/setting/index.dart';
-import '../pages/setting/pages/action_menu_set.dart';
-import '../pages/setting/pages/color_select.dart';
-import '../pages/setting/pages/display_mode.dart';
-import '../pages/setting/pages/font_size_select.dart';
-import '../pages/setting/pages/home_tabbar_set.dart';
-import '../pages/setting/pages/navigation_bar_set.dart';
-import '../pages/setting/pages/play_gesture_set.dart';
-import '../pages/setting/pages/play_speed_set.dart';
-import '../pages/setting/recommend_setting.dart';
-import '../pages/setting/play_setting.dart';
-import '../pages/setting/privacy_setting.dart';
-import '../pages/setting/style_setting.dart';
+// 设置子页面 - 已迁移至 features/setting
+// import '../pages/setting/extra_setting.dart';
+// import '../pages/setting/pages/action_menu_set.dart';
+// import '../pages/setting/pages/color_select.dart';
+// import '../pages/setting/pages/display_mode.dart';
+// import '../pages/setting/pages/font_size_select.dart';
+// import '../pages/setting/pages/home_tabbar_set.dart';
+// import '../pages/setting/pages/navigation_bar_set.dart';
+// import '../pages/setting/pages/play_gesture_set.dart';
+// import '../pages/setting/pages/play_speed_set.dart';
+// import '../pages/setting/recommend_setting.dart';
+// import '../pages/setting/play_setting.dart';
+// import '../pages/setting/privacy_setting.dart';
+// import '../pages/setting/style_setting.dart';
 import '../pages/subscription/index.dart';
 import '../pages/subscription_detail/index.dart';
 import '../pages/video/detail/reply_reply/index.dart';
@@ -105,6 +105,20 @@ import 'package:pilipala/features/message/presentation/system/message_system_pag
     as features_message_system;
 import 'package:pilipala/features/setting/presentation/setting_page.dart'
     as features_setting;
+import 'package:pilipala/features/setting/presentation/privacy_setting_page.dart';
+import 'package:pilipala/features/setting/presentation/recommend_setting_page.dart';
+import 'package:pilipala/features/setting/presentation/play_setting_page.dart';
+import 'package:pilipala/features/setting/presentation/style_setting_page.dart';
+import 'package:pilipala/features/setting/presentation/extra_setting_page.dart';
+import 'package:pilipala/features/setting/presentation/pages/color_select.dart';
+import 'package:pilipala/features/setting/presentation/pages/home_tabbar_set.dart';
+import 'package:pilipala/features/setting/presentation/pages/font_size_select.dart';
+import 'package:pilipala/features/setting/presentation/pages/display_mode.dart';
+import 'package:pilipala/features/setting/presentation/pages/play_speed_set.dart';
+import 'package:pilipala/features/setting/presentation/pages/play_gesture_set.dart';
+import 'package:pilipala/features/setting/presentation/pages/navigation_bar_set.dart';
+import 'package:pilipala/features/setting/presentation/pages/action_menu_set.dart';
+import 'package:pilipala/features/setting/presentation/pages/logs.dart';
 import '../router/bindings.dart';
 
 Box<dynamic> setting = GStrorage.setting;

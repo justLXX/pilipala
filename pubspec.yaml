@@ -116,7 +116,7 @@ dependencies:
   ns_danmaku:
     git:
       url: https://github.com/guozhigq/flutter_ns_danmaku.git
-      ref: master
+      ref: d1cb3f0190ca67ec4d7fd372dac96f4f17a81a1a
   # 状态栏图标控制
   status_bar_control: ^3.2.1
   # 代理
@@ -125,7 +125,7 @@ dependencies:
   floating:
     git:
       url: https://github.com/guozhigq/floating.git
-      ref: main
+      ref: 8e89669eb9341f9980265306e24ef96fdbd3fd08
   # html解析
   html: ^0.15.4
   # html渲染
@@ -186,6 +186,8 @@ dependency_overrides:
     git:
       url: https://github.com/media-kit/media-kit
       path: libs/universal/media_kit_libs_video
+  media_kit_libs_android_video:
+    path: media_kit_libs_android_video
 
 flutter_launcher_icons:
   android: true

@@ -73,7 +73,9 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   void dispose() {
     VideoDetailPage.routeObserver.unsubscribe(this);
     _vdCtr.playerController.removeStatusLister(_playerStatusListener);
-    _vdCtr.playerController.dispose();
+    // playerController.dispose() 由 VideoDetailController.onClose() 统一管理，
+    // 避免单例 PlPlayerController 的 _playerCount 被双重递减到 0，
+    // 导致返回时 reinitPlayer 中 setDataSource 因 _playerCount==0 直接 return
     Get.delete<VideoDetailController>(tag: _heroTag);
     _extendNestCtr.dispose();
     super.dispose();
@@ -145,6 +147,8 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 
   /// Build the player header control (back button overlay on player).
   PreferredSizeWidget _buildPlayerHeader() {
+    // Scaffold 的零高度 appBar 已消费安全区，body 从安全区下方开始，
+    // 因此此处无需额外添加 topPadding
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: AppBar(
@@ -187,9 +191,9 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     if (orientation == Orientation.landscape || isFullScreen) {
       return MediaQuery.sizeOf(context).height;
     }
-    // Pin the entire video area + toolbar so it stays fixed when scrolling
+    // Scaffold 的零高度 appBar 已消费安全区，此处无需加 topPadding
     final videoHeight = MediaQuery.sizeOf(context).width * 9 / 16;
-    return MediaQuery.of(context).padding.top + kToolbarHeight + videoHeight;
+    return kToolbarHeight + videoHeight;
   }
 
   // ==================== Build ====================
@@ -198,6 +202,16 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      // 零高度 appBar 消费顶部安全区，使 body 从安全区下方开始，
+      // 与旧版行为一致，避免 SliverAppBar 跨越状态栏区域导致滑动抖动
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(0),
+        child: AppBar(
+          backgroundColor: Colors.black,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+        ),
+      ),
       body: Obx(() {
         if (_vdCtr.videoDetail != null) {
           return _buildContent(context);
@@ -222,6 +236,8 @@ class _VideoDetailPageState extends State<VideoDetailPage>
             final orientation = MediaQuery.of(context).orientation;
             final isFullScreen =
                 _vdCtr.playerController.isFullScreen.value;
+            // Scaffold 的零高度 appBar 已消费安全区，body 从安全区下方开始，
+            // 因此 expandedHeight 仅需视频高度（与旧版一致）
             final expandedHeight = (orientation == Orientation.landscape ||
                     isFullScreen)
                 ? (MediaQuery.sizeOf(context).height -

@@ -540,7 +540,7 @@ class DynamicArchiveModel {
     disablePreview = json['disable_preview'] is String
         ? int.tryParse(json['disable_preview'])
         : json['disable_preview'];
-    durationText = json['duration_text'];
+    durationText = json['duration_text']?.toString();
     jumpUrl = json['jump_url'];
     stat = json['stat'] != null ? Stat.fromJson(json['stat']) : null;
     title = json['title'];
@@ -897,7 +897,7 @@ class Stat {
   String? play;
 
   Stat.fromJson(Map<String, dynamic> json) {
-    danmaku = json['danmaku'];
-    play = json['play'];
+    danmaku = json['danmaku']?.toString();
+    play = json['play']?.toString();
   }
 }
