@@ -93,19 +93,23 @@ class DynamicsController extends GetxController {
       offset: offset,
       mid: mid.value,
     );
-    isLoadingDynamic.value = false;
-    if (res['status']) {
-      if (type == 'onLoad' && res['data'].items.isEmpty) {
-        SmartDialog.showToast('没有更多了');
-        return;
+    try{
+      isLoadingDynamic.value = false;
+      if (res['status']) {
+        if (type == 'onLoad' && res['data'].items.isEmpty) {
+          SmartDialog.showToast('没有更多了');
+          return;
+        }
+        if (type == 'init') {
+          dynamicsList.value = res['data'].items;
+        } else {
+          dynamicsList.addAll(res['data'].items);
+        }
+        offset = res['data'].offset;
+        page++;
       }
-      if (type == 'init') {
-        dynamicsList.value = res['data'].items;
-      } else {
-        dynamicsList.addAll(res['data'].items);
-      }
-      offset = res['data'].offset;
-      page++;
+    }catch(e){
+      print(e);
     }
     return res;
   }

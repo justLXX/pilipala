@@ -22,9 +22,6 @@ class _MemberPageState extends State<MemberPage>
   late String heroTag;
   late UserController _userController;
   late Future _futureBuilderFuture;
-  late Future _memberSeasonsFuture;
-  late Future _memberCoinsFuture;
-  late Future _memberLikeFuture;
   final ScrollController _extendNestCtr = ScrollController();
   late int mid;
 
@@ -34,9 +31,9 @@ class _MemberPageState extends State<MemberPage>
     mid = int.parse(Get.parameters['mid']!);
     _userController = Get.find<UserController>();
     _futureBuilderFuture = _userController.loadUserInfo(mid: mid);
-    _memberSeasonsFuture = _userController.loadUserStat(mid: mid);
-    _memberCoinsFuture = _userController.loadUserCoins(mid: mid);
-    _memberLikeFuture = _userController.loadUserLikes(mid: mid);
+    _userController.loadUserStat(mid: mid);
+    _userController.loadUserCoins(mid: mid);
+    _userController.loadUserLikes(mid: mid);
     _userController.loadUserSeasons(mid: mid);
   }
 

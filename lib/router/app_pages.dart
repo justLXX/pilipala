@@ -6,20 +6,11 @@ import 'package:hive/hive.dart';
 import 'package:pilipala/pages/fav_edit/index.dart';
 import 'package:pilipala/pages/follow_search/view.dart';
 import 'package:pilipala/pages/member_article/index.dart';
-// 旧版消息页面保留供参考，路由已切换到 features/message
-// import 'package:pilipala/pages/message/at/index.dart';
-// import 'package:pilipala/pages/message/like/index.dart';
-// import 'package:pilipala/pages/message/reply/index.dart';
-// import 'package:pilipala/pages/message/system/index.dart';
 import 'package:pilipala/pages/opus/index.dart';
 import 'package:pilipala/pages/read/index.dart';
-// 设置子页面 - 已迁移至 features/setting
-// import '../pages/setting/pages/logs.dart';
 
 import '../pages/about/index.dart';
 import '../pages/blacklist/index.dart';
-// 动态已迁移至 features/dynamics
-// 动态详情已迁移至 features/dynamics
 import '../pages/fan/index.dart';
 import '../pages/fav/index.dart';
 import '../pages/fav_detail/index.dart';
@@ -30,12 +21,6 @@ import '../pages/history_search/index.dart';
 import '../pages/home/index.dart';
 import '../pages/html/index.dart';
 import '../pages/later/index.dart';
-// 旧版直播保留供参考，路由已切换到 features/live
-// import '../pages/live_room/view.dart';
-// 旧版登录页保留供参考，路由已切换到 features/login
-// import '../pages/login/index.dart';
-// 旧版媒体库保留供参考，路由已切换到 features/media
-// import '../pages/media/index.dart';
 import '../pages/member_archive/index.dart';
 import '../pages/member_coin/index.dart';
 import '../pages/member_dynamics/index.dart';
@@ -43,27 +28,10 @@ import '../pages/member_like/index.dart';
 import '../pages/member_search/index.dart';
 import '../pages/member_seasons/index.dart';
 import '../pages/search_result/index.dart';
-// 设置子页面 - 已迁移至 features/setting
-// import '../pages/setting/extra_setting.dart';
-// import '../pages/setting/pages/action_menu_set.dart';
-// import '../pages/setting/pages/color_select.dart';
-// import '../pages/setting/pages/display_mode.dart';
-// import '../pages/setting/pages/font_size_select.dart';
-// import '../pages/setting/pages/home_tabbar_set.dart';
-// import '../pages/setting/pages/navigation_bar_set.dart';
-// import '../pages/setting/pages/play_gesture_set.dart';
-// import '../pages/setting/pages/play_speed_set.dart';
-// import '../pages/setting/recommend_setting.dart';
-// import '../pages/setting/play_setting.dart';
-// import '../pages/setting/privacy_setting.dart';
-// import '../pages/setting/style_setting.dart';
 import '../pages/subscription/index.dart';
 import '../pages/subscription_detail/index.dart';
 import '../pages/video/detail/reply_reply/index.dart';
 import '../pages/webview/index.dart';
-// 旧版私信保留供参考，路由已切换到 features/message
-// import '../pages/whisper/index.dart';
-// import '../pages/whisper_detail/index.dart';
 import '../utils/storage.dart';
 
 // 新重构 features 页面 (使用别名避免命名冲突)
@@ -239,14 +207,8 @@ class Routes {
 
     // 首页(推荐) - 旧版 (兼容)
     CustomGetPage(name: '/', page: () => const HomePage()),
-    //
     CustomGetPage(name: '/webview', page: () => const WebviewPage()),
-    // 设置 - 已迁移至 features/setting（见上方新路由）
-    // CustomGetPage(name: '/setting', page: () => const SettingPage()),
-    // 媒体库 - 已迁移至 features/media（见上方新路由）
-    //
     CustomGetPage(name: '/fav', page: () => const FavPage()),
-    //
     CustomGetPage(name: '/favDetail', page: () => const FavDetailPage()),
     // 稍后再看
     CustomGetPage(name: '/later', page: () => const LaterPage()),
@@ -254,13 +216,10 @@ class Routes {
     CustomGetPage(name: '/history', page: () => const HistoryPage()),
     // 搜索结果 (旧版)
     CustomGetPage(name: '/searchResult', page: () => const SearchResultPage()),
-    // 动态 - 已迁移至 features/dynamics（见上方新路由）
-    // 动态详情 - 已迁移至 features/dynamics（见上方新路由）
     // 关注
     CustomGetPage(name: '/follow', page: () => const FollowPage()),
     // 粉丝
     CustomGetPage(name: '/fan', page: () => const FansPage()),
-    // 直播详情 - 已迁移至 features/live（见上方新路由）
     CustomGetPage(name: '/memberSearch', page: () => const MemberSearchPage()),
     // 二级回复
     CustomGetPage(
@@ -297,12 +256,6 @@ class Routes {
     CustomGetPage(name: '/playSpeedSet', page: () => const PlaySpeedPage()),
     // 收藏搜索
     CustomGetPage(name: '/favSearch', page: () => const FavSearchPage()),
-    // 消息页面 - 已迁移至 features/message（见上方新路由）
-    // CustomGetPage(name: '/whisper', page: () => const WhisperPage()),
-    // 私信详情 - 已迁移至 features/message（见上方新路由）
-    // CustomGetPage(
-    //     name: '/whisperDetail', page: () => const WhisperDetailPage()),
-    // 登录页面 - 已迁移至 features/login（见上方新路由）
     // 用户动态
     CustomGetPage(
         name: '/memberDynamics', page: () => const MemberDynamicsPage()),
@@ -333,15 +286,6 @@ class Routes {
     // 操作菜单
     CustomGetPage(
         name: '/actionMenuSet', page: () => const ActionMenuSetPage()),
-    // 回复我的 - 已迁移至 features/message（见上方新路由）
-    // CustomGetPage(name: '/messageReply', page: () => const MessageReplyPage()),
-    // @我的 - 已迁移至 features/message（见上方新路由）
-    // CustomGetPage(name: '/messageAt', page: () => const MessageAtPage()),
-    // 收到的赞 - 已迁移至 features/message（见上方新路由）
-    // CustomGetPage(name: '/messageLike', page: () => const MessageLikePage()),
-    // 系统通知 - 已迁移至 features/message（见上方新路由）
-    // CustomGetPage(
-    //     name: '/messageSystem', page: () => const MessageSystemPage()),
     // 收藏夹编辑
     CustomGetPage(name: '/favEdit', page: () => const FavEditPage()),
 

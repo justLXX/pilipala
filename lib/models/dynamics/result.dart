@@ -540,7 +540,7 @@ class DynamicArchiveModel {
     disablePreview = json['disable_preview'] is String
         ? int.tryParse(json['disable_preview'])
         : json['disable_preview'];
-    durationText = json['duration_text']?.toString();
+    durationText = json['duration_text'];
     jumpUrl = json['jump_url'];
     stat = json['stat'] != null ? Stat.fromJson(json['stat']) : null;
     title = json['title'];
@@ -761,7 +761,7 @@ class DynamicLiveModel {
       roomId = livePlayInfo['room_id'] is String
           ? int.tryParse(livePlayInfo['room_id'])
           : livePlayInfo['room_id'];
-      liveId = livePlayInfo['live_id'];
+      liveId = livePlayInfo['live_id']?.toString();
       liveStatus = livePlayInfo['live_status'] is String
           ? int.tryParse(livePlayInfo['live_status'])
           : livePlayInfo['live_status'];
@@ -897,7 +897,7 @@ class Stat {
   String? play;
 
   Stat.fromJson(Map<String, dynamic> json) {
-    danmaku = json['danmaku']?.toString();
-    play = json['play']?.toString();
+    danmaku = json['danmaku'];
+    play = json['play'];
   }
 }

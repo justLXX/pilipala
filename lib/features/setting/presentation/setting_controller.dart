@@ -7,7 +7,6 @@ import 'package:pilipala/models/common/dynamic_badge_mode.dart';
 import 'package:pilipala/models/common/nav_bar_config.dart';
 import 'package:pilipala/models/common/theme_type.dart';
 import 'package:pilipala/utils/feed_back.dart';
-import 'package:pilipala/utils/storage.dart';
 
 import 'widgets/select_dialog.dart';
 

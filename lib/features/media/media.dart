@@ -9,3 +9,4 @@ export 'domain/media_use_cases.dart';
 
 // Presentation Layer
 export 'presentation/media_controller.dart';
+export 'presentation/media_page.dart';

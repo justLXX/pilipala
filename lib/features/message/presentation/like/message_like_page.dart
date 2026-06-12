@@ -126,15 +126,6 @@ class LikeItem extends StatelessWidget {
     final nickNameList = item.users!.map((e) => e.nickname).take(2).toList();
     int usersLen = item.users!.length > 3 ? 3 : item.users!.length;
     final String bvid = item.item!.uri!.split('/').last;
-    // 页码
-    final String page =
-        item.item!.nativeUri!.split('page=').last.split('&').first;
-    // 根评论id
-    final String commentRootId =
-        item.item!.nativeUri!.split('comment_root_id=').last.split('&').first;
-    // 二级评论id
-    final String commentSecondaryId =
-        item.item!.nativeUri!.split('comment_secondary_id=').last;
 
     return InkWell(
       onTap: () async {

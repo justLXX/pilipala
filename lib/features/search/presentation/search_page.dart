@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/search/presentation/search_controller.dart'
     as search_ctrl;
 import 'package:pilipala/features/search/presentation/widgets/hot_keyword.dart';

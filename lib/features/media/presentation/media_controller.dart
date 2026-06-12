@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/features/media/domain/media_use_cases.dart';
@@ -33,6 +35,41 @@ class MediaController extends GetxController {
   RxBool userLogin = false.obs;
   int? mid;
 
+  /// Favorites folder data (for page UI display)
+  Rx<FavFolderData> favFolderData = FavFolderData().obs;
+  final ScrollController scrollController = ScrollController();
+
+  /// Navigation items list
+  List navList = [
+    {
+      'icon': Icons.file_download_outlined,
+      'title': '离线缓存',
+      'onTap': () {
+        SmartDialog.showToast('功能开发中');
+      },
+    },
+    {
+      'icon': Icons.history,
+      'title': '观看记录',
+      'onTap': () => Get.toNamed('/history'),
+    },
+    {
+      'icon': Icons.star_border,
+      'title': '我的收藏',
+      'onTap': () => Get.toNamed('/fav'),
+    },
+    {
+      'icon': Icons.subscriptions_outlined,
+      'title': '我的订阅',
+      'onTap': () => Get.toNamed('/subscription'),
+    },
+    {
+      'icon': Icons.watch_later_outlined,
+      'title': '稍后再看',
+      'onTap': () => Get.toNamed('/later'),
+    },
+  ];
+
   // Getters
   List<MediaVideoItemModel> get watchLaterList => _watchLaterList;
   List<HisListItem> get historyList => _historyList;
@@ -61,6 +98,9 @@ class MediaController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final Box userInfoCache = GStrorage.userInfo;
+    final userInfo = userInfoCache.get('userInfoCache');
+    userLogin.value = userInfo != null;
     loadWatchLater();
   }
 
@@ -160,15 +200,38 @@ class MediaController extends GetxController {
   int? _getCurrentUserMid() {
     final Box userInfoCache = GStrorage.userInfo;
     final userInfo = userInfoCache.get('userInfoCache');
-    if (userInfo != null && userInfo['mid'] != null) {
-      return userInfo['mid'] as int;
+    if (userInfo != null && userInfo.mid != null) {
+      return userInfo.mid;
     }
     return null;
   }
 
   /// Backward-compatible method called by main_page when media tab is selected.
-  Future<void> queryFavFolder() async {
-    await loadWatchLater();
+  /// Returns a result Map for the page FutureBuilder to consume.
+  Future<dynamic> queryFavFolder() async {
+    if (!userLogin.value) {
+      return {'status': false, 'data': [], 'msg': '未登录'};
+    }
+    final userId = mid ?? _getCurrentUserMid();
+    if (userId == null) {
+      return {'status': false, 'data': [], 'msg': '用户未登录'};
+    }
+    try {
+      final list = await _getFavFolders.execute(
+        mid: userId,
+        page: 1,
+        pageSize: 5,
+      );
+      final favData = FavFolderData(
+        list: list,
+        count: list.length,
+      );
+      favFolderData.value = favData;
+      _favFolders.value = list;
+      return {'status': true, 'data': list, 'msg': ''};
+    } catch (e) {
+      return {'status': false, 'data': [], 'msg': e.toString()};
+    }
   }
 
   /// Change selected tab.

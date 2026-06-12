@@ -7,7 +7,7 @@ import 'package:pilipala/models/common/reply_sort_type.dart';
 import 'widgets/select_dialog.dart';
 import 'package:pilipala/utils/storage.dart';
 
-import 'package:pilipala/pages/home/index.dart';
+import 'package:pilipala/features/home/presentation/home_controller.dart';
 import 'widgets/switch_item.dart';
 
 class ExtraSetting extends StatefulWidget {

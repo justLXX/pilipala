@@ -13,7 +13,7 @@ import 'package:pilipala/models/common/reply_sort_type.dart';
 import 'package:pilipala/models/common/reply_type.dart';
 import 'package:pilipala/models/dynamics/result.dart';
 import 'package:pilipala/models/video/reply/item.dart';
-import 'package:pilipala/pages/dynamics/widgets/author_panel.dart';
+import 'package:pilipala/features/dynamics/presentation/widgets/author_panel.dart';
 import 'package:pilipala/pages/video/detail/reply/widgets/reply_item.dart';
 import 'package:pilipala/pages/video/detail/reply_new/index.dart';
 import 'package:pilipala/pages/video/detail/reply_reply/index.dart';

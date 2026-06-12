@@ -9,6 +9,7 @@ import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/video_detail_res.dart';
 import 'package:pilipala/models/video/play/url.dart';
 import 'package:pilipala/models/video/reply/data.dart';
+import 'package:pilipala/models/video/view_point.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/plugin/pl_player/models/bottom_control_type.dart';
 import 'package:pilipala/utils/id_utils.dart';
@@ -38,6 +39,12 @@ class VideoDetailController extends GetxController
   // Related videos
   final RxList<HotVideoItemModel> _relatedVideos = <HotVideoItemModel>[].obs;
   final RxBool _isRelatedLoading = false.obs;
+
+  // View points (chapters)
+  final RxList<ViewPoint> viewPoints = <ViewPoint>[].obs;
+
+  // Current playing chapter index (for highlighting)
+  final RxInt currentChapterIndex = (-1).obs;
 
   // User login state
   final Box<dynamic> _userInfoCache = GStrorage.userInfo;
@@ -223,7 +230,10 @@ class VideoDetailController extends GetxController
       // 5. Load related videos
       loadRelatedVideos();
 
-      // 6. Query follow status if logged in
+      // 6. Load chapters (view points)
+      loadViewPoints();
+
+      // 7. Query follow status if logged in
       if (_userLogin && videoDetail.owner?.mid != null) {
         queryFollowStatus();
       }
@@ -325,6 +335,43 @@ class VideoDetailController extends GetxController
       // Non-critical, silently fail
     } finally {
       _isRelatedLoading.value = false;
+    }
+  }
+
+  /// Load chapters (view points) from player info API.
+  Future<void> loadViewPoints() async {
+    final currentBvid = _videoDetail.value?.bvid ?? bvid;
+    final currentAid = _videoDetail.value?.aid;
+    final currentCid = _videoDetail.value?.cid ?? cid;
+    if (currentCid == 0) return;
+
+    try {
+      final result = await VideoHttp.playerInfo(
+        aid: currentAid,
+        bvid: currentBvid,
+        cid: currentCid,
+      );
+      if (result['status'] && result['data'] != null) {
+        viewPoints.value = result['data'] as List<ViewPoint>;
+      }
+    } catch (_) {
+      // Non-critical, silently fail
+    }
+  }
+
+  /// Update current chapter index based on player position.
+  void updateCurrentChapter(int positionSeconds) {
+    if (viewPoints.isEmpty) return;
+    int newIndex = -1;
+    for (int i = 0; i < viewPoints.length; i++) {
+      final vp = viewPoints[i];
+      if (positionSeconds >= (vp.from ?? 0) && positionSeconds < (vp.to ?? 0)) {
+        newIndex = i;
+        break;
+      }
+    }
+    if (newIndex != currentChapterIndex.value) {
+      currentChapterIndex.value = newIndex;
     }
   }
 

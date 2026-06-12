@@ -17,8 +17,9 @@ InlineSpan richNode(item, context) {
       richTextNodes = item.modules.moduleDynamic.desc.richTextNodes;
     } else if (item.modules.moduleDynamic.major != null) {
       // 动态页面 richTextNodes 层级可能与主页动态层级不同
-      richTextNodes =
-          item.modules.moduleDynamic.major.opus.summary.richTextNodes;
+      richTextNodes = item.modules.moduleDynamic.major.opus.summary != null
+          ? item.modules.moduleDynamic.major.opus.summary!.richTextNodes
+          : null;
       if (item.modules.moduleDynamic.major.opus.title != null) {
         spanChilds.add(
           TextSpan(

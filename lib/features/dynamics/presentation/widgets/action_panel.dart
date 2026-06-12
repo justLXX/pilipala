@@ -60,7 +60,7 @@ class _ActionPanelState extends State<ActionPanel>
   // 动态点赞
   Future onLikeDynamic() async {
     feedBack();
-    var item = widget.item!;
+    var item = widget.item;
     String dynamicId = item.idStr!;
     // 1 已点赞 2 不喜欢 0 未操作
     Like like = item.modules!.moduleStat!.like!;

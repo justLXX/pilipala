@@ -14,6 +14,7 @@ import 'package:pilipala/features/video/presentation/widgets/reply_reply_panel.d
 import 'package:pilipala/features/video/presentation/widgets/header_control.dart';
 import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/video_detail_res.dart';
+import 'package:pilipala/models/video/view_point.dart';
 import 'package:pilipala/pages/danmaku/view.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/plugin/pl_player/models/play_repeat.dart';
@@ -49,12 +50,17 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     _heroTag = Get.arguments?['heroTag'] ?? '${bvid}_$cid';
     _vdCtr = Get.put(VideoDetailController(), tag: _heroTag);
     _vdCtr.playerController.addStatusLister(_playerStatusListener);
+    _vdCtr.playerController.addPositionListener(_playerPositionListener);
     _vdCtr.loadVideoDetail(
       bvid: bvid,
       aid: Get.parameters['aid'] != null
           ? int.parse(Get.parameters['aid']!)
           : null,
     );
+  }
+
+    void _playerPositionListener(Duration position) {
+    _vdCtr.updateCurrentChapter(position.inSeconds);
   }
 
   void _playerStatusListener(PlayerStatus status) {
@@ -73,6 +79,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   void dispose() {
     VideoDetailPage.routeObserver.unsubscribe(this);
     _vdCtr.playerController.removeStatusLister(_playerStatusListener);
+    _vdCtr.playerController.removePositionListener(_playerPositionListener);
     // playerController.dispose() 由 VideoDetailController.onClose() 统一管理，
     // 避免单例 PlPlayerController 的 _playerCount 被双重递减到 0，
     // 导致返回时 reinitPlayer 中 setDataSource 因 _playerCount==0 直接 return
@@ -453,6 +460,22 @@ class _VideoDetailPageState extends State<VideoDetailPage>
         const SliverToBoxAdapter(
           child: Divider(height: 1, indent: 12, endIndent: 12),
         ),
+        // Chapter (ViewPoints) section
+        Obx(() {
+          if (_vdCtr.viewPoints.isNotEmpty) {
+            return SliverToBoxAdapter(
+              child: _ChapterSection(
+                viewPoints: _vdCtr.viewPoints,
+                currentChapterIndex: _vdCtr.currentChapterIndex,
+                onChapterTap: (ViewPoint vp) {
+                  _vdCtr.playerController
+                      .seekTo(Duration(seconds: vp.from ?? 0));
+                },
+              ),
+            );
+          }
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }),
         // UP master info with follow button
         if (detail.owner != null)
           SliverToBoxAdapter(
@@ -497,6 +520,194 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 }
 
 // ==================== Intro Tab Widgets ====================
+
+/// Chapter (view points) section with horizontal scrolling cards.
+/// Douyin-style design: rounded card thumbnails with title overlay.
+class _ChapterSection extends StatelessWidget {
+  final List<ViewPoint> viewPoints;
+  final RxInt currentChapterIndex;
+  final void Function(ViewPoint) onChapterTap;
+
+  const _ChapterSection({
+    required this.viewPoints,
+    required this.currentChapterIndex,
+    required this.onChapterTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              const Icon(Icons.bookmark_outline, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                '章节',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${viewPoints.length}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 106,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: viewPoints.length,
+            itemBuilder: (context, index) {
+              final vp = viewPoints[index];
+              return Obx(() => _ChapterCard(
+                    viewPoint: vp,
+                    isActive: currentChapterIndex.value == index,
+                    onTap: () => onChapterTap(vp),
+                  ));
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+/// Single chapter card with thumbnail, title overlay and time info.
+class _ChapterCard extends StatelessWidget {
+  final ViewPoint viewPoint;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _ChapterCard({
+    required this.viewPoint,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final imgUrl = viewPoint.imgUrl;
+    final hasImage = imgUrl != null && imgUrl.isNotEmpty;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: isActive
+              ? Border.all(
+                  color: theme.colorScheme.primary,
+                  width: 2,
+                )
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Thumbnail image area
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Image or placeholder
+                    if (hasImage)
+                      NetworkImgLayer(
+                        src: imgUrl,
+                        width: 140,
+                        height: 76,
+                        quality: 50,
+                      )
+                    else
+                      Container(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Center(
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            color: theme.colorScheme.outline,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    // Time badge overlay at bottom-right
+                    Positioned(
+                      right: 4,
+                      bottom: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          viewPoint.fromTimeString,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Active indicator overlay
+                    if (isActive)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Chapter title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Text(
+                viewPoint.content ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  color: isActive
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// Action bar inside the intro tab (like, coin, collect, share).
 class _IntroActionBar extends StatelessWidget {

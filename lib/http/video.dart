@@ -9,6 +9,7 @@ import '../models/user/fav_folder.dart';
 import '../models/video/ai.dart';
 import '../models/video/play/url.dart';
 import '../models/video/subTitile/result.dart';
+import '../models/video/view_point.dart';
 import '../models/video_detail_res.dart';
 import '../utils/recommend_filter.dart';
 import '../utils/storage.dart';
@@ -476,6 +477,37 @@ class VideoHttp {
       return {'status': true, 'data': res.data['data']};
     } else {
       return {'status': false, 'data': null, 'msg': res.data['message']};
+    }
+  }
+
+  /// 获取播放器信息（章节数据）
+  static Future playerInfo({int? aid, String? bvid, required int cid}) async {
+    Map<String, dynamic> data = {
+      'cid': cid,
+    };
+    if (aid != null) {
+      data['aid'] = aid;
+    }
+    if (bvid != null) {
+      data['bvid'] = bvid;
+    }
+    Map params = await WbiSign().makSign(data);
+    try {
+      var res = await Request().get(Api.playerInfo, data: params);
+      if (res.data['code'] == 0) {
+        List<ViewPoint> viewPoints = [];
+        final viewPointsData = res.data['data']['view_points'];
+        if (viewPointsData != null && viewPointsData is List) {
+          for (var item in viewPointsData) {
+            viewPoints.add(ViewPoint.fromJson(item));
+          }
+        }
+        return {'status': true, 'data': viewPoints};
+      } else {
+        return {'status': false, 'data': []};
+      }
+    } catch (err) {
+      return {'status': false, 'data': [], 'msg': err};
     }
   }
 

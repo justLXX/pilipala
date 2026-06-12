@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/features/home/domain/video_use_cases.dart';
+import 'package:pilipala/http/api.dart';
+import 'package:pilipala/http/init.dart';
 import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/model_rec_video_item.dart';
 import 'package:pilipala/utils/storage.dart';
@@ -29,6 +31,9 @@ class HomeController extends GetxController {
   final RxString _userFace = ''.obs;
   final Box _userInfoCache = GStrorage.userInfo;
   dynamic _userInfo;
+
+  /// Default search word (used by search bar and extra_setting_page).
+  RxString defaultSearch = ''.obs;
 
   int _currentPage = 0;
   int _hotPage = 1;
@@ -64,6 +69,11 @@ class HomeController extends GetxController {
     super.onInit();
     // Initialize login state (check if box is closed and reopen if needed)
     _ensureUserInfoBoxOpen();
+    // Load default search word
+    final Box setting = GStrorage.setting;
+    if (setting.get(SettingBoxKey.enableSearchWord, defaultValue: true)) {
+      searchDefault();
+    }
     // loadVideos() 由 RcmdPage.initState() 调用，避免重复请求
   }
 
@@ -186,5 +196,15 @@ class HomeController extends GetxController {
     } finally {
       _isHotLoadingMore.value = false;
     }
+  }
+
+  /// Load default search word from API.
+  void searchDefault() async {
+    try {
+      var res = await Request().get(Api.searchDefault);
+      if (res.data is Map && res.data['code'] == 0) {
+        defaultSearch.value = res.data['data']['name'] ?? '';
+      }
+    } catch (_) {}
   }
 }

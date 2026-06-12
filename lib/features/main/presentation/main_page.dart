@@ -32,7 +32,6 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   final MainController _mainController = Get.put(MainController());
-  features_home.HomeController? _featuresHomeController;
   features_rank.RankController? _rankController;
   features_dynamics.DynamicsController? _dynamicController;
   features_media.MediaController? _mediaController;
@@ -92,7 +91,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
 
   void controllerInit() {
     Get.put(features_repo.VideoRepository());
-    _featuresHomeController = Get.put(features_home.HomeController());
+    Get.put(features_home.HomeController());
     if (_mainController.pagesIds.contains(1)) {
       _rankController = Get.put(features_rank.RankController());
     }
