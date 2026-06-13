@@ -126,3 +126,206 @@ class RemoveFromWatchLaterUseCase {
     }
   }
 }
+
+/// Use case for pausing/resuming history.
+class PauseHistoryUseCase {
+  final MediaRepository _repository;
+
+  PauseHistoryUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required bool pause}) async {
+    final response = await _repository.pauseHistory(pause: pause);
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to pause history');
+    }
+  }
+}
+
+/// Use case for getting history pause status.
+class GetHistoryStatusUseCase {
+  final MediaRepository _repository;
+
+  GetHistoryStatusUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<bool> execute() async {
+    final response = await _repository.getHistoryStatus();
+    if (response.isSuccess && response.data != null) {
+      return response.data!;
+    }
+    throw Exception(response.msg ?? 'Failed to get history status');
+  }
+}
+
+/// Use case for clearing all history.
+class ClearHistoryUseCase {
+  final MediaRepository _repository;
+
+  ClearHistoryUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute() async {
+    final response = await _repository.clearHistory();
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to clear history');
+    }
+  }
+}
+
+/// Use case for deleting a single history item.
+class DeleteHistoryUseCase {
+  final MediaRepository _repository;
+
+  DeleteHistoryUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required String kid}) async {
+    final response = await _repository.deleteHistory(kid: kid);
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to delete history');
+    }
+  }
+}
+
+/// Use case for deleting favorite folder.
+class DeleteFavFolderUseCase {
+  final MediaRepository _repository;
+
+  DeleteFavFolderUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required int mediaId}) async {
+    final response = await _repository.deleteFavFolder(mediaId: mediaId);
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to delete favorite folder');
+    }
+  }
+}
+
+/// Use case for canceling video from favorite.
+class CancelFavVideoUseCase {
+  final MediaRepository _repository;
+
+  CancelFavVideoUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required int aid, required String mediaIds}) async {
+    final response = await _repository.cancelFavVideo(
+      aid: aid,
+      mediaIds: mediaIds,
+    );
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to cancel favorite');
+    }
+  }
+}
+
+/// Use case for searching history.
+class SearchHistoryUseCase {
+  final MediaRepository _repository;
+
+  SearchHistoryUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<Map<String, dynamic>> execute({
+    required int pn,
+    required String keyword,
+  }) async {
+    final response = await _repository.searchHistory(
+      pn: pn,
+      keyword: keyword,
+    );
+    if (response.isSuccess && response.data != null) {
+      return response.data!;
+    }
+    throw Exception(response.msg ?? 'Failed to search history');
+  }
+}
+
+/// Use case for getting subscription folder list.
+class GetSubFolderUseCase {
+  final MediaRepository _repository;
+
+  GetSubFolderUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<Map<String, dynamic>> execute({
+    required int mid,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _repository.getSubFolder(
+      mid: mid,
+      page: page,
+      pageSize: pageSize,
+    );
+    if (response.isSuccess && response.data != null) {
+      return response.data!;
+    }
+    throw Exception(response.msg ?? 'Failed to get subscription folder');
+  }
+}
+
+/// Use case for canceling subscription.
+class CancelSubscriptionUseCase {
+  final MediaRepository _repository;
+
+  CancelSubscriptionUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<void> execute({required int seasonId}) async {
+    final response = await _repository.cancelSubscription(seasonId: seasonId);
+    if (!response.isSuccess) {
+      throw Exception(response.msg ?? 'Failed to cancel subscription');
+    }
+  }
+}
+
+/// Use case for getting subscription season list.
+class GetSeasonListUseCase {
+  final MediaRepository _repository;
+
+  GetSeasonListUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<Map<String, dynamic>> execute({
+    required int seasonId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _repository.getSeasonList(
+      seasonId: seasonId,
+      page: page,
+      pageSize: pageSize,
+    );
+    if (response.isSuccess && response.data != null) {
+      return response.data!;
+    }
+    throw Exception(response.msg ?? 'Failed to get season list');
+  }
+}
+
+/// Use case for getting subscription resource list.
+class GetResourceListUseCase {
+  final MediaRepository _repository;
+
+  GetResourceListUseCase({MediaRepository? repository})
+      : _repository = repository ?? Get.find<MediaRepository>();
+
+  Future<Map<String, dynamic>> execute({
+    required int seasonId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _repository.getResourceList(
+      seasonId: seasonId,
+      page: page,
+      pageSize: pageSize,
+    );
+    if (response.isSuccess && response.data != null) {
+      return response.data!;
+    }
+    throw Exception(response.msg ?? 'Failed to get resource list');
+  }
+}

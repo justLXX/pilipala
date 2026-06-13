@@ -107,7 +107,8 @@ class LoginUtils {
             );
           });
         }
-        Get.back();
+        // 登录成功后返回上一页
+        _navigateBack();
       } else {
         // 获取用户信息失败
         SmartDialog.showToast(result['msg']);
@@ -117,6 +118,15 @@ class LoginUtils {
       SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.warning);
       content = content + e.toString();
       Clipboard.setData(ClipboardData(text: content));
+    }
+  }
+  /// 登录成功后返回上一页，兼容 macOS 等平台
+  static void _navigateBack() {
+    final context = Get.context;
+    if (context != null && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Get.offAllNamed('/');
     }
   }
 }

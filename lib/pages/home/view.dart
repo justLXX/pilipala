@@ -249,8 +249,8 @@ class DefaultUser extends StatelessWidget {
       height: 38,
       child: IconButton(
         style: ButtonStyle(
-          padding: MaterialStateProperty.all(EdgeInsets.zero),
-          backgroundColor: MaterialStateProperty.resolveWith((states) {
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
             return Theme.of(context)
                 .colorScheme
                 .onSecondaryContainer
@@ -341,9 +341,9 @@ class CustomChip extends StatelessWidget {
     return InputChip(
       side: BorderSide.none,
       backgroundColor: secondaryContainer,
-      color: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return primary;
         }
         return colorTheme.secondaryContainer;

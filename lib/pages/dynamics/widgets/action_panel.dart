@@ -8,6 +8,7 @@ import 'package:pilipala/http/dynamics.dart';
 import 'package:pilipala/models/dynamics/result.dart';
 import 'package:pilipala/pages/dynamics/index.dart';
 import 'package:pilipala/utils/feed_back.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:status_bar_control/status_bar_control.dart';
 import 'rich_node_panel.dart';
 
@@ -32,7 +33,7 @@ class _ActionPanelState extends State<ActionPanel>
   RxDouble height = 0.0.obs;
   RxBool isExpand = false.obs;
   late double statusHeight;
-  TextEditingController _inputController = TextEditingController();
+  final TextEditingController _inputController = TextEditingController();
   FocusNode myFocusNode = FocusNode();
   String _inputText = '';
 
@@ -60,7 +61,7 @@ class _ActionPanelState extends State<ActionPanel>
   // 动态点赞
   Future onLikeDynamic() async {
     feedBack();
-    var item = widget.item!;
+    var item = widget.item;
     String dynamicId = item.idStr!;
     // 1 已点赞 2 不喜欢 0 未操作
     Like like = item.modules!.moduleStat!.like!;
@@ -324,7 +325,7 @@ class _ActionPanelState extends State<ActionPanel>
                 if (!isExpand.value) ...[
                   const Divider(thickness: 0.1, height: 1),
                   ListTile(
-                    onTap: () => Get.back(),
+                    onTap: () => safeBack(),
                     minLeadingWidth: 0,
                     dense: true,
                     title: Text(
@@ -345,7 +346,7 @@ class _ActionPanelState extends State<ActionPanel>
 
   togglePanelState(status) {
     if (!status) {
-      Get.back();
+      safeBack();
       height.value = defaultHeight;
       _inputText = '';
       _inputController.clear();
@@ -388,7 +389,7 @@ class _ActionPanelState extends State<ActionPanel>
           flex: 1,
           child: TextButton.icon(
             onPressed: forwardHandler,
-            icon: const Icon(
+            icon: const FaIcon(
               FontAwesomeIcons.shareFromSquare,
               size: 16,
             ),
@@ -404,7 +405,7 @@ class _ActionPanelState extends State<ActionPanel>
           child: TextButton.icon(
             onPressed: () => _dynamicsController.pushDetail(widget.item, 1,
                 action: 'comment'),
-            icon: const Icon(
+            icon: const FaIcon(
               FontAwesomeIcons.comment,
               size: 16,
             ),
@@ -419,7 +420,7 @@ class _ActionPanelState extends State<ActionPanel>
           flex: 1,
           child: TextButton.icon(
             onPressed: handleState(onLikeDynamic),
-            icon: Icon(
+            icon: FaIcon(
               stat.like!.status!
                   ? FontAwesomeIcons.solidThumbsUp
                   : FontAwesomeIcons.thumbsUp,

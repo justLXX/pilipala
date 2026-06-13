@@ -13,6 +13,7 @@ import 'package:pilipala/plugin/pl_player/models/play_repeat.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/id_utils.dart';
 import 'package:pilipala/utils/storage.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../common/pages_bottom_sheet.dart';
@@ -155,7 +156,7 @@ class BangumiIntroController extends GetxController {
                           } else {
                             SmartDialog.showToast(res['msg']);
                           }
-                          Get.back();
+                          safeBack();
                         },
                       ),
                     )
@@ -187,7 +188,7 @@ class BangumiIntroController extends GetxController {
       // 重新获取收藏状态
       queryHasFavVideo();
       SmartDialog.showToast('✅ 操作成功');
-      Get.back();
+      safeBack();
     }
   }
 

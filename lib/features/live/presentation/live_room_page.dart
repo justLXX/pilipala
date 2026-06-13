@@ -351,9 +351,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                       child: Obx(
                         () => IconButton(
                           style: ButtonStyle(
-                            padding: MaterialStateProperty.all(EdgeInsets.zero),
-                            backgroundColor: MaterialStateProperty.resolveWith(
-                                (Set<MaterialState> states) {
+                            padding: WidgetStateProperty.all(EdgeInsets.zero),
+                            backgroundColor: WidgetStateProperty.resolveWith(
+                                (Set<WidgetState> states) {
                               return Colors.grey.withOpacity(0.1);
                             }),
                           ),
@@ -391,7 +391,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                       height: 34,
                       child: IconButton(
                         style: ButtonStyle(
-                          padding: MaterialStateProperty.all(EdgeInsets.zero),
+                          padding: WidgetStateProperty.all(EdgeInsets.zero),
                         ),
                         onPressed: () => _liveRoomController.sendMsg(),
                         icon: const Icon(

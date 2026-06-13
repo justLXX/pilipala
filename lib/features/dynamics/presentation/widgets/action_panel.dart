@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/dynamics.dart';
 import 'package:pilipala/models/dynamics/result.dart';
@@ -324,7 +325,7 @@ class _ActionPanelState extends State<ActionPanel>
                 if (!isExpand.value) ...[
                   const Divider(thickness: 0.1, height: 1),
                   ListTile(
-                    onTap: () => Get.back(),
+                    onTap: () => safeBack(),
                     minLeadingWidth: 0,
                     dense: true,
                     title: Text(
@@ -345,7 +346,7 @@ class _ActionPanelState extends State<ActionPanel>
 
   togglePanelState(status) {
     if (!status) {
-      Get.back();
+      safeBack();
       height.value = defaultHeight;
       _inputText = '';
       _inputController.clear();
@@ -388,7 +389,7 @@ class _ActionPanelState extends State<ActionPanel>
           flex: 1,
           child: TextButton.icon(
             onPressed: forwardHandler,
-            icon: const Icon(
+            icon: const FaIcon(
               FontAwesomeIcons.shareFromSquare,
               size: 16,
             ),
@@ -404,7 +405,7 @@ class _ActionPanelState extends State<ActionPanel>
           child: TextButton.icon(
             onPressed: () => _dynamicsController.pushDetail(widget.item, 1,
                 action: 'comment'),
-            icon: const Icon(
+            icon: const FaIcon(
               FontAwesomeIcons.comment,
               size: 16,
             ),
@@ -419,7 +420,7 @@ class _ActionPanelState extends State<ActionPanel>
           flex: 1,
           child: TextButton.icon(
             onPressed: handleState(onLikeDynamic),
-            icon: Icon(
+            icon: FaIcon(
               stat.like!.status!
                   ? FontAwesomeIcons.solidThumbsUp
                   : FontAwesomeIcons.thumbsUp,

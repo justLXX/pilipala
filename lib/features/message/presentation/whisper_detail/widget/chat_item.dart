@@ -71,7 +71,7 @@ class ChatItem extends StatelessWidget {
     Color textColor(BuildContext context) {
       return isOwner
           ? Theme.of(context).colorScheme.onPrimary
-          : Theme.of(context).colorScheme.onBackground;
+          : Theme.of(context).colorScheme.onSurface;
     }
 
     const double safeDistanceval = 6;

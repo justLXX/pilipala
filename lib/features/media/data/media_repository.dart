@@ -136,6 +136,179 @@ class MediaRepository {
     return response;
   }
 
+  /// Pause/resume history.
+  Future<ApiResponse<void>> pauseHistory({required bool pause}) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      Api.pauseHistory,
+      data: {
+        'switch': pause,
+        'csrf': await _getCsrf(),
+      },
+    );
+    return response;
+  }
+
+  /// Get history pause status.
+  Future<ApiResponse<bool>> getHistoryStatus() async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Api.historyStatus,
+    );
+    if (response.isSuccess && response.data != null) {
+      return ApiResponse.success(response.data!['data'] as bool);
+    }
+    return ApiResponse.error(msg: response.msg);
+  }
+
+  /// Clear all history.
+  Future<ApiResponse<void>> clearHistory() async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      Api.clearHistory,
+      data: {
+        'csrf': await _getCsrf(),
+      },
+    );
+    return response;
+  }
+
+  /// Delete single history item.
+  Future<ApiResponse<void>> deleteHistory({required String kid}) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      Api.delHistory,
+      data: {
+        'kid': kid,
+        'csrf': await _getCsrf(),
+      },
+    );
+    return response;
+  }
+
+  /// Get favorite folder detail with keyword search.
+  Future<ApiResponse<Map<String, dynamic>>> getFavFolderDetailSearch({
+    required int mediaId,
+    int page = 1,
+    int pageSize = 20,
+    String? keyword,
+    int? type,
+  }) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Api.userFavFolderDetail,
+      queryParameters: {
+        'media_id': mediaId,
+        'pn': page,
+        'ps': pageSize,
+        if (keyword != null) 'keyword': keyword,
+        if (type != null) 'type': type,
+      },
+    );
+    return response;
+  }
+
+  /// Delete favorite folder.
+  Future<ApiResponse<void>> deleteFavFolder({required int mediaId}) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      Api.delFavFolder,
+      data: {
+        'media_id': mediaId,
+        'csrf': await _getCsrf(),
+      },
+    );
+    return response;
+  }
+
+  /// Cancel video from favorite.
+  Future<ApiResponse<void>> cancelFavVideo({
+    required int aid,
+    required String mediaIds,
+  }) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      Api.favVideo,
+      data: {
+        'aid': aid,
+        'del_media_ids': mediaIds,
+        'csrf': await _getCsrf(),
+      },
+    );
+    return response;
+  }
+
+  /// Search history.
+  Future<ApiResponse<Map<String, dynamic>>> searchHistory({
+    required int pn,
+    required String keyword,
+  }) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Api.searchHistory,
+      queryParameters: {
+        'pn': pn,
+        'keyword': keyword,
+      },
+    );
+    return response;
+  }
+
+  /// Get subscription folder list.
+  Future<ApiResponse<Map<String, dynamic>>> getSubFolder({
+    required int mid,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Api.userSubFolder,
+      queryParameters: {
+        'mid': mid,
+        'pn': page,
+        'ps': pageSize,
+      },
+    );
+    return response;
+  }
+
+  /// Cancel subscription.
+  Future<ApiResponse<void>> cancelSubscription({required int seasonId}) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      Api.cancelSub,
+      data: {
+        'season_id': seasonId,
+        'csrf': await _getCsrf(),
+      },
+    );
+    return response;
+  }
+
+  /// Get subscription season list.
+  Future<ApiResponse<Map<String, dynamic>>> getSeasonList({
+    required int seasonId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Api.userSeasonList,
+      queryParameters: {
+        'season_id': seasonId,
+        'pn': page,
+        'ps': pageSize,
+      },
+    );
+    return response;
+  }
+
+  /// Get subscription resource list.
+  Future<ApiResponse<Map<String, dynamic>>> getResourceList({
+    required int seasonId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      Api.userResourceList,
+      queryParameters: {
+        'season_id': seasonId,
+        'pn': page,
+        'ps': pageSize,
+      },
+    );
+    return response;
+  }
+
   /// Get CSRF token for POST requests.
   Future<String> _getCsrf() async {
     return await Request.getCsrf();

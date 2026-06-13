@@ -7,6 +7,7 @@ import 'package:pilipala/models/common/dynamic_badge_mode.dart';
 import 'package:pilipala/models/common/nav_bar_config.dart';
 import 'package:pilipala/models/common/theme_type.dart';
 import 'package:pilipala/utils/feed_back.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 import 'widgets/select_dialog.dart';
 
@@ -70,7 +71,7 @@ class SettingController extends GetxController {
             TextButton(
               onPressed: () async {
                 await _logout.execute();
-                SmartDialog.dismiss().then((value) => Get.back());
+                SmartDialog.dismiss().then((value) => safeBack());
               },
               child: const Text('确认'),
             )

@@ -7,6 +7,7 @@ import 'package:gt3_flutter_plugin/gt3_flutter_plugin.dart';
 import 'package:pilipala/features/login/domain/login_use_cases.dart';
 import 'package:pilipala/models/login/index.dart';
 import 'package:pilipala/utils/login.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 /// Controller for the login feature.
 ///
@@ -299,7 +300,7 @@ class LoginController extends GetxController {
     if (res['status']) {
       await LoginUtils.confirmLogin('', null);
       validTimer?.cancel();
-      Get.back();
+      safeBack();
     }
   }
 }

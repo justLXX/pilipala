@@ -268,7 +268,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             widget.showEposideCb?.call();
           },
           style: ButtonStyle(
-            padding: MaterialStateProperty.all(EdgeInsets.zero),
+            padding: WidgetStateProperty.all(EdgeInsets.zero),
           ),
           child: const Text(
             '选集',
@@ -283,7 +283,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         child: TextButton(
           onPressed: () => _.toggleVideoFit(),
           style: ButtonStyle(
-            padding: MaterialStateProperty.all(EdgeInsets.zero),
+            padding: WidgetStateProperty.all(EdgeInsets.zero),
           ),
           child: Obx(
             () => Text(
@@ -300,7 +300,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         height: 34,
         child: TextButton(
           style: ButtonStyle(
-            padding: MaterialStateProperty.all(EdgeInsets.zero),
+            padding: WidgetStateProperty.all(EdgeInsets.zero),
           ),
           onPressed: () {},
           child: Obx(
@@ -316,7 +316,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       /// 全屏
       BottomControlType.fullscreen: ComBtn(
         icon: Obx(
-          () => Icon(
+          () => FaIcon(
             _.isFullScreen.value
                 ? FontAwesomeIcons.compress
                 : FontAwesomeIcons.expand,
@@ -793,7 +793,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 child: Visibility(
                   visible: _.showControls.value,
                   child: ComBtn(
-                    icon: Icon(
+                    icon: FaIcon(
                       _.controlsLock.value
                           ? FontAwesomeIcons.lock
                           : FontAwesomeIcons.lockOpen,

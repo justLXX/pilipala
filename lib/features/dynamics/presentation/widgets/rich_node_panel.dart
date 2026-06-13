@@ -3,6 +3,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/search.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // 富文本
 InlineSpan richNode(item, context) {
@@ -180,7 +181,7 @@ InlineSpan richNode(item, context) {
           );
         }
 
-        /// TODO 商品
+        /// 商品节点
         if (i.type == 'RICH_TEXT_NODE_TYPE_GOODS') {
           spanChilds.add(
             WidgetSpan(
@@ -196,7 +197,18 @@ InlineSpan richNode(item, context) {
             WidgetSpan(
               alignment: PlaceholderAlignment.middle,
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  if (i.jumpUrl != null && i.jumpUrl!.isNotEmpty) {
+                    String url = i.jumpUrl!;
+                    if (url.startsWith('//')) {
+                      url = 'https:$url';
+                    }
+                    launchUrl(
+                      Uri.parse(url),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  }
+                },
                 child: Text(
                   '${i.text} ',
                   style: authorStyle,

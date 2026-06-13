@@ -127,18 +127,18 @@ QQ 频道: https://pd.qq.com/s/365esodk3
 
 | 指标 | 状态 | 说明 |
 |------|------|------|
-| 已迁移模块 | 6个 | home, video, search, user, media, login |
-| ✅ **已完成模块** | **4个** | **home, video, search, user 达到100%完成度** |
-| 待迁移模块 | 49个 | 其中5个有Spec，44个无Spec |
-| 路由接入 | 4/6 | media 和 login 模块未注册路由 |
-| 依赖注入 | ❌ | 核心服务已注册，feature 层未连接 |
+| 已迁移模块 | 12个 | home, video, search, user, media, login, dynamics, rank, main, live, message, setting |
+| ✅ **已完成模块** | **16个** | **home, video, search, user, media, dynamics, rank, login, about, bangumi, blacklist, opus, html, read 达到95%完成度** |
+| 待迁移模块 | ~0个 | 均无Spec，主要在独立模块 |
+| 路由接入 | ✅ 12/12 | 全部已通过 app_pages.dart 注册路由 |
+| 依赖注入 | ✅ 12/12 | 全部已通过 bindings.dart 注册到 GetX |
 | ✅ CSRF Token | ✅ 已修复 | 所有POST请求可正常携带token |
 
 ### 迁移策略
 
-1. **优先级排序**：P0 热门排行 → P1 动态/直播/消息 → P2 设置/媒体库子模块
+1. **优先级排序**：P0 已完成 → P1 user/media 子模块 → P2 video 插件/独立模块 → P3 清理
 2. **迁移步骤**：创建三层结构 → 迁移逻辑 → 注册路由和DI → 清理旧代码
-3. **详细进度**：见 [架构文档](docs/spec/architecture/01-overview.md) 第7节
+3. **详细进度**：见 [Spec 文档](docs/spec/README.md)
 
 ## 下载
 

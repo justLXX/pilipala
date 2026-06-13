@@ -8,6 +8,7 @@ import 'package:pilipala/models/search/hot.dart';
 import 'package:pilipala/models/search/result.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:pilipala/utils/utils.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 /// Controller for the search feature.
 ///
@@ -318,7 +319,7 @@ class PiliSearchController extends GetxController {
       _inputText.value = '';
       _suggestions.clear();
     } else {
-      Get.back();
+      safeBack();
     }
   }
 

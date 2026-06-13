@@ -15,6 +15,7 @@ import 'package:pilipala/pages/video/detail/introduction/widgets/action_item.dar
 import 'package:pilipala/pages/video/detail/introduction/widgets/fav_panel.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/storage.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import '../../../common/widgets/http_error.dart';
 import 'controller.dart';
 import 'widgets/intro_detail.dart';
@@ -79,7 +80,7 @@ class _BangumiIntroPanelState extends State<BangumiIntroPanel>
             // 请求错误
             return HttpError(
               errMsg: snapshot.data['msg'],
-              fn: () => Get.back(),
+              fn: () => safeBack(),
             );
           }
         } else {
@@ -232,11 +233,11 @@ class _BangumiInfoState extends State<BangumiInfo> {
                               height: 34,
                               child: IconButton(
                                 style: ButtonStyle(
-                                  padding: MaterialStateProperty.all(
+                                  padding: WidgetStateProperty.all(
                                       EdgeInsets.zero),
                                   backgroundColor:
-                                      MaterialStateProperty.resolveWith(
-                                          (Set<MaterialState> states) {
+                                      WidgetStateProperty.resolveWith(
+                                          (Set<WidgetState> states) {
                                     return t.colorScheme.primaryContainer
                                         .withOpacity(0.7);
                                   }),
@@ -348,43 +349,43 @@ class _BangumiInfoState extends State<BangumiInfo> {
               children: <Widget>[
                 Obx(
                   () => ActionItem(
-                    icon: const Icon(FontAwesomeIcons.thumbsUp),
-                    selectIcon: const Icon(FontAwesomeIcons.solidThumbsUp),
+                    icon: const FaIcon(FontAwesomeIcons.thumbsUp),
+                    selectIcon: const FaIcon(FontAwesomeIcons.solidThumbsUp),
                     onTap: handleState(bangumiIntroController.actionLikeVideo),
                     selectStatus: bangumiIntroController.hasLike.value,
-                    text: widget.bangumiDetail!.stat!['likes']!.toString(),
+                    text: widget.bangumiDetail!.stat?['likes']!.toString(),
                   ),
                 ),
                 Obx(
                   () => ActionItem(
-                    icon: const Icon(FontAwesomeIcons.b),
-                    selectIcon: const Icon(FontAwesomeIcons.b),
+                    icon: const FaIcon(FontAwesomeIcons.b),
+                    selectIcon: const FaIcon(FontAwesomeIcons.b),
                     onTap: handleState(bangumiIntroController.actionCoinVideo),
                     selectStatus: bangumiIntroController.hasCoin.value,
-                    text: widget.bangumiDetail!.stat!['coins']!.toString(),
+                    text: widget.bangumiDetail!.stat?['coins']!.toString(),
                   ),
                 ),
                 Obx(
                   () => ActionItem(
-                    icon: const Icon(FontAwesomeIcons.star),
-                    selectIcon: const Icon(FontAwesomeIcons.solidStar),
+                    icon: const FaIcon(FontAwesomeIcons.star),
+                    selectIcon: const FaIcon(FontAwesomeIcons.solidStar),
                     onTap: () => showFavBottomSheet(),
                     selectStatus: bangumiIntroController.hasFav.value,
-                    text: widget.bangumiDetail!.stat!['favorite']!.toString(),
+                    text: widget.bangumiDetail!.stat?['favorite']!.toString(),
                   ),
                 ),
                 ActionItem(
-                  icon: const Icon(FontAwesomeIcons.comment),
-                  selectIcon: const Icon(FontAwesomeIcons.reply),
+                  icon: const FaIcon(FontAwesomeIcons.comment),
+                  selectIcon: const FaIcon(FontAwesomeIcons.reply),
                   onTap: () => videoDetailCtr.tabCtr.animateTo(1),
                   selectStatus: false,
-                  text: widget.bangumiDetail!.stat!['reply']!.toString(),
+                  text: widget.bangumiDetail!.stat?['reply']!.toString(),
                 ),
                 ActionItem(
-                  icon: const Icon(FontAwesomeIcons.shareFromSquare),
+                  icon: const FaIcon(FontAwesomeIcons.shareFromSquare),
                   onTap: () => bangumiIntroController.actionShareVideo(),
                   selectStatus: false,
-                  text: widget.bangumiDetail!.stat!['share']!.toString(),
+                  text: widget.bangumiDetail!.stat?['share']!.toString(),
                 ),
               ],
             ),

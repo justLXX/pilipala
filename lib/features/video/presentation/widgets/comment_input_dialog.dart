@@ -8,6 +8,7 @@ import 'package:pilipala/models/video/reply/item.dart';
 import 'package:pilipala/models/video/reply/emote.dart';
 import 'package:pilipala/pages/emote/view.dart';
 import 'package:pilipala/utils/feed_back.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 class CommentInputDialog extends StatefulWidget {
   const CommentInputDialog({
@@ -77,7 +78,7 @@ class _CommentInputDialogState extends State<CommentInputDialog>
     );
     if (result['status']) {
       SmartDialog.showToast(result['data']['success_toast']);
-      Get.back(result: {
+      safeBack(result: {
         'data': ReplyItemModel.fromJson(result['data']['reply'], ''),
       });
     } else {

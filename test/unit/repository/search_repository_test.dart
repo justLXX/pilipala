@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pilipala/core/network/api_client.dart';
 import 'package:pilipala/features/search/data/search_repository.dart';
-import 'package:pilipala/models/search/hot.dart';
 
-import '../../helpers/test_data_factory.dart';
 
 /// Manual mock implementation of ApiClient for testing.
 class TestApiClient implements ApiClient {

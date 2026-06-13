@@ -5,6 +5,7 @@ import 'package:pilipala/features/search/presentation/search_controller.dart'
 import 'package:pilipala/features/search/presentation/widgets/hot_keyword.dart';
 import 'package:pilipala/features/search/presentation/widgets/search_text.dart';
 import 'package:pilipala/features/search/presentation/widgets/search_results.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 /// SearchPage displays the search interface with three states:
 /// - State A: Default (history + hot search)
@@ -55,7 +56,7 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => safeBack(),
             child: Text('取消',
                 style: TextStyle(color: Theme.of(context).colorScheme.primary)),
           ),

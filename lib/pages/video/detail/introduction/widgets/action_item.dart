@@ -4,8 +4,8 @@ import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/utils/feed_back.dart';
 
 class ActionItem extends StatelessWidget {
-  final dynamic icon;
-  final Icon? selectIcon;
+  final Widget? icon;
+  final Widget? selectIcon;
   final Function? onTap;
   final Function? onLongPress;
   final String? text;
@@ -45,22 +45,35 @@ class ActionItem extends StatelessWidget {
               },
               child: icon is Icon
                   ? Icon(
-                      selectStatus
-                          ? selectIcon!.icon ?? icon!.icon
-                          : icon!.icon,
+                      (icon as Icon).icon,
                       color: selectStatus
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.outline,
                       size: 20,
                     )
-                  : Image.asset(
-                      key: ValueKey<bool>(selectStatus),
-                      'assets/images/coin.png',
-                      width: const IconThemeData.fallback().size,
-                      color: selectStatus
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline,
-                    ),
+                  : icon != null
+                      ? SizedBox(
+                          key: ValueKey<bool>(selectStatus),
+                          child: IconTheme(
+                            data: IconThemeData(
+                              color: selectStatus
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.outline,
+                              size: 20,
+                            ),
+                            child: selectStatus
+                                ? (selectIcon ?? icon!)
+                                : icon!,
+                          ),
+                        )
+                      : Image.asset(
+                          key: ValueKey<bool>(selectStatus),
+                          'assets/images/coin.png',
+                          width: const IconThemeData.fallback().size,
+                          color: selectStatus
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
             ),
             const SizedBox(height: 6),
             Text(

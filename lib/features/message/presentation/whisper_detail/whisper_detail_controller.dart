@@ -8,6 +8,7 @@ import 'package:pilipala/features/message/domain/message_use_cases.dart';
 import 'package:pilipala/models/msg/session.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/storage.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 import '../whisper/whisper_controller.dart';
 
@@ -143,7 +144,7 @@ class WhisperDetailController extends GetxController {
           content: const Text('确认清空会话内容并移除会话？'),
           actions: [
             TextButton(
-              onPressed: Get.back,
+              onPressed: safeBack,
               child: Text(
                 '取消',
                 style: TextStyle(color: Theme.of(context).colorScheme.outline),
@@ -158,7 +159,7 @@ class WhisperDetailController extends GetxController {
                     late final WhisperController whisperController =
                         Get.find<WhisperController>();
                     whisperController.removeSessionMsg(talkerId!);
-                    Get.back();
+                    safeBack();
                   } catch (_) {}
                 }
               },

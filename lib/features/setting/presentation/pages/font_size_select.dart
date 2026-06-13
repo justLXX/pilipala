@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/utils/storage.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 class FontSizeSelectPage extends StatefulWidget {
   const FontSizeSelectPage({super.key});
@@ -29,7 +30,7 @@ class _FontSizeSelectPageState extends State<FontSizeSelectPage> {
   setFontSize() {
     setting.put(SettingBoxKey.defaultTextScale, currentSize);
     Get.forceAppUpdate();
-    Get.back();
+    safeBack();
   }
 
   @override

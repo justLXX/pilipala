@@ -21,6 +21,7 @@ import 'package:pilipala/services/shutdown_timer_service.dart';
 import '../../../../http/danmaku.dart';
 import '../../../../models/common/search_type.dart';
 import '../../../../models/video_detail_res.dart';
+import '../../../../utils/navigation_helper.dart';
 import '../introduction/index.dart';
 
 class HeaderControl extends StatefulWidget implements PreferredSizeWidget {
@@ -150,21 +151,21 @@ class _HeaderControlState extends State<HeaderControl> {
                         final res = await UserHttp.toViewLater(
                             bvid: widget.videoDetailCtr!.bvid);
                         SmartDialog.showToast(res['msg']);
-                        Get.back();
+                        safeBack();
                       },
                       dense: true,
                       leading: const Icon(Icons.watch_later_outlined, size: 20),
                       title: const Text('添加至「稍后再看」', style: titleStyle),
                     ),
                     ListTile(
-                      onTap: () => {Get.back(), scheduleExit()},
+                      onTap: () => {safeBack(), scheduleExit()},
                       dense: true,
                       leading:
                           const Icon(Icons.hourglass_top_outlined, size: 20),
                       title: const Text('定时关闭', style: titleStyle),
                     ),
                     ListTile(
-                      onTap: () => {Get.back(), showSetVideoQa()},
+                      onTap: () => {safeBack(), showSetVideoQa()},
                       dense: true,
                       leading: const Icon(Icons.play_circle_outline, size: 20),
                       title: const Text('选择画质', style: titleStyle),
@@ -174,7 +175,7 @@ class _HeaderControlState extends State<HeaderControl> {
                     ),
                     if (widget.videoDetailCtr!.currentAudioQa != null)
                       ListTile(
-                        onTap: () => {Get.back(), showSetAudioQa()},
+                        onTap: () => {safeBack(), showSetAudioQa()},
                         dense: true,
                         leading: const Icon(Icons.album_outlined, size: 20),
                         title: const Text('选择音质', style: titleStyle),
@@ -184,7 +185,7 @@ class _HeaderControlState extends State<HeaderControl> {
                       ),
                     if (widget.videoDetailCtr!.currentDecodeFormats != null)
                       ListTile(
-                        onTap: () => {Get.back(), showSetDecodeFormats()},
+                        onTap: () => {safeBack(), showSetDecodeFormats()},
                         dense: true,
                         leading: const Icon(Icons.av_timer_outlined, size: 20),
                         title: const Text('解码格式', style: titleStyle),
@@ -193,7 +194,7 @@ class _HeaderControlState extends State<HeaderControl> {
                             style: subTitleStyle),
                       ),
                     ListTile(
-                      onTap: () => {Get.back(), showSetRepeat()},
+                      onTap: () => {safeBack(), showSetRepeat()},
                       dense: true,
                       leading: const Icon(Icons.repeat, size: 20),
                       title: const Text('播放顺序', style: titleStyle),
@@ -201,7 +202,7 @@ class _HeaderControlState extends State<HeaderControl> {
                           style: subTitleStyle),
                     ),
                     ListTile(
-                      onTap: () => {Get.back(), showSetDanmaku()},
+                      onTap: () => {safeBack(), showSetDanmaku()},
                       dense: true,
                       leading: const Icon(Icons.subtitles_outlined, size: 20),
                       title: const Text('弹幕设置', style: titleStyle),
@@ -236,7 +237,7 @@ class _HeaderControlState extends State<HeaderControl> {
           }),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => safeBack(),
               child: Text(
                 '取消',
                 style: TextStyle(color: Theme.of(context).colorScheme.outline),
@@ -285,7 +286,7 @@ class _HeaderControlState extends State<HeaderControl> {
                               isSend: true,
                             )
                           ]);
-                          Get.back();
+                          safeBack();
                         } else {
                           SmartDialog.showToast('发送失败，错误信息为${res['msg']}');
                         }
@@ -340,7 +341,7 @@ class _HeaderControlState extends State<HeaderControl> {
                             shutdownTimerService.scheduledExitInMinutes =
                                 choice;
                             shutdownTimerService.startShutdownTimer();
-                            Get.back();
+                            safeBack();
                           },
                           contentPadding: const EdgeInsets.only(),
                           dense: true,
@@ -398,7 +399,7 @@ class _HeaderControlState extends State<HeaderControl> {
                             onTap: () {
                               shutdownTimerService.exitApp = false;
                               setState(() {});
-                              // Get.back();
+                              // safeBack();
                             },
                             text: " 暂停视频 ",
                             selectStatus: !shutdownTimerService.exitApp,
@@ -409,7 +410,7 @@ class _HeaderControlState extends State<HeaderControl> {
                             onTap: () {
                               shutdownTimerService.exitApp = true;
                               setState(() {});
-                              // Get.back();
+                              // safeBack();
                             },
                             text: " 退出APP ",
                             selectStatus: shutdownTimerService.exitApp,
@@ -460,7 +461,7 @@ class _HeaderControlState extends State<HeaderControl> {
                               onChanged: (value) {
                                 tempThemeValue = value!;
                                 widget.controller?.toggleSubtitle(value);
-                                Get.back();
+                                safeBack();
                               },
                             ),
                             ...widget.videoDetailCtr!.subtitles
@@ -472,7 +473,7 @@ class _HeaderControlState extends State<HeaderControl> {
                                         tempThemeValue = value!;
                                         widget.controller
                                             ?.toggleSubtitle(value);
-                                        Get.back();
+                                        safeBack();
                                       },
                                     ))
                                 .toList(),
@@ -505,7 +506,7 @@ class _HeaderControlState extends State<HeaderControl> {
                       onPressed: () async {
                         // setState(() => currentSpeed = i),
                         await widget.controller!.setPlaybackSpeed(i);
-                        Get.back();
+                        safeBack();
                       },
                       child: Text(i.toString()),
                     ),
@@ -514,7 +515,7 @@ class _HeaderControlState extends State<HeaderControl> {
                       onPressed: () async {
                         // setState(() => currentSpeed = i),
                         await widget.controller!.setPlaybackSpeed(i);
-                        Get.back();
+                        safeBack();
                       },
                       child: Text(i.toString()),
                     ),
@@ -525,7 +526,7 @@ class _HeaderControlState extends State<HeaderControl> {
           }),
           actions: <Widget>[
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => safeBack(),
               child: Text(
                 '取消',
                 style: TextStyle(color: Theme.of(context).colorScheme.outline),
@@ -534,7 +535,7 @@ class _HeaderControlState extends State<HeaderControl> {
             TextButton(
               onPressed: () async {
                 await widget.controller!.setDefaultSpeed();
-                Get.back();
+                safeBack();
               },
               child: const Text('默认速度'),
             ),
@@ -624,7 +625,7 @@ class _HeaderControlState extends State<HeaderControl> {
                               widget.videoDetailCtr!.currentVideoQa =
                                   VideoQualityCode.fromCode(quality)!;
                               widget.videoDetailCtr!.updatePlayer();
-                              Get.back();
+                              safeBack();
                             },
                             dense: true,
                             // 可能包含会员解锁画质
@@ -695,7 +696,7 @@ class _HeaderControlState extends State<HeaderControl> {
                             widget.videoDetailCtr!.currentAudioQa =
                                 AudioQualityCode.fromCode(quality)!;
                             widget.videoDetailCtr!.updatePlayer();
-                            Get.back();
+                            safeBack();
                           },
                           dense: true,
                           contentPadding:
@@ -769,7 +770,7 @@ class _HeaderControlState extends State<HeaderControl> {
                             widget.videoDetailCtr!.currentDecodeFormats =
                                 VideoDecodeFormatsCode.fromString(i)!;
                             widget.videoDetailCtr!.updatePlayer();
-                            Get.back();
+                            safeBack();
                           },
                           dense: true,
                           contentPadding:
@@ -1118,7 +1119,7 @@ class _HeaderControlState extends State<HeaderControl> {
                         ListTile(
                           onTap: () {
                             widget.controller!.setPlayRepeat(i);
-                            Get.back();
+                            safeBack();
                           },
                           dense: true,
                           contentPadding:
@@ -1164,7 +1165,7 @@ class _HeaderControlState extends State<HeaderControl> {
       title: Row(
         children: [
           ComBtn(
-            icon: const Icon(
+            icon: const FaIcon(
               FontAwesomeIcons.arrowLeft,
               size: 15,
               color: Colors.white,
@@ -1181,7 +1182,7 @@ class _HeaderControlState extends State<HeaderControl> {
                         DeviceOrientation.portraitUp,
                       ])
                     },
-                  Get.back()
+                  safeBack();
                 }
             },
           ),
@@ -1216,7 +1217,7 @@ class _HeaderControlState extends State<HeaderControl> {
             )
           ] else ...[
             ComBtn(
-              icon: const Icon(
+              icon: const FaIcon(
                 FontAwesomeIcons.house,
                 size: 15,
                 color: Colors.white,
@@ -1262,7 +1263,7 @@ class _HeaderControlState extends State<HeaderControl> {
               height: 34,
               child: TextButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
                 ),
                 onPressed: () => showShootDanmakuSheet(),
                 child: const Text(
@@ -1277,7 +1278,7 @@ class _HeaderControlState extends State<HeaderControl> {
               child: Obx(
                 () => IconButton(
                   style: ButtonStyle(
-                    padding: MaterialStateProperty.all(EdgeInsets.zero),
+                    padding: WidgetStateProperty.all(EdgeInsets.zero),
                   ),
                   onPressed: () {
                     _.isOpenDanmu.value = !_.isOpenDanmu.value;
@@ -1300,7 +1301,7 @@ class _HeaderControlState extends State<HeaderControl> {
               height: 34,
               child: IconButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
                 ),
                 onPressed: () async {
                   bool canUsePiP = false;
@@ -1345,7 +1346,7 @@ class _HeaderControlState extends State<HeaderControl> {
               height: 34,
               child: TextButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
                 ),
                 onPressed: () => showSetSpeedSheet(),
                 child: Text(

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/image_save.dart';
 import 'package:pilipala/utils/route_push.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import '../../models/model_rec_video_item.dart';
 import 'stat/danmu.dart';
 import 'stat/view.dart';
@@ -315,13 +316,13 @@ class MorePanel extends StatelessWidget {
   Future<dynamic> menuActionHandler(String type) async {
     switch (type) {
       case 'block':
-        Get.back();
+        safeBack();
         blockUser();
         break;
       case 'watchLater':
         var res = await UserHttp.toViewLater(bvid: videoItem.bvid as String);
         SmartDialog.showToast(res['msg']);
-        Get.back();
+        safeBack();
         break;
       default:
     }
@@ -373,7 +374,7 @@ class MorePanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InkWell(
-            onTap: () => Get.back(),
+            onTap: () => safeBack(),
             child: Container(
               height: 35,
               padding: const EdgeInsets.only(bottom: 2),

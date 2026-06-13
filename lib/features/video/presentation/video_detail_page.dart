@@ -20,6 +20,7 @@ import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/plugin/pl_player/models/play_repeat.dart';
 import 'package:pilipala/plugin/pl_player/utils/fullscreen.dart'
     as fullscreen;
+import 'package:pilipala/utils/navigation_helper.dart';
 
 /// VideoDetailPage displays the video detail page.
 ///
@@ -133,7 +134,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
               ElevatedButton(
                 onPressed: () {
                   _vdCtr.toggleCoin(multiply: 1);
-                  Get.back();
+                  safeBack();
                 },
                 child: const Text('1 枚'),
               ),
@@ -141,7 +142,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
               ElevatedButton(
                 onPressed: () {
                   _vdCtr.toggleCoin(multiply: 2);
-                  Get.back();
+                  safeBack();
                 },
                 child: const Text('2 枚'),
               ),
@@ -178,7 +179,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
                     Orientation.landscape) {
                   fullscreen.verticalScreen();
                 } else {
-                  Get.back();
+                  safeBack();
                 }
               },
             ),

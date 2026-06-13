@@ -32,7 +32,7 @@ class WidgetTestHelper {
     tester.view.physicalSize = Size(width, height);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(() {
-      tester.view.physicalSize = Size(400, 600);
+      tester.view.physicalSize = const Size(400, 600);
       tester.view.devicePixelRatio = 1.0;
     });
   }

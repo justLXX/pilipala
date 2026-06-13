@@ -3,33 +3,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:pilipala/pages/fav_edit/index.dart';
-import 'package:pilipala/pages/follow_search/view.dart';
-import 'package:pilipala/pages/member_article/index.dart';
-import 'package:pilipala/pages/opus/index.dart';
-import 'package:pilipala/pages/read/index.dart';
+import 'package:pilipala/features/media/presentation/fav_edit/fav_edit_page.dart' as features_fav_edit;
+import 'package:pilipala/features/user/presentation/follow_search/follow_search_page.dart' as features_follow_search;
+import 'package:pilipala/features/user/presentation/member_article/member_article_page.dart' as features_member_article;
+import 'package:pilipala/features/opus/presentation/opus_page.dart' as features_opus;
+import 'package:pilipala/features/read/presentation/read_page.dart' as features_read;
 
-import '../pages/about/index.dart';
-import '../pages/blacklist/index.dart';
-import '../pages/fan/index.dart';
-import '../pages/fav/index.dart';
-import '../pages/fav_detail/index.dart';
-import '../pages/fav_search/index.dart';
-import '../pages/follow/index.dart';
-import '../pages/history/index.dart';
-import '../pages/history_search/index.dart';
+import 'package:pilipala/features/about/presentation/about_page.dart' as features_about;
+import 'package:pilipala/features/blacklist/presentation/blacklist_page.dart' as features_blacklist;
+import 'package:pilipala/features/user/presentation/fan/fan_page.dart' as features_fan;
+import 'package:pilipala/features/media/presentation/fav/fav_page.dart' as features_fav;
+import 'package:pilipala/features/media/presentation/fav_detail/fav_detail_page.dart' as features_fav_detail;
+import 'package:pilipala/features/media/presentation/fav_search/fav_search_page.dart' as features_fav_search;
+import 'package:pilipala/features/user/presentation/follow/follow_page.dart' as features_follow;
+import 'package:pilipala/features/media/presentation/history/history_page.dart' as features_history;
+import 'package:pilipala/features/media/presentation/history_search/history_search_page.dart' as features_history_search;
 import '../pages/home/index.dart';
-import '../pages/html/index.dart';
-import '../pages/later/index.dart';
-import '../pages/member_archive/index.dart';
-import '../pages/member_coin/index.dart';
-import '../pages/member_dynamics/index.dart';
-import '../pages/member_like/index.dart';
-import '../pages/member_search/index.dart';
-import '../pages/member_seasons/index.dart';
+import 'package:pilipala/features/html/presentation/html_page.dart' as features_html;
+import 'package:pilipala/features/media/presentation/later/later_page.dart' as features_later;
+import 'package:pilipala/features/user/presentation/member_archive/member_archive_page.dart' as features_member_archive;
+import 'package:pilipala/features/user/presentation/member_coin/member_coin_page.dart' as features_member_coin;
+import 'package:pilipala/features/user/presentation/member_dynamics/member_dynamics_page.dart' as features_member_dynamics;
+import 'package:pilipala/features/user/presentation/member_like/member_like_page.dart' as features_member_like;
+import 'package:pilipala/features/user/presentation/member_search/member_search_page.dart' as features_member_search;
+import 'package:pilipala/features/user/presentation/member_seasons/member_seasons_page.dart' as features_member_seasons;
 import '../pages/search_result/index.dart';
-import '../pages/subscription/index.dart';
-import '../pages/subscription_detail/index.dart';
+import 'package:pilipala/features/media/presentation/subscription/sub_page.dart' as features_subscription;
+import 'package:pilipala/features/media/presentation/subscription_detail/sub_detail_page.dart' as features_sub_detail;
 import '../pages/video/detail/reply_reply/index.dart';
 import '../pages/webview/index.dart';
 import '../utils/storage.dart';
@@ -208,19 +208,19 @@ class Routes {
     // 首页(推荐) - 旧版 (兼容)
     CustomGetPage(name: '/', page: () => const HomePage()),
     CustomGetPage(name: '/webview', page: () => const WebviewPage()),
-    CustomGetPage(name: '/fav', page: () => const FavPage()),
-    CustomGetPage(name: '/favDetail', page: () => const FavDetailPage()),
+    CustomGetPage(name: '/fav', page: () => const features_fav.FavPage()),
+    CustomGetPage(name: '/favDetail', page: () => const features_fav_detail.FavDetailPage()),
     // 稍后再看
-    CustomGetPage(name: '/later', page: () => const LaterPage()),
+    CustomGetPage(name: '/later', page: () => const features_later.LaterPage()),
     // 历史记录
-    CustomGetPage(name: '/history', page: () => const HistoryPage()),
+    CustomGetPage(name: '/history', page: () => const features_history.HistoryPage()),
     // 搜索结果 (旧版)
     CustomGetPage(name: '/searchResult', page: () => const SearchResultPage()),
     // 关注
-    CustomGetPage(name: '/follow', page: () => const FollowPage()),
+    CustomGetPage(name: '/follow', page: () => const features_follow.FollowPage()),
     // 粉丝
-    CustomGetPage(name: '/fan', page: () => const FansPage()),
-    CustomGetPage(name: '/memberSearch', page: () => const MemberSearchPage()),
+    CustomGetPage(name: '/fan', page: () => const features_fan.FansPage()),
+    CustomGetPage(name: '/memberSearch', page: () => const features_member_search.MemberSearchPage()),
     // 二级回复
     CustomGetPage(
         name: '/replyReply', page: () => const VideoReplyReplyPanel()),
@@ -236,7 +236,7 @@ class Routes {
     // 其他设置
     CustomGetPage(name: '/extraSetting', page: () => const ExtraSetting()),
     //
-    CustomGetPage(name: '/blackListPage', page: () => const BlackListPage()),
+    CustomGetPage(name: '/blackListPage', page: () => const features_blacklist.BlackListPage()),
     CustomGetPage(name: '/colorSetting', page: () => const ColorSelectPage()),
     // 首页tabbar
     CustomGetPage(name: '/tabbarSetting', page: () => const TabbarSetPage()),
@@ -246,37 +246,37 @@ class Routes {
     CustomGetPage(
         name: '/displayModeSetting', page: () => const SetDiaplayMode()),
     // 关于
-    CustomGetPage(name: '/about', page: () => const AboutPage()),
+    CustomGetPage(name: '/about', page: () => const features_about.AboutPage()),
     //
-    CustomGetPage(name: '/htmlRender', page: () => const HtmlRenderPage()),
+    CustomGetPage(name: '/htmlRender', page: () => const features_html.HtmlRenderPage()),
     // 历史记录搜索
     CustomGetPage(
-        name: '/historySearch', page: () => const HistorySearchPage()),
+        name: '/historySearch', page: () => const features_history_search.HistorySearchPage()),
 
     CustomGetPage(name: '/playSpeedSet', page: () => const PlaySpeedPage()),
     // 收藏搜索
-    CustomGetPage(name: '/favSearch', page: () => const FavSearchPage()),
+    CustomGetPage(name: '/favSearch', page: () => const features_fav_search.FavSearchPage()),
     // 用户动态
     CustomGetPage(
-        name: '/memberDynamics', page: () => const MemberDynamicsPage()),
+        name: '/memberDynamics', page: () => const features_member_dynamics.MemberDynamicsPage()),
     // 用户投稿
     CustomGetPage(
-        name: '/memberArchive', page: () => const MemberArchivePage()),
+        name: '/memberArchive', page: () => const features_member_archive.MemberArchivePage()),
     // 用户最近投币
-    CustomGetPage(name: '/memberCoin', page: () => const MemberCoinPage()),
+    CustomGetPage(name: '/memberCoin', page: () => const features_member_coin.MemberCoinPage()),
     // 用户最近喜欢
-    CustomGetPage(name: '/memberLike', page: () => const MemberLikePage()),
+    CustomGetPage(name: '/memberLike', page: () => const features_member_like.MemberLikePage()),
     // 用户专栏
     CustomGetPage(
-        name: '/memberSeasons', page: () => const MemberSeasonsPage()),
+        name: '/memberSeasons', page: () => const features_member_seasons.MemberSeasonsPage()),
     // 日志
     CustomGetPage(name: '/logs', page: () => const LogsPage()),
     // 搜索关注
-    CustomGetPage(name: '/followSearch', page: () => const FollowSearchPage()),
+    CustomGetPage(name: '/followSearch', page: () => const features_follow_search.FollowSearchPage()),
     // 订阅
-    CustomGetPage(name: '/subscription', page: () => const SubPage()),
+    CustomGetPage(name: '/subscription', page: () => const features_subscription.SubPage()),
     // 订阅详情
-    CustomGetPage(name: '/subDetail', page: () => const SubDetailPage()),
+    CustomGetPage(name: '/subDetail', page: () => const features_sub_detail.SubDetailPage()),
     // 播放器手势
     CustomGetPage(
         name: '/playerGestureSet', page: () => const PlayGesturePage()),
@@ -287,14 +287,14 @@ class Routes {
     CustomGetPage(
         name: '/actionMenuSet', page: () => const ActionMenuSetPage()),
     // 收藏夹编辑
-    CustomGetPage(name: '/favEdit', page: () => const FavEditPage()),
+    CustomGetPage(name: '/favEdit', page: () => const features_fav_edit.FavEditPage()),
 
     // 专栏
-    CustomGetPage(name: '/opus', page: () => const OpusPage()),
-    CustomGetPage(name: '/read', page: () => const ReadPage()),
+    CustomGetPage(name: '/opus', page: () => const features_opus.OpusPage()),
+    CustomGetPage(name: '/read', page: () => const features_read.ReadPage()),
     // 用户专栏
     CustomGetPage(
-        name: '/memberArticle', page: () => const MemberArticlePage()),
+        name: '/memberArticle', page: () => const features_member_article.MemberArticlePage()),
   ];
 }
 

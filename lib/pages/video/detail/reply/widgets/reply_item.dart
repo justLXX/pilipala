@@ -135,7 +135,7 @@ class ReplyItem extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(7),
-                color: colorScheme.background,
+                color: colorScheme.surface,
               ),
               child: Image.asset(
                 'assets/images/big-vip.png',

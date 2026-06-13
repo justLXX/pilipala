@@ -10,6 +10,7 @@ import 'package:pilipala/pages/video/detail/reply_new/toolbar_icon_button.dart';
 import 'package:pilipala/features/message/presentation/whisper_detail/whisper_detail_controller.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/storage.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'widget/chat_item.dart';
 
 class WhisperDetailPage extends StatefulWidget {
@@ -114,7 +115,7 @@ class _WhisperDetailPageState extends State<WhisperDetailPage>
                 width: 34,
                 height: 34,
                 child: IconButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => safeBack(),
                   icon: Icon(
                     Icons.arrow_back_ios,
                     size: 18,

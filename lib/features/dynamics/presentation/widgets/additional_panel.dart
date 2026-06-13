@@ -3,18 +3,15 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/search.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// TODO 点击跳转
+/// 附加面板组件
 Widget addWidget(item, context, type, {floor = 1}) {
   Map<dynamic, dynamic> dynamicProperty = {
     'ADDITIONAL_TYPE_UGC': item.modules.moduleDynamic.additional.ugc,
-    // 直播预约
     'ADDITIONAL_TYPE_RESERVE': item.modules.moduleDynamic.additional.reserve,
-    // 商品
     'ADDITIONAL_TYPE_GOODS': item.modules.moduleDynamic.additional.goods,
-    // 比赛信息
     'ADDITIONAL_TYPE_MATCH': item.modules.moduleDynamic.additional.match,
-    // 游戏信息
     'ADDITIONAL_TYPE_COMMON': item.modules.moduleDynamic.additional.common,
   };
   Color bgColor = floor == 1
@@ -22,7 +19,6 @@ Widget addWidget(item, context, type, {floor = 1}) {
       : Theme.of(context).colorScheme.surface;
   switch (type) {
     case 'ADDITIONAL_TYPE_UGC':
-      // 转发的投稿
       return InkWell(
         onTap: () async {
           String text = dynamicProperty[type].jumpUrl;
@@ -39,8 +35,6 @@ Widget addWidget(item, context, type, {floor = 1}) {
             } catch (err) {
               SmartDialog.showToast(err.toString());
             }
-          } else {
-            print("No match found.");
           }
         },
         child: Container(
@@ -87,7 +81,18 @@ Widget addWidget(item, context, type, {floor = 1}) {
               ? Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      if (dynamicProperty[type].jumpUrl != null) {
+                        String url = dynamicProperty[type].jumpUrl;
+                        if (url.startsWith('//')) {
+                          url = 'https:$url';
+                        }
+                        launchUrl(
+                          Uri.parse(url),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
+                    },
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.only(
@@ -125,76 +130,174 @@ Widget addWidget(item, context, type, {floor = 1}) {
                           )
                         ],
                       ),
-                      // TextButton(onPressed: () {}, child: Text('123'))
                     ),
                   ),
                 )
               : const SizedBox()
           : const SizedBox();
     case 'ADDITIONAL_TYPE_GOODS':
-      // 商品
-      return const SizedBox();
-    // return Padding(
-    //     padding: const EdgeInsets.only(top: 6),
-    //     child: InkWell(
-    //       onTap: () {},
-    //       child: Container(
-    //         padding:
-    //             const EdgeInsets.only(left: 12, top: 8, right: 12, bottom: 8),
-    //         decoration: BoxDecoration(
-    //           color: bgColor,
-    //           borderRadius: const BorderRadius.all(Radius.circular(6)),
-    //         ),
-    //         child: Row(
-    //           children: [
-    //             NetworkImgLayer(
-    //               width: 75,
-    //               height: 75,
-    //               src: dynamicProperty[type].items.first.cover,
-    //             ),
-    //             const SizedBox(width: 10),
-    //             Expanded(
-    //               child: Column(
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 mainAxisAlignment: MainAxisAlignment.start,
-    //                 children: [
-    //                   Text(
-    //                     dynamicProperty[type].items.first.name,
-    //                     maxLines: 1,
-    //                     overflow: TextOverflow.ellipsis,
-    //                   ),
-    //                   Text(
-    //                     dynamicProperty[type].items.first.brief,
-    //                     maxLines: 1,
-    //                     style: TextStyle(
-    //                       color: Theme.of(context).colorScheme.outline,
-    //                       fontSize: Theme.of(context)
-    //                           .textTheme
-    //                           .labelMedium!
-    //                           .fontSize,
-    //                     ),
-    //                   ),
-    //                   const SizedBox(height: 2),
-    //                   Text(
-    //                     dynamicProperty[type].items.first.price,
-    //                     style: TextStyle(
-    //                       color: Theme.of(context).colorScheme.primary,
-    //                     ),
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     ),);
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: InkWell(
+          onTap: () {
+            if (dynamicProperty[type].jumpUrl != null) {
+              String url = dynamicProperty[type].jumpUrl;
+              if (url.startsWith('//')) {
+                url = 'https:$url';
+              }
+              launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              );
+            }
+          },
+          child: Container(
+            padding:
+                const EdgeInsets.only(left: 12, top: 8, right: 12, bottom: 8),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
+            ),
+            child: Row(
+              children: [
+                if (dynamicProperty[type].items != null &&
+                    dynamicProperty[type].items.isNotEmpty)
+                  NetworkImgLayer(
+                    width: 75,
+                    height: 75,
+                    src: dynamicProperty[type].items.first.cover,
+                  ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      if (dynamicProperty[type].items != null &&
+                          dynamicProperty[type].items.isNotEmpty) ...[
+                        Text(
+                          dynamicProperty[type].items.first.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          dynamicProperty[type].items.first.brief,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .labelMedium!
+                                .fontSize,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          dynamicProperty[type].items.first.price,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     case 'ADDITIONAL_TYPE_MATCH':
-      return const SizedBox();
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: InkWell(
+          onTap: () {
+            if (dynamicProperty[type].jumpUrl != null) {
+              String url = dynamicProperty[type].jumpUrl;
+              if (url.startsWith('//')) {
+                url = 'https:$url';
+              }
+              launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              );
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(
+                left: 12, top: 10, right: 12, bottom: 10),
+            color: bgColor,
+            child: Text(
+              dynamicProperty[type].title ?? '比赛信息',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      );
     case 'ADDITIONAL_TYPE_COMMON':
-      return const SizedBox();
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: InkWell(
+          onTap: () {
+            if (dynamicProperty[type].jumpUrl != null) {
+              String url = dynamicProperty[type].jumpUrl;
+              if (url.startsWith('//')) {
+                url = 'https:$url';
+              }
+              launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              );
+            }
+          },
+          child: Container(
+            padding:
+                const EdgeInsets.only(left: 12, top: 8, right: 12, bottom: 8),
+            color: bgColor,
+            child: Row(
+              children: [
+                if (dynamicProperty[type].cover != null)
+                  NetworkImgLayer(
+                    width: 75,
+                    height: 75,
+                    src: dynamicProperty[type].cover,
+                  ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        dynamicProperty[type].title ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (dynamicProperty[type].desc != null)
+                        Text(
+                          dynamicProperty[type].desc,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .labelMedium!
+                                .fontSize,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     case 'ADDITIONAL_TYPE_VOTE':
       return const SizedBox();
     default:
-      return const Text('11');
+      return const SizedBox();
   }
 }

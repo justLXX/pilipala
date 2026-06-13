@@ -116,6 +116,10 @@ class MediaBinding extends Bindings {
     Get.lazyPut<GetFavFolderDetailUseCase>(() => GetFavFolderDetailUseCase());
     Get.lazyPut<AddToWatchLaterUseCase>(() => AddToWatchLaterUseCase());
     Get.lazyPut<RemoveFromWatchLaterUseCase>(() => RemoveFromWatchLaterUseCase());
+    Get.lazyPut<PauseHistoryUseCase>(() => PauseHistoryUseCase());
+    Get.lazyPut<GetHistoryStatusUseCase>(() => GetHistoryStatusUseCase());
+    Get.lazyPut<ClearHistoryUseCase>(() => ClearHistoryUseCase());
+    Get.lazyPut<DeleteHistoryUseCase>(() => DeleteHistoryUseCase());
     Get.lazyPut<media_ctrl.MediaController>(() => media_ctrl.MediaController());
   }
 }

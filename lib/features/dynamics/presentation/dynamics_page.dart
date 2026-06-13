@@ -9,7 +9,6 @@ import 'package:pilipala/common/skeleton/dynamic_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/models/dynamics/result.dart';
-import 'package:pilipala/plugin/pl_popup/index.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/main_stream.dart';
 import 'package:pilipala/utils/route_push.dart';
@@ -207,11 +206,10 @@ class _DynamicsPageState extends State<DynamicsPage>
                       () => UpPanel(
                         upData: _dynamicsController.upData.value,
                         onClickUpCb: (data) {
-                          // _dynamicsController.onTapUp(data);
                           Navigator.push(
                             context,
-                            PlPopupRoute(
-                              child: OverlayPanel(
+                            MaterialPageRoute(
+                              builder: (context) => UpDynamicsPage(
                                   ctr: _dynamicsController, upInfo: data),
                             ),
                           );

@@ -7,17 +7,17 @@ import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import 'index.dart';
 
-class OverlayPanel extends StatefulWidget {
-  const OverlayPanel({super.key, required this.ctr, required this.upInfo});
-
+class UpDynamicsPage extends StatefulWidget {
   final DynamicsController ctr;
   final UpItem upInfo;
 
+  const UpDynamicsPage({super.key, required this.ctr, required this.upInfo});
+
   @override
-  State<OverlayPanel> createState() => _OverlayPanelState();
+  State<UpDynamicsPage> createState() => _UpDynamicsPageState();
 }
 
-class _OverlayPanelState extends State<OverlayPanel>
+class _UpDynamicsPageState extends State<UpDynamicsPage>
     with SingleTickerProviderStateMixin {
   static const itemPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 0);
   final PageController pageController = PageController();
@@ -67,21 +67,23 @@ class _OverlayPanelState extends State<OverlayPanel>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: Get.width,
-      height: Get.height,
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.fromLTRB(
-        0,
-        MediaQuery.of(context).padding.top + 4,
-        0,
-        MediaQuery.of(context).padding.bottom + 4,
+    return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 0,
+        centerTitle: false,
+        title: Text(
+          '${widget.upInfo.uname}的动态',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
+      body: Column(
         children: [
           SizedBox(
             height: 50,
@@ -112,15 +114,7 @@ class _OverlayPanelState extends State<OverlayPanel>
               itemCount: upList.length,
               controller: pageController,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  clipBehavior: Clip.antiAlias,
-                  margin: const EdgeInsets.fromLTRB(10, 12, 10, 0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: UpDyanmicsPage(upInfo: upList[index], ctr: widget.ctr),
-                );
+                return UpDyanmicsPage(upInfo: upList[index], ctr: widget.ctr);
               },
             ),
           ),

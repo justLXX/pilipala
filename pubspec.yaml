@@ -65,7 +65,7 @@ dependencies:
   # cookie 管理
   webview_cookie_manager: ^2.0.6
   # 浏览器
-  webview_flutter: ^4.8.0
+  webview_flutter: ^4.10.0
   # 解决sliver滑动不同步
   extended_nested_scroll_view: ^6.2.1
   # 上拉加载
@@ -73,7 +73,10 @@ dependencies:
   # 下拉刷新
   pull_to_refresh_notification: ^3.0.1
   # 图标
-  font_awesome_flutter: ^10.4.0
+  font_awesome_flutter:
+    git:
+      url: https://github.com/fluttercommunity/font_awesome_flutter.git
+      ref: "ace115c0ad386a5e5333421685c2f8f96f7d73af"
   # toast
   flutter_smart_dialog: ^4.9.4
   # 下滑关闭

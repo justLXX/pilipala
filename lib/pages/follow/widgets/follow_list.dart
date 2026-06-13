@@ -4,12 +4,11 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/models/follow/result.dart';
-import 'package:pilipala/pages/follow/index.dart';
 
 import 'follow_item.dart';
 
 class FollowList extends StatefulWidget {
-  final FollowController ctr;
+  final dynamic ctr;
   const FollowList({
     super.key,
     required this.ctr,

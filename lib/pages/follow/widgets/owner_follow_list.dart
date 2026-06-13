@@ -6,11 +6,10 @@ import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/http/member.dart';
 import 'package:pilipala/models/follow/result.dart';
 import 'package:pilipala/models/member/tags.dart';
-import 'package:pilipala/pages/follow/index.dart';
 import 'follow_item.dart';
 
 class OwnerFollowList extends StatefulWidget {
-  final FollowController ctr;
+  final dynamic ctr;
   final MemberTagItemModel? tagItem;
   const OwnerFollowList({super.key, required this.ctr, this.tagItem});
 

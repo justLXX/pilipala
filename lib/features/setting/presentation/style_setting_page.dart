@@ -10,6 +10,7 @@ import 'widgets/select_dialog.dart';
 import 'widgets/slide_dialog.dart';
 import 'package:pilipala/utils/global_data_cache.dart';
 import 'package:pilipala/utils/storage.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 import 'package:pilipala/models/common/dynamic_badge_mode.dart';
 import 'package:pilipala/models/common/nav_bar_config.dart';
@@ -69,10 +70,10 @@ class _StyleSettingState extends State<StyleSetting> {
                 alignment: Alignment.centerRight,
                 scale: 0.8,
                 child: Switch(
-                    thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-                        (Set<MaterialState> states) {
+                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                        (Set<WidgetState> states) {
                       if (states.isNotEmpty &&
-                          states.first == MaterialState.selected) {
+                          states.first == WidgetState.selected) {
                         return const Icon(Icons.done);
                       }
                       return null; // All other states will use the default thumbIcon.
@@ -164,7 +165,7 @@ class _StyleSettingState extends State<StyleSetting> {
                         ),
                         actions: [
                           TextButton(
-                              onPressed: () => Get.back(),
+                              onPressed: () => safeBack(),
                               child: Text('取消',
                                   style: TextStyle(
                                       color: Theme.of(context)
@@ -174,7 +175,7 @@ class _StyleSettingState extends State<StyleSetting> {
                             onPressed: () {
                               setting.put(
                                   SettingBoxKey.defaultPicQa, picQuality);
-                              Get.back();
+                              safeBack();
                               settingController.picQuality.value = picQuality;
                               GlobalDataCache().imgQuality = picQuality;
                               SmartDialog.showToast('设置成功');

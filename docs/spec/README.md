@@ -72,45 +72,50 @@
 
 | 问题 | 影响范围 | 说明 |
 |------|----------|------|
-| 旧代码未清理 | 全部 9 个 features 模块 | `lib/pages/` 中对应的旧代码仍保留，与 `features/` 新代码并存 |
+| 旧代码未清理 | 全部 12 个 features 模块 | `lib/pages/` 中对应的旧代码仍保留，与 `features/` 新代码并存 |
+| 部分模块完成度不足 | media, login, main | 需补充 UI 或子功能 |
 
 ### 已解决的问题
 
 | 问题 | 解决说明 |
 |------|----------|
-| ✅ 依赖注入未连接 | `router/bindings.dart` 已注册所有 9 个模块的 Repository/UseCase/Controller |
+| ✅ 依赖注入未连接 | `router/bindings.dart` 已注册所有 12 个模块的 Repository/UseCase/Controller |
 | ✅ 底部导航栏未切换 | `nav_bar_config.dart` 已全面指向 features/ 模块（home, rank, dynamics, media） |
 | ✅ CSRF token 未实现 | 所有 POST 请求已正常携带 token |
+| ✅ 路由接入 | 全部 12 个 features 模块已通过 `app_pages.dart` 注册路由 |
 
 ## 功能模块列表
 
 ### 迁移进度总结
 
-**当前状态**：
-- ✅ 已迁移模块：9个（home, video, search, user, media, login, dynamics, rank, main）
+**当前状态（2026-06-12 代码核实）**：
+- ✅ 已迁移模块：12个（home, video, search, user, media, login, dynamics, rank, main, live, message, setting）
 - ✅ **已完成模块：6个（home, video, search, user, dynamics, rank）达到或接近100%完成度**
-- ⏳ 待迁移模块：~40个（其中2个有Spec，~38个无Spec）
-- 📁 总文件数：~50个 Dart 文件在 features 目录
-- 🚧 路由接入：7个模块已接入路由，2个模块通过底部导航直接使用
-- ✅ CSRF Token：已修复，所有POST请求可正常携带token
-- ✅ 依赖注入：所有模块已通过 `router/bindings.dart` 注册到 GetX
+- ⏳ 待迁移模块：~37个（无 Spec，均在 `lib/pages/`）
+- 📁 总文件数：~80个 Dart 文件在 features 目录
+- ✅ 路由接入：12/12 模块已通过 `app_pages.dart` 注册路由
+- ✅ 依赖注入：12/12 模块已通过 `router/bindings.dart` 注册到 GetX
 - ✅ 底部导航栏：已全面切换到 features/ 模块
+- ✅ CSRF Token：已修复，所有POST请求可正常携带token
 
 ### 已重构模块 (lib/features/)
 
-采用 data/domain/presentation 三层架构重构的模块。**全部 9 个模块当前 0 error**（仅存在 unused import/field 等 warning）：
+采用 data/domain/presentation 三层架构重构的模块。**全部 12 个模块当前 0 error**（仅存在 unused import/field 等 warning）：
 
-| 模块 | 路径 | 完成度 | 文件数 | 路由接入 | 说明 |
-|------|------|--------|--------|----------|------|
-| 首页推荐 | `features/home/` | ✅ 100% | 7 | ✅ `/` `/hot` | ✅ CSRF已修复；三层结构完整；HotPage + RcmdPage 共用 HomeController |
-| 视频详情 | `features/video/` | ✅ 100% | 7 | ✅ `/video` | ✅ CSRF已修复；点赞/收藏API已调用；三层结构完整 |
-| 搜索 | `features/search/` | ✅ 100% | 8 | ✅ `/search` | ✅ Controller命名已修复为`PiliSearchController`；搜索结果UI已添加 |
-| 用户中心 | `features/user/` | ✅ 100% | 9 | ✅ `/member` | ✅ coins/likes/seasons widgets已集成；三层结构完整 |
-| 动态 | `features/dynamics/` | ✅ 95% | ~20 | ✅ `/dynamics` `/dynamicDetail` | ✅ 三层结构完整；13个widgets+详情页+转发/点赞；Binding已注册 |
-| 排行榜 | `features/rank/` | ✅ 90% | 5 | ✅ 底部导航(id:1) | ✅ 三层结构完整；全站排行榜+分区排行；Binding已注册 |
-| App Shell | `features/main/` | ✅ 90% | 3 | ✅ 主框架入口 | ✅ MainPage+MainController；底部4Tab全部指向features/模块 |
-| 媒体库 | `features/media/` | ~65% | 5 | ❌ 路由未注册 | 三层结构完整，模型/API 已修正；收藏 tab 空实现；子路由未注册 |
-| 登录 | `features/login/` | ~45% | 4 | ✅ `/loginPage` | 三层结构但无 UI；SMS/QR 登录 UseCase 缺失；token 持久化 TODO |
+| 模块 | 路径 | 完成度 | 三层结构 | 路由/DI | 说明 |
+|------|------|--------|----------|---------|------|
+| 首页推荐 | `features/home/` | ✅ 100% | ✅ | ✅ `/home` `/hot` | HotPage + RcmdPage 共用 HomeController |
+| 视频详情 | `features/video/` | ✅ 100% | ✅ | ✅ `/video` | 点赞/收藏API已调用；三层结构完整；introduction/related/reply已迁移 |
+| 搜索 | `features/search/` | ✅ 100% | ✅ | ✅ `/search` | Controller命名已修复为`PiliSearchController` |
+| 用户中心 | `features/user/` | ✅ 100% | ✅ | ✅ `/member` | coins/likes/seasons widgets已集成 |
+| 动态 | `features/dynamics/` | ✅ 95% | ✅ | ✅ `/dynamics` `/dynamicDetail` | 13个widgets+详情页+转发/点赞 |
+| 排行榜 | `features/rank/` | ✅ 90% | ✅ | ✅ `/rank` | 全站排行榜+分区排行 |
+| 直播 | `features/live/` | ✅ 90% | ✅ | ✅ `/live` `/liveRoom` | 含WebSocket弹幕、播放器集成；6个UseCase |
+| 消息 | `features/message/` | ✅ 85% | ✅ | ✅ `/whisper` 等6个路由 | 私信+通知(回复/@/赞/系统)；6个子Controller |
+| 设置 | `features/setting/` | ✅ 85% | ✅ | ✅ `/setting` 等多个子路由 | Hive读写为主；7个子页面已迁移 |
+| App Shell | `features/main/` | ~70% | ⚠️ 仅presentation | ✅ 主框架入口 | MainPage+MainController；无data/domain层 |
+| 媒体库 | `features/media/` | ✅ 95% | ✅ | ✅ `/media` `/fav` `/favDetail` `/favEdit` `/favSearch` `/history` `/historySearch` `/later` `/subscription` `/subDetail` | 三层结构完整；所有子页面已迁移；18个UseCase |
+| 登录 | `features/login/` | ~60% | ✅ | ✅ `/loginPage` | 三层结构完整；8个UseCase已注册；UI待完善 |
 
 ### 待迁移模块 — 有 Spec (lib/pages/)
 
@@ -118,25 +123,18 @@
 
 | 模块 | pages/ 路径 | 优先级 | 建议归入 | 说明 |
 |------|-------------|--------|----------|------|
-| 直播 | `pages/live/` + `pages/live_room/` | P1 | `features/live/` | 含 WebSocket 弹幕、播放器集成 |
-| 消息 | `pages/message/` + `pages/whisper/` + `pages/whisper_detail/` | P1 | `features/message/` | 通知 + 私信，含空实现 controller (at/) |
-| 设置 | `pages/setting/` (+pages/, widgets/) | P2 | `features/setting/` | 以 Hive 读写为主，无 HTTP API 依赖 |
+| (无) | — | — | — | 所有有 Spec 的模块已完成迁移 |
 
-> **已迁移说明**：热门排行（`pages/hot/` + `pages/rank/`）已分别迁移至 `features/home/`（HotPage）和 `features/rank/`（独立模块）。动态（`pages/dynamics/`）已迁移至 `features/dynamics/`。
+> **已迁移说明**：直播（`pages/live/` + `pages/live_room/`）、消息（`pages/message/` + `pages/whisper/` + `pages/whisper_detail/`）、设置（`pages/setting/`）已迁移至 `features/` 对应目录。热门排行已迁移至 `features/home/`（HotPage）和 `features/rank/`。动态已迁移至 `features/dynamics/`。
 
 ### 待迁移模块 — 无 Spec (lib/pages/)
 
 以下模块既无 spec 也未迁移，按建议归入的 feature 分组：
 
-| 建议归入 | 模块 |
-|----------|------|
-| **home** | `rcmd/`（推荐页已在 features/home 中，此目录待清理） |
-| **user** | `fan/`, `follow/`, `follow_search/`, `member_archive/`, `member_article/`, `member_coin/`, `member_dynamics/`, `member_like/`, `member_search/`, `member_seasons/`, `mine/` |
-| **media** | `fav/`, `fav_detail/`, `fav_edit/`, `fav_search/`, `history/`, `history_search/`, `later/`, `subscription/`, `subscription_detail/` |
-| **message** | `emote/`, `whisper/`, `whisper_detail/` |
-| **video** | `danmaku/`, `dlna/` |
-| **独立模块** | `about/`, `bangumi/`, `blacklist/`, `html/`, `opus/`, `read/`, `webview/` |
-| **基础设施** | `main/`（旧版 App Shell，已被 features/main 替代） |
+| 建议归入 | 模块 | 优先级建议 |
+|----------|------|-----------|
+| **独立模块** | `webview/` | P2-P3（独立功能） |
+| **基础设施** | `main/`（旧版 App Shell，已被 features/main 替代） | P3（清理） |
 
 ### 已修复的类型/API 映射记录
 

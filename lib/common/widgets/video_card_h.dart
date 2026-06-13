@@ -7,6 +7,7 @@ import 'package:pilipala/http/constants.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/image_save.dart';
 import 'package:pilipala/utils/route_push.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/utils/url_utils.dart';
 import '../../http/search.dart';
 import '../../http/user.dart';
@@ -303,7 +304,7 @@ class VideoContent extends StatelessWidget {
                 if (source == 'later') ...[
                   IconButton(
                     style: ButtonStyle(
-                      padding: MaterialStateProperty.all(EdgeInsets.zero),
+                      padding: WidgetStateProperty.all(EdgeInsets.zero),
                     ),
                     onPressed: () => onPressedFn?.call(),
                     icon: Icon(
@@ -334,7 +335,7 @@ class MorePanel extends StatelessWidget {
       case 'watchLater':
         var res = await UserHttp.toViewLater(bvid: videoItem.bvid as String);
         SmartDialog.showToast(res['msg']);
-        Get.back();
+        safeBack();
         break;
       default:
     }
@@ -383,7 +384,7 @@ class MorePanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InkWell(
-            onTap: () => Get.back(),
+            onTap: () => safeBack(),
             child: Container(
               height: 35,
               padding: const EdgeInsets.only(bottom: 2),

@@ -47,7 +47,7 @@ The app uses **GetX** for state management, routing, and dependency injection.
 
 - **Controllers** extend `GetxController` (often with `GetTickerProviderStateMixin`). Reactive state uses `.obs` and `Rx` types.
 - **Views** are in `view.dart` files, controllers in `controller.dart`. Each page directory exports both via `index.dart`.
-- Controllers are registered with `Get.put()` or `Get.lazyPut()` — no formal GetX Bindings classes are used; controllers are instantiated directly in views.
+- **Bindings**: Formal GetX `Bindings` classes in `lib/router/bindings.dart` register Repository/UseCase/Controller via `Get.lazyPut()`.
 - Navigation uses `GetMaterialApp` with named routes defined in `lib/router/app_pages.dart` via `CustomGetPage`.
 
 ### Page Structure Convention

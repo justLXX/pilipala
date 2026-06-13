@@ -60,16 +60,17 @@ class WebviewController extends GetxController {
           // 加载完成
           onUrlChange: (UrlChange urlChange) async {
             loadShow.value = false;
-            String url = urlChange.url ?? '';
-            if (type.value == 'login' &&
-                (url.startsWith(
-                        'https://passport.bilibili.com/web/sso/exchange_cookie') ||
-                    url.startsWith('https://m.bilibili.com/'))) {
-              LoginUtils.confirmLogin(url, controller);
-            }
           },
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest request) {
+            // 拦截登录成功重定向，防止 WebView 继续跳转
+            if (type.value == 'login' &&
+                (request.url.startsWith(
+                        'https://passport.bilibili.com/web/sso/exchange_cookie') ||
+                    request.url.startsWith('https://m.bilibili.com/'))) {
+              LoginUtils.confirmLogin(request.url, controller);
+              return NavigationDecision.prevent;
+            }
             if (request.url.startsWith('bilibili://')) {
               if (request.url.startsWith('bilibili://video/')) {
                 String str = Uri.parse(request.url).pathSegments[0];

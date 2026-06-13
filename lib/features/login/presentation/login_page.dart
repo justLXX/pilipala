@@ -25,23 +25,32 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Obx(
-          () => _loginCtr.currentIndex.value == 0
-              ? IconButton(
-                  onPressed: () async {
-                    _loginCtr.mobTextFieldNode.unfocus();
-                    await Future.delayed(const Duration(milliseconds: 200));
-                    Get.back();
-                  },
-                  icon: const Icon(Icons.close_outlined),
-                )
-              : IconButton(
-                  onPressed: () => _loginCtr.previousPage(),
-                  icon: const Icon(Icons.arrow_back),
-                ),
-        ),
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (bool didPop) {
+        if (didPop) return;
+        Navigator.of(context).maybePop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: Obx(
+            () => _loginCtr.currentIndex.value == 0
+                ? IconButton(
+                    onPressed: () {
+                      _loginCtr.mobTextFieldNode.unfocus();
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      } else {
+                        Get.offAllNamed('/');
+                      }
+                    },
+                    icon: const Icon(Icons.close_outlined),
+                  )
+                : IconButton(
+                    onPressed: () => _loginCtr.previousPage(),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+          ),
         actions: [
           IconButton(
             tooltip: '浏览器打开',
@@ -75,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
           _buildLoginPage(context),
         ],
       ),
+    ),
     );
   }
 

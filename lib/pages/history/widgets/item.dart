@@ -220,10 +220,10 @@ class HistoryItem extends StatelessWidget {
                                         curve: Curves.easeInOut,
                                         child: IconButton(
                                           style: ButtonStyle(
-                                            padding: MaterialStateProperty.all(
+                                            padding: WidgetStateProperty.all(
                                                 EdgeInsets.zero),
                                             backgroundColor:
-                                                MaterialStateProperty
+                                                WidgetStateProperty
                                                     .resolveWith(
                                               (states) {
                                                 return Colors.white

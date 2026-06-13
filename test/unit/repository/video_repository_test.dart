@@ -1,10 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pilipala/core/network/api_client.dart';
 import 'package:pilipala/features/home/data/video_repository.dart';
-import 'package:pilipala/models/model_hot_video_item.dart' as hot;
-import 'package:pilipala/models/model_rec_video_item.dart' as rec;
 
-import '../../helpers/test_data_factory.dart';
 
 /// Manual mock implementation of ApiClient for testing.
 class TestApiClient implements ApiClient {
