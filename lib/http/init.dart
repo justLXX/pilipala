@@ -42,14 +42,17 @@ class Request {
       ignoreExpires: true,
       storage: FileStorage(cookiePath),
     );
-    cookieManager = CookieManager(cookieJar);
+    cookieManager = CookieManager(cookieJar, ignoreInvalidCookies: true);
     dio.interceptors.add(cookieManager);
-    final List<Cookie> cookie = await cookieManager.cookieJar
-        .loadForRequest(Uri.parse(HttpString.baseUrl));
+    dio.interceptors.removeWhere((interceptor) {
+      return interceptor is _LoginCookieInterceptor;
+    });
+    dio.interceptors.add(_LoginCookieInterceptor());
     final userInfo = userInfoCache.get('userInfoCache');
     if (userInfo != null && userInfo.mid != null) {
-      final List<Cookie> cookie2 = await cookieManager.cookieJar
-          .loadForRequest(Uri.parse(HttpString.tUrl));
+      final List<Cookie> cookie2 = await _loadCookiesForRequest(
+        Uri.parse(HttpString.tUrl),
+      );
       if (cookie2.isEmpty) {
         try {
           await Request().get(HttpString.tUrl);
@@ -70,17 +73,111 @@ class Request {
       log("setCookie, ${e.toString()}");
     }
 
-    final String cookieString = cookie
-        .map((Cookie cookie) => '${cookie.name}=${cookie.value}')
-        .join('; ');
+    await syncCookieHeader();
+  }
 
-    dio.options.headers['cookie'] = cookieString;
+  static Future<void> syncCookieHeader() async {
+    await _loadCookiesForRequest(
+      Uri.parse(HttpString.baseUrl),
+    );
+    dio.options.headers.remove(HttpHeaders.cookieHeader);
+    dio.options.headers.remove('cookie');
+  }
+
+  static Future<void> saveLoginCookies(dynamic data) async {
+    final Map<String, String> loginCookies = _storedLoginCookies();
+    if (data is Map) {
+      final cookieInfo = data['cookie_info'];
+      final rawCookies = cookieInfo is Map ? cookieInfo['cookies'] : null;
+      if (rawCookies is List) {
+        for (final item in rawCookies) {
+          if (item is! Map) {
+            continue;
+          }
+          final name = item['name']?.toString();
+          final value = item['value']?.toString();
+          if (name == null || value == null || name.isEmpty) {
+            continue;
+          }
+          loginCookies[name] = value;
+        }
+      }
+
+      final url = data['url']?.toString();
+      if (url != null && url.isNotEmpty) {
+        final uri = Uri.tryParse(url);
+        if (uri != null) {
+          for (final entry in uri.queryParameters.entries) {
+            if (_loginCookieNames.contains(entry.key) &&
+                entry.value.isNotEmpty) {
+              loginCookies[entry.key] = entry.value;
+            }
+          }
+        }
+      }
+    }
+
+    if (loginCookies.isEmpty) {
+      return;
+    }
+
+    await localCache.put(LocalCacheKey.loginCookies, loginCookies);
+    await cookieManager.cookieJar.deleteAll();
+    buvid = null;
+    await syncCookieHeader();
+  }
+
+  static Future<List<Cookie>> _loadCookiesForRequest(Uri uri) async {
+    try {
+      return await cookieManager.cookieJar.loadForRequest(uri);
+    } catch (e) {
+      log("loadCookiesForRequest failed, clear cookie jar: ${e.toString()}");
+      await cookieManager.cookieJar.deleteAll();
+      return [];
+    }
+  }
+
+  static Map<String, String> _storedLoginCookies() {
+    final stored = localCache.get(LocalCacheKey.loginCookies);
+    if (stored is Map) {
+      return stored.map(
+        (key, value) => MapEntry(key.toString(), value.toString()),
+      );
+    }
+    return {};
+  }
+
+  static const Set<String> _loginCookieNames = {
+    'DedeUserID',
+    'DedeUserID__ckMd5',
+    'SESSDATA',
+    'bili_jct',
+    'sid',
+  };
+
+  static String loginCookieHeader() {
+    return _storedLoginCookies()
+        .entries
+        .map((entry) => '${entry.key}=${entry.value}')
+        .join('; ');
+  }
+
+  static bool hasLoginCookies() {
+    final cookies = _storedLoginCookies();
+    return (cookies['SESSDATA']?.isNotEmpty ?? false) &&
+        (cookies['bili_jct']?.isNotEmpty ?? false);
   }
 
   // 从cookie中获取 csrf token
   static Future<String> getCsrf() async {
-    List<Cookie> cookies = await cookieManager.cookieJar
-        .loadForRequest(Uri.parse(HttpString.apiBaseUrl));
+    final loginCookies = _storedLoginCookies();
+    final cachedToken = loginCookies['bili_jct'];
+    if (cachedToken != null && cachedToken.isNotEmpty) {
+      return cachedToken;
+    }
+    List<Cookie> cookies = await _loadCookiesForRequest(
+      Uri.parse(HttpString.apiBaseUrl),
+    );
     String token = '';
     if (cookies.where((e) => e.name == 'bili_jct').isNotEmpty) {
       token = cookies.firstWhere((e) => e.name == 'bili_jct').value;
@@ -93,15 +190,37 @@ class Request {
       return buvid!;
     }
 
-    final List<Cookie> cookies = await cookieManager.cookieJar
-        .loadForRequest(Uri.parse(HttpString.baseUrl));
-    buvid = cookies.firstWhere((cookie) => cookie.name == 'buvid3').value;
-    if (buvid == null) {
+    final List<Cookie> cookies = await _loadCookiesForRequest(
+      Uri.parse(HttpString.baseUrl),
+    );
+    final buvid3Cookie = cookies.where((cookie) => cookie.name == 'buvid3');
+    final buvid4Cookie = cookies.where((cookie) => cookie.name == 'buvid4');
+    if (buvid3Cookie.isNotEmpty) {
+      buvid = buvid3Cookie.first.value;
+    }
+    if (buvid == null || buvid!.isEmpty || buvid4Cookie.isEmpty) {
       try {
         var result = await Request().get(
           "${HttpString.apiBaseUrl}/x/frontend/finger/spi",
         );
-        buvid = result["data"]["b_3"].toString();
+        final data = result.data["data"];
+        buvid = data["b_3"].toString();
+        final String? buvid4 = data["b_4"]?.toString();
+        final List<Cookie> newCookies = [
+          Cookie('buvid3', buvid!),
+          Cookie('b_nut',
+              (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString()),
+          if (buvid4 != null && buvid4.isNotEmpty) Cookie('buvid4', buvid4),
+        ];
+        await cookieManager.cookieJar.saveFromResponse(
+          Uri.parse(HttpString.baseUrl),
+          newCookies,
+        );
+        await cookieManager.cookieJar.saveFromResponse(
+          Uri.parse(HttpString.apiBaseUrl),
+          newCookies,
+        );
+        await syncCookieHeader();
       } catch (e) {
         // 处理请求错误
         buvid = '';
@@ -121,6 +240,8 @@ class Request {
     dio.options.headers['env'] = 'prod';
     dio.options.headers['app-key'] = 'android64';
     dio.options.headers['x-bili-aurora-zone'] = 'sh001';
+    dio.options.headers['user-agent'] =
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15';
     dio.options.headers['referer'] = 'https://www.bilibili.com/';
   }
 
@@ -217,21 +338,24 @@ class Request {
    */
   get(url, {data, options, cancelToken, extra}) async {
     Response response;
-    final Options options = Options();
+    final Options requestOptions = options ?? Options();
     ResponseType resType = ResponseType.json;
     if (extra != null) {
       resType = extra!['resType'] ?? ResponseType.json;
       if (extra['ua'] != null) {
-        options.headers = {'user-agent': headerUa(type: extra['ua'])};
+        requestOptions.headers = {
+          ...?requestOptions.headers,
+          'user-agent': headerUa(type: extra['ua']),
+        };
       }
     }
-    options.responseType = resType;
+    requestOptions.responseType = resType;
 
     try {
       response = await dio.get(
         url,
         queryParameters: data,
-        options: options,
+        options: requestOptions,
         cancelToken: cancelToken,
       );
       return response;
@@ -334,5 +458,26 @@ class Request {
       default:
         dio.options.baseUrl = HttpString.apiBaseUrl;
     }
+  }
+}
+
+class _LoginCookieInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final loginCookieHeader = Request.loginCookieHeader();
+    if (loginCookieHeader.isEmpty) {
+      handler.next(options);
+      return;
+    }
+
+    final existingCookieHeader =
+        options.headers[HttpHeaders.cookieHeader]?.toString();
+    if (existingCookieHeader == null || existingCookieHeader.isEmpty) {
+      options.headers[HttpHeaders.cookieHeader] = loginCookieHeader;
+    } else {
+      options.headers[HttpHeaders.cookieHeader] =
+          '$existingCookieHeader; $loginCookieHeader';
+    }
+    handler.next(options);
   }
 }

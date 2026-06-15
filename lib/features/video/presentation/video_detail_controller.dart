@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:pilipala/http/init.dart';
 import 'package:pilipala/http/reply.dart';
+import 'package:pilipala/http/user.dart';
 import 'package:pilipala/http/video.dart';
 import 'package:pilipala/features/video/presentation/widgets/comment_controller.dart';
 import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/video_detail_res.dart';
+import 'package:pilipala/models/video/play/quality.dart';
 import 'package:pilipala/models/video/play/url.dart';
 import 'package:pilipala/models/video/reply/data.dart';
 import 'package:pilipala/models/video/view_point.dart';
@@ -31,6 +34,7 @@ class VideoDetailController extends GetxController
   final RxBool _isCollected = false.obs;
   final RxBool _isCoined = false.obs;
   final RxString _error = ''.obs;
+  final Rx<VideoQuality?> _currentVideoQuality = Rx<VideoQuality?>(null);
 
   // Follow state
   final RxMap _followStatus = <String, dynamic>{}.obs;
@@ -87,11 +91,32 @@ class VideoDetailController extends GetxController
   RxBool get isLikedRx => _isLiked;
   RxBool get isCollectedRx => _isCollected;
   RxBool get isCoinedRx => _isCoined;
+  Rx<VideoQuality?> get currentVideoQualityRx => _currentVideoQuality;
+  VideoQuality? get currentVideoQuality => _currentVideoQuality.value;
+  List<FormatItem> get qualityFormats => _playUrl.value?.supportFormats ?? [];
+  Set<int> get availableQualityCodes {
+    final playUrl = _playUrl.value;
+    if (playUrl == null) {
+      return {};
+    }
+    final dashVideo = playUrl.dash?.video ?? [];
+    if (dashVideo.isNotEmpty) {
+      return dashVideo.map((item) => item.id).whereType<int>().toSet();
+    }
+    final acceptQuality = playUrl.acceptQuality ?? [];
+    if (acceptQuality.isNotEmpty) {
+      return acceptQuality.toSet();
+    }
+    final quality = playUrl.quality;
+    return quality == null ? {} : {quality};
+  }
+
   String get error => _error.value;
 
   // Follow getters
   RxMap get followStatusRx => _followStatus;
-  bool get isFollowed => _followStatus['attribute'] != null && _followStatus['attribute'] != 0;
+  bool get isFollowed =>
+      _followStatus['attribute'] != null && _followStatus['attribute'] != 0;
   RxInt get followerCount => _followerCount;
 
   // Related videos getters
@@ -110,8 +135,7 @@ class VideoDetailController extends GetxController
     heroTag = Get.arguments?['heroTag'] ?? '${bvid}_$cid';
 
     // Check login state
-    _userInfo = _userInfoCache.get('userInfoCache');
-    _userLogin = _userInfo != null;
+    _refreshLocalLoginState();
 
     // Initialize player controller
     playerController = PlPlayerController(videoType: 'archive');
@@ -136,41 +160,11 @@ class VideoDetailController extends GetxController
     final playUrl = _playUrl.value;
     if (playUrl == null) return;
 
-    String videoUrl = '';
-    String audioUrl = '';
-
-    if (playUrl.dash != null &&
-        playUrl.dash!.video != null &&
-        playUrl.dash!.video!.isNotEmpty) {
-      final videoItem = playUrl.dash!.video!.first;
-      videoUrl = videoItem.baseUrl ?? '';
-      if (playUrl.dash!.audio != null && playUrl.dash!.audio!.isNotEmpty) {
-        audioUrl = playUrl.dash!.audio!.first.baseUrl ?? '';
-      }
-    } else if (playUrl.durl != null && playUrl.durl!.isNotEmpty) {
-      videoUrl = playUrl.durl!.first.url ?? '';
-    }
-
-    if (videoUrl.isEmpty) return;
-
-    final dataSource = DataSource(
-      videoSource: videoUrl,
-      audioSource: audioUrl.isNotEmpty ? audioUrl : null,
-      type: DataSourceType.network,
-      httpHeaders: {
-        'user-agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_3_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15',
-        'referer': 'https://www.bilibili.com',
-      },
-    );
-
-    await playerController.setDataSource(
-      dataSource,
+    await _setPlayerSource(
       autoplay: true,
       seekTo: seekTo,
       bvid: bvid,
       cid: cid,
-      duration: Duration(milliseconds: playUrl.timeLength ?? 0),
     );
   }
 
@@ -193,6 +187,7 @@ class VideoDetailController extends GetxController
       }
       final videoDetail = result['data'] as VideoDetailData;
       _videoDetail.value = videoDetail;
+      await _refreshUserLoginState();
 
       // Update cid from video detail if route param is missing
       if (videoDetail.cid != null && cid == 0) {
@@ -224,7 +219,8 @@ class VideoDetailController extends GetxController
       // 4. Initialize comment controller
       final int oid = videoDetail.aid ?? 0;
       if (oid > 0) {
-        commentController = Get.put(CommentController(aid: oid), tag: 'comment_$oid');
+        commentController =
+            Get.put(CommentController(aid: oid), tag: 'comment_$oid');
       }
 
       // 5. Load related videos
@@ -242,6 +238,32 @@ class VideoDetailController extends GetxController
     } finally {
       _isLoading.value = false;
     }
+  }
+
+  void _refreshLocalLoginState() {
+    _userInfo = _userInfoCache.get('userInfoCache');
+    _userLogin = _userInfo != null || Request.hasLoginCookies();
+  }
+
+  Future<bool> _refreshUserLoginState() async {
+    _refreshLocalLoginState();
+    if (!_userLogin) {
+      return false;
+    }
+    if (_userInfo != null) {
+      return true;
+    }
+    try {
+      final result = await UserHttp.userInfo();
+      if (result['status'] && result['data']?.isLogin == true) {
+        _userInfo = result['data'];
+        await _userInfoCache.put('userInfoCache', _userInfo);
+        _userLogin = true;
+        return true;
+      }
+    } catch (_) {}
+    _userLogin = Request.hasLoginCookies();
+    return _userLogin;
   }
 
   /// Query like/coin/collect status separately (same as legacy).
@@ -280,7 +302,7 @@ class VideoDetailController extends GetxController
 
   /// Toggle follow/unfollow the video owner.
   Future<void> toggleFollow() async {
-    if (!_userLogin) {
+    if (!await _refreshUserLoginState()) {
       SmartDialog.showToast('账号未登录');
       return;
     }
@@ -377,6 +399,15 @@ class VideoDetailController extends GetxController
 
   /// Initialize player with play URL.
   Future<void> _initPlayer({String? bvid, required int cid}) async {
+    await _setPlayerSource(autoplay: true, bvid: bvid ?? '', cid: cid);
+  }
+
+  Future<void> _setPlayerSource({
+    required bool autoplay,
+    required String bvid,
+    required int cid,
+    Duration seekTo = Duration.zero,
+  }) async {
     final playUrl = _playUrl.value;
     if (playUrl == null) return;
 
@@ -387,8 +418,16 @@ class VideoDetailController extends GetxController
     if (playUrl.dash != null &&
         playUrl.dash!.video != null &&
         playUrl.dash!.video!.isNotEmpty) {
-      final videoItem = playUrl.dash!.video!.first;
+      final selectedCode = _currentVideoQuality.value?.code;
+      final videoItem = selectedCode == null
+          ? playUrl.dash!.video!.first
+          : playUrl.dash!.video!.firstWhere(
+              (item) => item.id == selectedCode,
+              orElse: () => playUrl.dash!.video!.first,
+            );
       videoUrl = videoItem.baseUrl ?? '';
+      _currentVideoQuality.value =
+          videoItem.quality ?? VideoQualityCode.fromCode(videoItem.id ?? 0);
       if (playUrl.dash!.audio != null && playUrl.dash!.audio!.isNotEmpty) {
         audioUrl = playUrl.dash!.audio!.first.baseUrl ?? '';
       }
@@ -396,6 +435,9 @@ class VideoDetailController extends GetxController
     // Fallback to DURL format
     else if (playUrl.durl != null && playUrl.durl!.isNotEmpty) {
       videoUrl = playUrl.durl!.first.url ?? '';
+      _currentVideoQuality.value = playUrl.quality == null
+          ? _currentVideoQuality.value
+          : VideoQualityCode.fromCode(playUrl.quality!);
     }
 
     if (videoUrl.isEmpty) {
@@ -416,11 +458,59 @@ class VideoDetailController extends GetxController
 
     await playerController.setDataSource(
       dataSource,
-      autoplay: true,
-      bvid: bvid ?? '',
+      autoplay: autoplay,
+      seekTo: seekTo,
+      bvid: bvid,
       cid: cid,
       duration: Duration(milliseconds: playUrl.timeLength ?? 0),
     );
+  }
+
+  Future<void> switchVideoQuality(int qualityCode) async {
+    final targetQuality = VideoQualityCode.fromCode(qualityCode);
+    if (targetQuality == null) {
+      SmartDialog.showToast('暂不支持该清晰度');
+      return;
+    }
+    if (_currentVideoQuality.value?.code == qualityCode) {
+      return;
+    }
+
+    final playUrl = _playUrl.value;
+    final videoDetail = _videoDetail.value;
+    if (playUrl == null || videoDetail == null) {
+      SmartDialog.showToast('视频尚未加载完成');
+      return;
+    }
+
+    final seekTo = playerController.position.value;
+    final dashVideos = playUrl.dash?.video ?? [];
+    final hasDashTarget = dashVideos.any((item) => item.id == qualityCode);
+
+    try {
+      SmartDialog.showLoading(msg: '正在切换清晰度');
+      _currentVideoQuality.value = targetQuality;
+      if (!hasDashTarget) {
+        await loadPlayUrl(
+          avid: videoDetail.aid ?? 0,
+          cid: cid,
+          bvid: videoDetail.bvid ?? bvid,
+          qn: qualityCode,
+        );
+        _currentVideoQuality.value = targetQuality;
+      }
+      await _setPlayerSource(
+        autoplay: true,
+        seekTo: seekTo,
+        bvid: videoDetail.bvid ?? bvid,
+        cid: cid,
+      );
+      SmartDialog.dismiss();
+      SmartDialog.showToast('已切换到${targetQuality.description}');
+    } catch (e) {
+      SmartDialog.dismiss();
+      SmartDialog.showToast('切换清晰度失败');
+    }
   }
 
   /// Load video play URL.
@@ -439,6 +529,17 @@ class VideoDetailController extends GetxController
       );
       if (result['status'] && result['data'] != null) {
         _playUrl.value = result['data'] as PlayUrlModel;
+        final playUrl = _playUrl.value;
+        final currentQuality = playUrl?.quality;
+        if (currentQuality != null) {
+          _currentVideoQuality.value =
+              VideoQualityCode.fromCode(currentQuality);
+        } else {
+          final firstDashQuality = playUrl?.dash?.video?.isNotEmpty == true
+              ? playUrl!.dash!.video!.first.quality
+              : null;
+          _currentVideoQuality.value = firstDashQuality;
+        }
       }
     } catch (e) {
       _error.value = e.toString();
@@ -471,7 +572,7 @@ class VideoDetailController extends GetxController
 
   /// Like / unlike video (same as legacy actionLikeVideo).
   Future<void> toggleLike() async {
-    if (!_userLogin) {
+    if (!await _refreshUserLoginState()) {
       SmartDialog.showToast('账号未登录');
       return;
     }
@@ -502,7 +603,7 @@ class VideoDetailController extends GetxController
 
   /// Collect / uncollect video (same as legacy actionFavVideo).
   Future<void> toggleCollect() async {
-    if (!_userLogin) {
+    if (!await _refreshUserLoginState()) {
       SmartDialog.showToast('账号未登录');
       return;
     }
@@ -531,7 +632,7 @@ class VideoDetailController extends GetxController
 
   /// Coin video (same as legacy actionCoinVideo).
   Future<void> toggleCoin({required int multiply}) async {
-    if (!_userLogin) {
+    if (!await _refreshUserLoginState()) {
       SmartDialog.showToast('账号未登录');
       return;
     }

@@ -34,13 +34,12 @@ class SettingRepository {
       _setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
 
   /// Get theme type.
-  ThemeType getThemeType() => ThemeType.values[_setting.get(
-      SettingBoxKey.themeMode,
-      defaultValue: ThemeType.system.code)];
+  ThemeType getThemeType() => ThemeType.values[_setting
+      .get(SettingBoxKey.themeMode, defaultValue: ThemeType.system.code)];
 
   /// Get dynamic badge mode.
-  DynamicBadgeMode getDynamicBadgeMode() => DynamicBadgeMode
-      .values[_setting.get(SettingBoxKey.dynamicBadgeMode,
+  DynamicBadgeMode getDynamicBadgeMode() =>
+      DynamicBadgeMode.values[_setting.get(SettingBoxKey.dynamicBadgeMode,
           defaultValue: DynamicBadgeMode.number.code)];
 
   /// Set dynamic badge mode.
@@ -58,6 +57,7 @@ class SettingRepository {
   /// Logout: clear cookies, user cache, access key.
   Future<void> logout() async {
     await Request.cookieManager.cookieJar.deleteAll();
+    await _localCache.delete(LocalCacheKey.loginCookies);
     Request.dio.options.headers['cookie'] = '';
     _userInfoCache.put('userInfoCache', null);
     _localCache.put(LocalCacheKey.accessKey, {'mid': -1, 'value': ''});

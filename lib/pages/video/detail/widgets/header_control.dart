@@ -16,6 +16,7 @@ import 'package:pilipala/pages/video/detail/index.dart';
 import 'package:pilipala/pages/video/detail/introduction/widgets/menu_row.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/plugin/pl_player/models/play_repeat.dart';
+import 'package:pilipala/utils/responsive.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:pilipala/services/shutdown_timer_service.dart';
 import '../../../../http/danmaku.dart';
@@ -1153,6 +1154,7 @@ class _HeaderControlState extends State<HeaderControl> {
     );
     final bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
+    final bool isPhoneLandscape = Responsive.isCompact(context) && isLandscape;
     return AppBar(
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
@@ -1170,20 +1172,17 @@ class _HeaderControlState extends State<HeaderControl> {
               size: 15,
               color: Colors.white,
             ),
-            fuc: () => <Set<void>>{
-              if (widget.controller!.isFullScreen.value)
-                <void>{widget.controller!.triggerFullScreen(status: false)}
-              else
-                <void>{
-                  if (MediaQuery.of(context).orientation ==
-                      Orientation.landscape)
-                    {
-                      SystemChrome.setPreferredOrientations([
-                        DeviceOrientation.portraitUp,
-                      ])
-                    },
-                  safeBack();
-                }
+            fuc: () {
+              if (widget.controller!.isFullScreen.value && isPhoneLandscape) {
+                widget.controller!.triggerFullScreen(status: false);
+                return;
+              }
+              if (isPhoneLandscape) {
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                ]);
+              }
+              safeBack(context: context);
             },
           ),
           SizedBox(width: buttonSpace),

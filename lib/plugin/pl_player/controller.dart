@@ -933,16 +933,30 @@ class PlPlayerController {
     _isFullScreen.value = val;
   }
 
+  Future<void> _setStatusBarHidden(bool hidden) async {
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      return;
+    }
+    try {
+      await StatusBarControl.setHidden(
+        hidden,
+        animation: StatusBarAnimation.FADE,
+      );
+    } catch (err) {
+      debugPrint('StatusBarControl setHidden failed: $err');
+    }
+  }
+
   // 全屏
   Future<void> triggerFullScreen({bool status = true}) async {
     FullScreenMode mode = FullScreenModeCode.fromCode(
         setting.get(SettingBoxKey.fullScreenMode, defaultValue: 0))!;
-    await StatusBarControl.setHidden(true, animation: StatusBarAnimation.FADE);
     if (!isFullScreen.value && status) {
       /// 按照视频宽高比决定全屏方向
       toggleFullScreen(true);
 
       /// 进入全屏
+      await _setStatusBarHidden(true);
       await enterFullScreen();
       if (mode == FullScreenMode.vertical ||
           (mode == FullScreenMode.auto && direction.value == 'vertical')) {
@@ -951,7 +965,7 @@ class PlPlayerController {
         await landScape();
       }
     } else if (isFullScreen.value && !status) {
-      StatusBarControl.setHidden(false, animation: StatusBarAnimation.FADE);
+      await _setStatusBarHidden(false);
       exitFullScreen();
       await verticalScreen();
       toggleFullScreen(false);

@@ -92,6 +92,7 @@ class DioApiClient implements ApiClient {
         final message = data['message'] as String?;
 
         if (code == 0) {
+          await Request.syncCookieHeader();
           return ApiResponse.success(data['data'] as T, code: 200);
         } else {
           return ApiResponse.error(msg: message ?? 'Unknown error', code: code);
@@ -128,6 +129,7 @@ class DioApiClient implements ApiClient {
         final message = responseData['message'] as String?;
 
         if (code == 0) {
+          await Request.syncCookieHeader();
           return ApiResponse.success(responseData['data'] as T, code: 200);
         } else {
           return ApiResponse.error(

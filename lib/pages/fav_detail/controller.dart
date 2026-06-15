@@ -7,6 +7,7 @@ import 'package:pilipala/models/user/fav_detail.dart';
 import 'package:pilipala/models/user/fav_folder.dart';
 import 'package:pilipala/pages/fav/index.dart';
 import 'package:pilipala/utils/utils.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 
 class FavDetailController extends GetxController {
   FavFolderItemData? item;
@@ -107,7 +108,7 @@ class FavDetailController extends GetxController {
                 if (res['status']) {
                   FavController favController = Get.find<FavController>();
                   await favController.removeFavFolder(mediaIds: mediaId!);
-                  Get.back();
+                  safeBack();
                 }
               },
               child: const Text('确认'),

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/core/network/api_client.dart';
 import 'package:pilipala/http/api.dart';
 import 'package:pilipala/http/constants.dart';
+import 'package:pilipala/http/init.dart';
 import 'package:pilipala/models/login/index.dart';
 import 'package:pilipala/utils/login.dart';
 
@@ -72,6 +73,7 @@ class LoginRepository {
     if (response.isSuccess && response.data != null) {
       final data = response.data!;
       if (data['status'] == 0) {
+        await Request.saveLoginCookies(data);
         return {'status': true, 'data': data};
       } else {
         return {
@@ -109,6 +111,7 @@ class LoginRepository {
     );
 
     if (response.isSuccess && response.data != null) {
+      await Request.saveLoginCookies(response.data);
       return {'status': true, 'data': response.data};
     }
     return {
@@ -173,6 +176,7 @@ class LoginRepository {
     if (response.isSuccess) {
       final data = response.data;
       if (data != null && data['code'] == 0) {
+        await Request.saveLoginCookies(data);
         return {'status': true, 'data': data};
       }
     }

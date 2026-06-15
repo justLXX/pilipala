@@ -1,6 +1,7 @@
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_reply.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
@@ -14,13 +15,15 @@ import 'package:pilipala/features/video/presentation/widgets/reply_reply_panel.d
 import 'package:pilipala/features/video/presentation/widgets/header_control.dart';
 import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/video_detail_res.dart';
+import 'package:pilipala/models/video/play/quality.dart';
 import 'package:pilipala/models/video/view_point.dart';
 import 'package:pilipala/pages/danmaku/view.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/plugin/pl_player/models/play_repeat.dart';
-import 'package:pilipala/plugin/pl_player/utils/fullscreen.dart'
-    as fullscreen;
+import 'package:pilipala/plugin/pl_player/utils/fullscreen.dart' as fullscreen;
 import 'package:pilipala/utils/navigation_helper.dart';
+import 'package:pilipala/utils/responsive.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// VideoDetailPage displays the video detail page.
 ///
@@ -52,15 +55,21 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     _vdCtr = Get.put(VideoDetailController(), tag: _heroTag);
     _vdCtr.playerController.addStatusLister(_playerStatusListener);
     _vdCtr.playerController.addPositionListener(_playerPositionListener);
-    _vdCtr.loadVideoDetail(
+    _vdCtr
+        .loadVideoDetail(
       bvid: bvid,
       aid: Get.parameters['aid'] != null
           ? int.parse(Get.parameters['aid']!)
           : null,
-    );
+    )
+        .then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
-    void _playerPositionListener(Duration position) {
+  void _playerPositionListener(Duration position) {
     _vdCtr.updateCurrentChapter(position.inSeconds);
   }
 
@@ -153,6 +162,81 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     );
   }
 
+  void _showQualitySheet() {
+    final formats = _vdCtr.qualityFormats;
+    if (formats.isEmpty) {
+      SmartDialog.showToast('暂无可切换清晰度');
+      return;
+    }
+    final availableCodes = _vdCtr.availableQualityCodes;
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Obx(() {
+            final currentCode = _vdCtr.currentVideoQualityRx.value?.code;
+            return ListView.separated(
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(bottom: 12),
+              itemCount: formats.length + 1,
+              separatorBuilder: (_, index) {
+                return index == 0
+                    ? const SizedBox.shrink()
+                    : const Divider(height: 1);
+              },
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: Text(
+                      '选择清晰度',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                }
+                final format = formats[index - 1];
+                final qualityCode = format.quality;
+                final quality = qualityCode == null
+                    ? null
+                    : VideoQualityCode.fromCode(qualityCode);
+                final enabled = qualityCode != null &&
+                    (availableCodes.isEmpty ||
+                        availableCodes.contains(qualityCode));
+                final title = format.newDesc ??
+                    format.displayDesc ??
+                    quality?.description ??
+                    '${qualityCode ?? ''}';
+                return ListTile(
+                  enabled: enabled,
+                  title: Text(title),
+                  subtitle: format.format == null || format.format!.isEmpty
+                      ? null
+                      : Text(format.format!),
+                  trailing: qualityCode == currentCode
+                      ? Icon(
+                          Icons.check,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                      : null,
+                  onTap: enabled
+                      ? () {
+                          safeBack(context: context);
+                          _vdCtr.switchVideoQuality(qualityCode);
+                        }
+                      : null,
+                );
+              },
+            );
+          }),
+        );
+      },
+    );
+  }
+
   /// Build the player header control (back button overlay on player).
   PreferredSizeWidget _buildPlayerHeader() {
     // Scaffold 的零高度 appBar 已消费安全区，body 从安全区下方开始，
@@ -173,17 +257,39 @@ class _VideoDetailPageState extends State<VideoDetailPage>
             IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
               onPressed: () {
-                if (_vdCtr.playerController.isFullScreen.value) {
+                final isPhoneLandscape = Responsive.isCompact(context) &&
+                    MediaQuery.of(context).orientation == Orientation.landscape;
+                if (_vdCtr.playerController.isFullScreen.value &&
+                    isPhoneLandscape) {
                   _vdCtr.playerController.triggerFullScreen(status: false);
-                } else if (MediaQuery.of(context).orientation ==
-                    Orientation.landscape) {
+                } else if (isPhoneLandscape) {
                   fullscreen.verticalScreen();
                 } else {
-                  safeBack();
+                  safeBack(context: context);
                 }
               },
             ),
             const Spacer(),
+            Obx(() {
+              final quality = _vdCtr.currentVideoQualityRx.value;
+              return TextButton.icon(
+                onPressed: _showQualitySheet,
+                icon: const Icon(
+                  Icons.high_quality,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                label: Text(
+                  quality?.description ?? '清晰度',
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -196,11 +302,13 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   double _calcPinnedHeaderHeight(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
     final isFullScreen = _vdCtr.playerController.isFullScreen.value;
-    if (orientation == Orientation.landscape || isFullScreen) {
+    final isPhoneLandscape =
+        Responsive.isCompact(context) && orientation == Orientation.landscape;
+    if (isPhoneLandscape || isFullScreen) {
       return MediaQuery.sizeOf(context).height;
     }
     // Scaffold 的零高度 appBar 已消费安全区，此处无需加 topPadding
-    final videoHeight = MediaQuery.sizeOf(context).width * 9 / 16;
+    final videoHeight = Responsive.videoPlayerWidth(context) * 9 / 16;
     return kToolbarHeight + videoHeight;
   }
 
@@ -233,29 +341,30 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   }
 
   Widget _buildContent(BuildContext context) {
-    final defaultVideoHeight = MediaQuery.sizeOf(context).width * 9 / 16;
+    if (_useDesktopLayout(context)) {
+      return _buildDesktopContent(context);
+    }
+
+    final defaultVideoHeight = Responsive.videoPlayerWidth(context) * 9 / 16;
 
     return ExtendedNestedScrollView(
       controller: _extendNestCtr,
-      headerSliverBuilder:
-          (BuildContext ctx, bool innerBoxIsScrolled) {
+      headerSliverBuilder: (BuildContext ctx, bool innerBoxIsScrolled) {
         return <Widget>[
           Obx(() {
             final orientation = MediaQuery.of(context).orientation;
-            final isFullScreen =
-                _vdCtr.playerController.isFullScreen.value;
+            final isFullScreen = _vdCtr.playerController.isFullScreen.value;
+            final isPhoneLandscape = Responsive.isCompact(context) &&
+                orientation == Orientation.landscape;
             // Scaffold 的零高度 appBar 已消费安全区，body 从安全区下方开始，
             // 因此 expandedHeight 仅需视频高度（与旧版一致）
-            final expandedHeight = (orientation == Orientation.landscape ||
-                    isFullScreen)
+            final expandedHeight = (isPhoneLandscape || isFullScreen)
                 ? (MediaQuery.sizeOf(context).height -
-                    (orientation == Orientation.landscape
-                        ? 0
-                        : MediaQuery.of(context).padding.top))
+                    (isPhoneLandscape ? 0 : MediaQuery.of(context).padding.top))
                 : defaultVideoHeight;
 
             // Enter/exit fullscreen mode for system UI
-            if (orientation == Orientation.landscape || isFullScreen) {
+            if (isPhoneLandscape || isFullScreen) {
               fullscreen.enterFullScreen();
             } else {
               fullscreen.exitFullScreen();
@@ -271,72 +380,33 @@ class _VideoDetailPageState extends State<VideoDetailPage>
               backgroundColor: Colors.black,
               flexibleSpace: FlexibleSpaceBar(
                 background: PopScope(
-                  canPop: !isFullScreen,
+                  canPop: !(isFullScreen && isPhoneLandscape),
                   onPopInvokedWithResult: (bool didPop, dynamic result) {
-                    if (_vdCtr.playerController.isFullScreen.value) {
-                      _vdCtr.playerController
-                          .triggerFullScreen(status: false);
+                    if (_vdCtr.playerController.isFullScreen.value &&
+                        isPhoneLandscape) {
+                      _vdCtr.playerController.triggerFullScreen(status: false);
                     }
-                    if (MediaQuery.of(context).orientation ==
-                        Orientation.landscape) {
+                    if (isPhoneLandscape) {
                       fullscreen.verticalScreen();
                     }
                   },
                   child: LayoutBuilder(
                     builder:
                         (BuildContext context, BoxConstraints constraints) {
-                      final dataStatus = _vdCtr
-                          .playerController.dataStatus.status.value;
-                      if (dataStatus == DataStatus.loaded) {
-                        return PLVideoPlayer(
-                          controller: _vdCtr.playerController,
-                          headerControl: _buildPlayerHeader(),
-                          danmuWidget: PlDanmaku(
-                            key: Key(_vdCtr.cid.toString()),
-                            cid: _vdCtr.cid,
-                            playerController: _vdCtr.playerController,
-                          ),
-                          bottomList: _vdCtr.bottomList,
-                          fullScreenCb: (bool status) {
-                            // Height is handled by Obx rebuild above
-                          },
-                        );
-                      } else if (dataStatus == DataStatus.loading) {
-                        return Container(
-                          color: Colors.black,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      } else if (dataStatus == DataStatus.error) {
-                        return Container(
+                      final player = _buildPlayer(context);
+                      if (!isPhoneLandscape && !isFullScreen) {
+                        return ColoredBox(
                           color: Colors.black,
                           child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.error,
-                                    color: Colors.white, size: 48),
-                                const SizedBox(height: 8),
-                                TextButton(
-                                  onPressed: () {
-                                    _vdCtr.loadVideoDetail(
-                                      bvid: Get.parameters['bvid'],
-                                      aid: Get.parameters['aid'] != null
-                                          ? int.parse(Get.parameters['aid']!)
-                                          : null,
-                                    );
-                                  },
-                                  child: const Text('重试',
-                                      style: TextStyle(color: Colors.white)),
-                                ),
-                              ],
+                            child: SizedBox(
+                              width: Responsive.videoPlayerWidth(context),
+                              height: defaultVideoHeight,
+                              child: player,
                             ),
                           ),
                         );
-                      } else {
-                        return Container(color: Colors.black);
                       }
+                      return player;
                     },
                   ),
                 ),
@@ -349,21 +419,204 @@ class _VideoDetailPageState extends State<VideoDetailPage>
         return _calcPinnedHeaderHeight(context);
       },
       onlyOneScrollInBody: true,
-      body: Column(
-        children: [
-          _buildTabBar(),
-          Expanded(
-            child: TabBarView(
-              controller: _vdCtr.tabController,
-              children: [
-                _buildIntroTab(),
-                _buildReplyTab(),
-              ],
+      body: Center(
+        child: SizedBox(
+          width: Responsive.constrainedContentWidth(context),
+          child: Column(
+            children: [
+              _buildTabBar(),
+              Expanded(
+                child: TabBarView(
+                  controller: _vdCtr.tabController,
+                  children: [
+                    _buildIntroTab(),
+                    _buildReplyTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _useDesktopLayout(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return width >= 900 &&
+        (UniversalPlatform.isMacOS ||
+            UniversalPlatform.isWindows ||
+            UniversalPlatform.isLinux);
+  }
+
+  Widget _buildDesktopContent(BuildContext context) {
+    return Obx(() {
+      final isFullScreen = _vdCtr.playerController.isFullScreen.value;
+      if (isFullScreen) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, dynamic result) {
+            _vdCtr.playerController.triggerFullScreen(status: false);
+          },
+          child: ColoredBox(
+            color: Colors.black,
+            child: _buildPlayer(context),
+          ),
+        );
+      }
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+          final pageWidth = maxWidth >= 1680 ? 1680.0 : maxWidth;
+          final horizontalPadding = pageWidth >= 1280 ? 24.0 : 16.0;
+          final gap = pageWidth >= 1280 ? 18.0 : 12.0;
+          final commentWidth = pageWidth >= 1280 ? 430.0 : 380.0;
+          final leftWidth =
+              pageWidth - horizontalPadding * 2 - gap - commentWidth;
+          final videoHeightByWidth = leftWidth * 9 / 16;
+          final maxVideoHeight = constraints.maxHeight * 0.62;
+          final playerHeight = videoHeightByWidth > maxVideoHeight
+              ? maxVideoHeight
+              : videoHeightByWidth;
+
+          return ColoredBox(
+            color: Theme.of(context).colorScheme.surface,
+            child: Center(
+              child: SizedBox(
+                width: pageWidth,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    12,
+                    horizontalPadding,
+                    0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: playerHeight,
+                              child: ColoredBox(
+                                color: Colors.black,
+                                child: _buildPlayer(context),
+                              ),
+                            ),
+                            Expanded(child: _buildIntroTab()),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: gap),
+                      SizedBox(
+                        width: commentWidth,
+                        child: _buildDesktopReplyPanel(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildDesktopReplyPanel() {
+    final commentCtr = _vdCtr.commentController;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          left: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            alignment: Alignment.centerLeft,
+            child: Obx(() {
+              final count = commentCtr?.count.value ?? 0;
+              return Text(
+                count > 0 ? '评论 $count' : '评论',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            }),
+          ),
+          Divider(
+            height: 1,
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
+          ),
+          Expanded(
+            child: commentCtr == null
+                ? const Center(child: CircularProgressIndicator())
+                : _CommentPanel(commentController: commentCtr),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildPlayer(BuildContext context) {
+    final dataStatus = _vdCtr.playerController.dataStatus.status.value;
+    if (dataStatus == DataStatus.loaded) {
+      return PLVideoPlayer(
+        controller: _vdCtr.playerController,
+        headerControl: _buildPlayerHeader(),
+        danmuWidget: PlDanmaku(
+          key: Key(_vdCtr.cid.toString()),
+          cid: _vdCtr.cid,
+          playerController: _vdCtr.playerController,
+        ),
+        bottomList: _vdCtr.bottomList,
+        fullScreenCb: (bool status) {
+          // 高度由上层 Obx 重建处理
+        },
+      );
+    } else if (dataStatus == DataStatus.loading) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    } else if (dataStatus == DataStatus.error) {
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.white, size: 48),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  _vdCtr.loadVideoDetail(
+                    bvid: Get.parameters['bvid'],
+                    aid: Get.parameters['aid'] != null
+                        ? int.parse(Get.parameters['aid']!)
+                        : null,
+                  );
+                },
+                child: const Text('重试', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Container(color: Colors.black);
+    }
   }
 
   Widget _buildError() {
@@ -829,16 +1082,17 @@ class _UpMasterInfo extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Obx(() {
-            final followed =
-                followStatusRx['attribute'] != null && followStatusRx['attribute'] != 0;
+            final followed = followStatusRx['attribute'] != null &&
+                followStatusRx['attribute'] != 0;
             return SizedBox(
               height: 32,
               child: TextButton(
                 onPressed: onFollow,
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  foregroundColor:
-                      followed ? theme.colorScheme.outline : theme.colorScheme.onPrimary,
+                  foregroundColor: followed
+                      ? theme.colorScheme.outline
+                      : theme.colorScheme.onPrimary,
                   backgroundColor: followed
                       ? theme.colorScheme.onInverseSurface
                       : theme.colorScheme.primary,
@@ -937,6 +1191,7 @@ class _RelatedVideos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crossAxisCount = Responsive.videoGridCount(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -947,10 +1202,26 @@ class _RelatedVideos extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
-        ...videos.map((video) => VideoCardH(
-              videoItem: video,
+        if (crossAxisCount == 1)
+          ...videos.map((video) => VideoCardH(
+                videoItem: video,
+                showPubdate: true,
+              ))
+        else
+          GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisExtent: 118,
+            ),
+            itemCount: videos.length,
+            itemBuilder: (context, index) => VideoCardH(
+              videoItem: videos[index],
               showPubdate: true,
-            )),
+            ),
+          ),
         SizedBox(height: MediaQuery.of(context).padding.bottom + 10),
       ],
     );
@@ -1140,14 +1411,16 @@ class _CommentPanelState extends State<_CommentPanel> {
                                         ),
                                       ),
                                     ).then((value) {
-                                      if (value != null && value['data'] != null) {
+                                      if (value != null &&
+                                          value['data'] != null) {
                                         final idx = commentCtr.replyList
                                             .indexOf(replyItem);
                                         if (idx >= 0) {
                                           commentCtr.replyList[idx].count =
-                                            (commentCtr.replyList[idx].count ??
-                                                0) +
-                                            1;
+                                              (commentCtr.replyList[idx]
+                                                          .count ??
+                                                      0) +
+                                                  1;
                                           commentCtr.replyList.refresh();
                                         }
                                       }
@@ -1192,7 +1465,7 @@ class _CommentPanelState extends State<_CommentPanel> {
       ],
     );
   }
-  
+
   Widget _buildCommentInputBar(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
@@ -1204,8 +1477,7 @@ class _CommentPanelState extends State<_CommentPanel> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(
-              color: Theme.of(context).dividerColor, width: 0.5),
+          top: BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
         ),
       ),
       child: GestureDetector(
@@ -1216,8 +1488,7 @@ class _CommentPanelState extends State<_CommentPanel> {
             builder: (ctx) => Padding(
               padding:
                   EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-              child: CommentInputDialog(
-                  oid: widget.commentController.aid ?? 0),
+              child: CommentInputDialog(oid: widget.commentController.aid ?? 0),
             ),
           ).then((value) {
             if (value != null && value['data'] != null) {
@@ -1270,4 +1541,3 @@ class _SliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
     return true;
   }
 }
-

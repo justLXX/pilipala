@@ -8,6 +8,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/features/home/presentation/home_controller.dart';
+import 'package:pilipala/http/init.dart';
 import 'package:pilipala/http/user.dart';
 import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import 'package:pilipala/features/media/presentation/media_controller.dart';
@@ -73,6 +74,7 @@ class LoginUtils {
     }
     try {
       await SetCookie.onSet();
+      await Request.syncCookieHeader();
       final result = await UserHttp.userInfo();
       if (result['status'] && result['data'].isLogin) {
         SmartDialog.showToast('登录成功');
@@ -120,6 +122,7 @@ class LoginUtils {
       Clipboard.setData(ClipboardData(text: content));
     }
   }
+
   /// 登录成功后返回上一页，兼容 macOS 等平台
   static void _navigateBack() {
     final context = Get.context;

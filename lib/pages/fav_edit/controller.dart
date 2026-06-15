@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/http/fav.dart';
 
 class FavEditController extends GetxController {
@@ -56,7 +57,7 @@ class FavEditController extends GetxController {
     );
     if (res['status']) {
       SmartDialog.showToast('编辑成功');
-      Get.back(result: {'title': title});
+      safeBack(result: {'title': title});
     } else {
       SmartDialog.showToast(res['msg']);
     }
@@ -69,7 +70,7 @@ class FavEditController extends GetxController {
     );
     if (res['status']) {
       SmartDialog.showToast('新建成功');
-      Get.back();
+      safeBack();
     } else {
       SmartDialog.showToast(res['msg']);
     }

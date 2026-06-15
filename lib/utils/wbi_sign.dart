@@ -110,12 +110,15 @@ class WbiSign {
   // 获取最新的 img_key 和 sub_key 可以从缓存中获取
   static Future<Map<String, dynamic>> getWbiKeys() async {
     final DateTime nowDate = DateTime.now();
-    if (localCache.get(LocalCacheKey.wbiKeys) != null &&
-        DateTime.fromMillisecondsSinceEpoch(
-                    localCache.get(LocalCacheKey.timeStamp) as int)
-                .day ==
-            nowDate.day) {
-      final Map cacheWbiKeys = localCache.get('wbiKeys');
+    final cachedWbiKeys = localCache.get(LocalCacheKey.wbiKeys);
+    final cachedTimeStamp = localCache.get(LocalCacheKey.timeStamp);
+    if (cachedWbiKeys != null &&
+        cachedTimeStamp is int &&
+        _isSameDate(
+          DateTime.fromMillisecondsSinceEpoch(cachedTimeStamp),
+          nowDate,
+        )) {
+      final Map cacheWbiKeys = cachedWbiKeys;
       return Map<String, dynamic>.from(cacheWbiKeys);
     }
     var resp =
@@ -137,10 +140,19 @@ class WbiSign {
     return wbiKeys;
   }
 
+  static bool _isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  static Future<void> clearCache() async {
+    await localCache.delete(LocalCacheKey.wbiKeys);
+    await localCache.delete(LocalCacheKey.timeStamp);
+  }
+
   Future<Map<String, dynamic>> makSign(Map<String, dynamic> params) async {
     // params 为需要加密的请求参数
     final Map<String, dynamic> wbiKeys = await getWbiKeys();
-    final Map<String, dynamic> query = params
+    final Map<String, dynamic> query = Map<String, dynamic>.from(params)
       ..addAll(encWbi(params, wbiKeys['imgKey'], wbiKeys['subKey']));
     return query;
   }

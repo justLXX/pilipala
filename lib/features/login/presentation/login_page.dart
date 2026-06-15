@@ -16,6 +16,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final LoginController _loginCtr = Get.find<LoginController>();
+  Future<Map<String, dynamic>?>? _qrCodeFuture;
+
+  void _refreshQrCode() {
+    _loginCtr.validTimer?.cancel();
+    setState(() {
+      _qrCodeFuture = _loginCtr.getWebQrcode();
+    });
+  }
 
   @override
   void dispose() {
@@ -36,14 +44,7 @@ class _LoginPageState extends State<LoginPage> {
           leading: Obx(
             () => _loginCtr.currentIndex.value == 0
                 ? IconButton(
-                    onPressed: () {
-                      _loginCtr.mobTextFieldNode.unfocus();
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      } else {
-                        Get.offAllNamed('/');
-                      }
-                    },
+                    onPressed: () => _back(context),
                     icon: const Icon(Icons.close_outlined),
                   )
                 : IconButton(
@@ -51,40 +52,40 @@ class _LoginPageState extends State<LoginPage> {
                     icon: const Icon(Icons.arrow_back),
                   ),
           ),
-        actions: [
-          IconButton(
-            tooltip: '浏览器打开',
-            onPressed: () {
-              Get.offNamed(
-                '/webview',
-                parameters: {
-                  'url':
-                      'https://passport.bilibili.com/h5-app/passport/login',
-                  'type': 'login',
-                  'pageTitle': '登录bilibili',
-                },
-              );
-            },
-            icon: const Icon(Icons.language, size: 20),
-          ),
-          IconButton(
-            tooltip: '二维码登录',
-            onPressed: () => _showQrCodeDialog(context),
-            icon: const Icon(Icons.qr_code, size: 20),
-          ),
-          const SizedBox(width: 22),
-        ],
+          actions: [
+            IconButton(
+              tooltip: '浏览器打开',
+              onPressed: () {
+                Get.offNamed(
+                  '/webview',
+                  parameters: {
+                    'url':
+                        'https://passport.bilibili.com/h5-app/passport/login',
+                    'type': 'login',
+                    'pageTitle': '登录bilibili',
+                  },
+                );
+              },
+              icon: const Icon(Icons.language, size: 20),
+            ),
+            IconButton(
+              tooltip: '二维码登录',
+              onPressed: () => _showQrCodeDialog(context),
+              icon: const Icon(Icons.qr_code, size: 20),
+            ),
+            const SizedBox(width: 22),
+          ],
+        ),
+        body: PageView(
+          physics: const NeverScrollableScrollPhysics(),
+          controller: _loginCtr.pageViewController,
+          onPageChanged: (int index) => _loginCtr.onPageChange(index),
+          children: [
+            _buildPhoneInputPage(context),
+            _buildLoginPage(context),
+          ],
+        ),
       ),
-      body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _loginCtr.pageViewController,
-        onPageChanged: (int index) => _loginCtr.onPageChange(index),
-        children: [
-          _buildPhoneInputPage(context),
-          _buildLoginPage(context),
-        ],
-      ),
-    ),
     );
   }
 
@@ -105,17 +106,48 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Text(
               '登录',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge!
-                  .copyWith(height: 2.1, fontSize: 34, fontWeight: FontWeight.w500, letterSpacing: 1),
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  height: 2.1,
+                  fontSize: 34,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1),
             ),
             Text(
               '请使用您的 BiliBili 账号登录。',
               style: Theme.of(context).textTheme.titleSmall!,
             ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _showQrCodeDialog(context),
+                icon: const Icon(Icons.qr_code_2),
+                label: const Text('扫码登录'),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Divider(
+                    color: Theme.of(context).dividerColor.withOpacity(0.4),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    '或',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                Expanded(
+                  child: Divider(
+                    color: Theme.of(context).dividerColor.withOpacity(0.4),
+                  ),
+                ),
+              ],
+            ),
             Container(
-              margin: const EdgeInsets.only(top: 38, bottom: 15),
+              margin: const EdgeInsets.only(top: 16, bottom: 15),
               child: TextFormField(
                 controller: _loginCtr.mobTextController,
                 focusNode: _loginCtr.mobTextFieldNode,
@@ -140,7 +172,11 @@ class _LoginPageState extends State<LoginPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(onPressed: () {}, child: const Text('中国大陆')),
+                TextButton.icon(
+                  onPressed: () => _back(context),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('返回'),
+                ),
                 TextButton(
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -187,10 +223,11 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Text(
                 '密码登录',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge!
-                    .copyWith(height: 2.1, fontSize: 34, fontWeight: FontWeight.w500, letterSpacing: 1),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    height: 2.1,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1),
               ),
               const SizedBox(width: 4),
               IconButton(
@@ -247,6 +284,10 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
+                onPressed: () => _back(context),
+                child: const Text('返回'),
+              ),
+              TextButton(
                 onPressed: () => _loginCtr.previousPage(),
                 child: const Text('上一步'),
               ),
@@ -279,10 +320,11 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Text(
                 '验证码登录',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge!
-                    .copyWith(height: 2.1, fontSize: 34, fontWeight: FontWeight.w500, letterSpacing: 1),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    height: 2.1,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1),
               ),
               const SizedBox(width: 4),
               IconButton(
@@ -322,8 +364,7 @@ class _LoginPageState extends State<LoginPage> {
                   validator: (v) {
                     return v!.trim().isNotEmpty ? null : "验证码不能为空";
                   },
-                  onSaved: (val) =>
-                      _loginCtr.webSmsCode = int.parse(val!),
+                  onSaved: (val) => _loginCtr.webSmsCode = int.parse(val!),
                 ),
                 Obx(() {
                   return Positioned(
@@ -335,8 +376,7 @@ class _LoginPageState extends State<LoginPage> {
                               ? null
                               : () => _loginCtr.getWebMsgCode(),
                           child: _loginCtr.smsCodeSendStatus.value
-                              ? Text(
-                                  '重新获取(${_loginCtr.seconds.value}s)')
+                              ? Text('重新获取(${_loginCtr.seconds.value}s)')
                               : const Text('获取验证码')),
                     ),
                   );
@@ -348,6 +388,10 @@ class _LoginPageState extends State<LoginPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              TextButton(
+                onPressed: () => _back(context),
+                child: const Text('返回'),
+              ),
               TextButton(
                 onPressed: () => _loginCtr.previousPage(),
                 child: const Text('上一步'),
@@ -371,73 +415,137 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 二维码登录弹窗
   void _showQrCodeDialog(BuildContext context) {
+    _refreshQrCode();
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-            builder: (context, StateSetter setState) {
+        return StatefulBuilder(builder: (context, StateSetter setDialogState) {
           return AlertDialog(
             title: Row(
               children: [
                 const Text('扫码登录'),
+                const Spacer(),
                 IconButton(
                   onPressed: () {
-                    setState(() {});
+                    _loginCtr.validTimer?.cancel();
+                    setDialogState(() {
+                      _qrCodeFuture = _loginCtr.getWebQrcode();
+                    });
                   },
                   icon: const Icon(Icons.refresh),
                 ),
               ],
             ),
-            contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
-            content: AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                width: 200,
-                padding: const EdgeInsets.all(12),
-                child: FutureBuilder(
-                  future: _loginCtr.getWebQrcode(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.data == null) {
-                        return const SizedBox();
-                      }
-                      Map data = snapshot.data as Map;
-                      return QrImageView(
-                        data: data['data']['url'],
-                        backgroundColor: Colors.white,
-                      );
-                    } else {
-                      return const Center(
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: CircularProgressIndicator(),
+            contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
+            content: SizedBox(
+              width: 260,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: FutureBuilder(
+                          future: _qrCodeFuture,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.data == null) {
+                                return Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        '二维码获取失败',
+                                        style: TextStyle(color: Colors.black87),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          setDialogState(() {
+                                            _qrCodeFuture =
+                                                _loginCtr.getWebQrcode();
+                                          });
+                                        },
+                                        icon: const Icon(Icons.refresh),
+                                        label: const Text('重新获取'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                              final Map data = snapshot.data as Map;
+                              if (data['status'] != true) {
+                                return Center(
+                                  child: Text(
+                                    data['msg']?.toString() ?? '二维码获取失败',
+                                    style:
+                                        const TextStyle(color: Colors.black87),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                );
+                              }
+                              final url = data['data']?['url']?.toString();
+                              if (url == null || url.isEmpty) {
+                                return const Center(
+                                  child: Text(
+                                    '二维码地址为空',
+                                    style: TextStyle(color: Colors.black87),
+                                  ),
+                                );
+                              }
+                              return QrImageView(
+                                data: url,
+                                backgroundColor: Colors.white,
+                              );
+                            }
+                            return const Center(
+                              child: SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    }
-                  },
-                ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '请使用哔哩哔哩客户端扫码确认登录',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
             actions: [
-              TextButton(
-                onPressed: () {},
-                child: Obx(() {
-                  return Text(
+              Obx(() {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Text(
                     '有效期: ${_loginCtr.validSeconds.value}s',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  );
-                }),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  '检查登录状态',
-                  style: TextStyle(
-                    fontSize:
-                        Theme.of(context).textTheme.titleMedium!.fontSize,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                ),
+                );
+              }),
+              TextButton.icon(
+                onPressed: () async {
+                  final data = await _qrCodeFuture;
+                  if (data != null) {
+                    await _loginCtr.queryWebQrcodeStatus();
+                  }
+                },
+                icon: const Icon(Icons.verified_user_outlined),
+                label: const Text('检查状态'),
               )
             ],
           );
@@ -446,5 +554,16 @@ class _LoginPageState extends State<LoginPage> {
     ).then((value) {
       _loginCtr.validTimer?.cancel();
     });
+  }
+
+  void _back(BuildContext context) {
+    _loginCtr.mobTextFieldNode.unfocus();
+    _loginCtr.passwordTextFieldNode.unfocus();
+    _loginCtr.msgCodeTextFieldNode.unfocus();
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Get.offAllNamed('/');
+    }
   }
 }

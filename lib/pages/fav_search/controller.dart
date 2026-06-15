@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/http/user.dart';
 import 'package:pilipala/models/user/fav_detail.dart';
 
@@ -35,7 +36,7 @@ class FavSearchController extends GetxController {
       controller.value.clear();
       searchKeyWord.value = '';
     } else {
-      Get.back();
+      safeBack();
     }
   }
 

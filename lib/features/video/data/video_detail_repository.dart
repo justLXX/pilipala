@@ -93,6 +93,7 @@ class VideoDetailRepository {
     required String bvid,
     required bool like,
   }) async {
+    await Request.getBuvid();
     final response = await _apiClient.post<Map<String, dynamic>>(
       Api.likeVideo,
       data: {
@@ -110,6 +111,7 @@ class VideoDetailRepository {
     required String bvid,
     required int multiply,
   }) async {
+    await Request.getBuvid();
     final response = await _apiClient.post<Map<String, dynamic>>(
       Api.coinVideo,
       data: {
@@ -128,6 +130,7 @@ class VideoDetailRepository {
     required List<int> addMediaIds,
     List<int>? delMediaIds,
   }) async {
+    await Request.getBuvid();
     final response = await _apiClient.post<Map<String, dynamic>>(
       Api.favVideo,
       data: {

@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/core/network/api_client.dart';
 import 'package:pilipala/http/api.dart';
+import 'package:pilipala/http/init.dart';
 import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:pilipala/utils/wbi_sign.dart';
@@ -26,16 +28,13 @@ class RankRepository {
   Future<ApiResponse<List<HotVideoItemModel>>> getRankVideoList({
     required int rid,
   }) async {
-    final Map<String, dynamic> signedParams = await WbiSign().makSign({
-      'rid': rid,
-      'type': 'all',
-    });
-    debugPrint('🔐 Rank WBI signed params: $signedParams');
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      Api.getRankApi,
-      queryParameters: signedParams,
-    );
+    var response = await _requestRank(rid);
+    if (response.code == -352) {
+      await WbiSign.clearCache();
+      await Request.getBuvid();
+      await Request.syncCookieHeader();
+      response = await _requestRank(rid);
+    }
 
     if (response.isSuccess && response.data != null) {
       final rawList = response.data!['list'] as List?;
@@ -58,5 +57,19 @@ class RankRepository {
     }
 
     return ApiResponse.error(msg: response.msg);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> _requestRank(int rid) async {
+    final Map<String, dynamic> signedParams = await WbiSign().makSign({
+      'rid': rid,
+      'type': 'all',
+    });
+    debugPrint('🔐 Rank WBI signed params: $signedParams');
+
+    return _apiClient.get<Map<String, dynamic>>(
+      Api.getRankApi,
+      queryParameters: signedParams,
+      options: Options(headers: {'referer': ''}),
+    );
   }
 }

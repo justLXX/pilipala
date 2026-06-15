@@ -8,6 +8,7 @@ import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/home/presentation/home_controller.dart';
 import 'package:pilipala/features/main/presentation/main_controller.dart';
+import 'package:pilipala/utils/responsive.dart';
 
 /// HotPage displays the hot video list.
 ///
@@ -57,8 +58,7 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
               const Duration(milliseconds: 300),
               () {
                 try {
-                  final mainStream =
-                      Get.find<MainController>().bottomBarStream;
+                  final mainStream = Get.find<MainController>().bottomBarStream;
                   if (direction == ScrollDirection.forward) {
                     mainStream.add(true);
                   } else if (direction == ScrollDirection.reverse) {
@@ -82,14 +82,13 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
                     return Obx(
                       () {
                         if (_homeController.hotVideoList.isNotEmpty) {
-                          return SliverList(
-                            delegate:
-                                SliverChildBuilderDelegate((context, index) {
-                              return VideoCardH(
-                                videoItem: _homeController.hotVideoList[index],
-                                showPubdate: true,
-                              );
-                            }, childCount: _homeController.hotVideoList.length),
+                          return _buildVideoSliver(
+                            context,
+                            _homeController.hotVideoList.length,
+                            (index) => VideoCardH(
+                              videoItem: _homeController.hotVideoList[index],
+                              showPubdate: true,
+                            ),
                           );
                         } else if (_homeController.hotError.isNotEmpty) {
                           return HttpError(
@@ -102,21 +101,20 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
                             },
                           );
                         } else {
-                          return SliverList(
-                            delegate:
-                                SliverChildBuilderDelegate((context, index) {
-                              return const VideoCardHSkeleton();
-                            }, childCount: 10),
+                          return _buildVideoSliver(
+                            context,
+                            10,
+                            (_) => const VideoCardHSkeleton(),
                           );
                         }
                       },
                     );
                   } else {
                     // Skeleton screen
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return const VideoCardHSkeleton();
-                      }, childCount: 10),
+                    return _buildVideoSliver(
+                      context,
+                      10,
+                      (_) => const VideoCardHSkeleton(),
                     );
                   }
                 },
@@ -128,6 +126,34 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoSliver(
+    BuildContext context,
+    int childCount,
+    Widget Function(int index) builder,
+  ) {
+    if (!Responsive.isExpanded(context)) {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => builder(index),
+          childCount: childCount,
+        ),
+      );
+    }
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: Responsive.videoGridCount(context),
+          mainAxisExtent: 118,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => builder(index),
+          childCount: childCount,
         ),
       ),
     );

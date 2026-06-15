@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -64,6 +65,7 @@ class LoginController extends GetxController {
   RxInt validSeconds = 180.obs;
   Timer? validTimer;
   late String qrcodeKey;
+  bool _checkingQrCode = false;
 
   // Password visibility
   RxBool passwordVisible = false.obs;
@@ -142,6 +144,10 @@ class LoginController extends GetxController {
 
   // Geetest captcha
   Future<void> requestCaptcha(Function(CaptchaDataModel) onCaptchaReady) async {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      SmartDialog.showToast('桌面端暂不支持滑块验证，请使用二维码登录');
+      return;
+    }
     SmartDialog.showLoading(msg: '请求中...');
     var result = await _getCaptcha.execute();
     SmartDialog.dismiss();
@@ -295,12 +301,22 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> queryWebQrcodeStatus() async {
-    var res = await _qrCodeLogin.checkStatus(qrcodeKey);
-    if (res['status']) {
-      await LoginUtils.confirmLogin('', null);
-      validTimer?.cancel();
-      safeBack();
+  Future<bool> queryWebQrcodeStatus() async {
+    if (_checkingQrCode) {
+      return false;
+    }
+    _checkingQrCode = true;
+    try {
+      var res = await _qrCodeLogin.checkStatus(qrcodeKey);
+      if (res['status']) {
+        validTimer?.cancel();
+        await LoginUtils.confirmLogin('', null);
+        safeBack();
+        return true;
+      }
+      return false;
+    } finally {
+      _checkingQrCode = false;
     }
   }
 }

@@ -14,17 +14,18 @@ InlineSpan richNode(item, context) {
     List<InlineSpan> spanChilds = [];
 
     dynamic richTextNodes;
-    if (item.modules.moduleDynamic.desc != null) {
-      richTextNodes = item.modules.moduleDynamic.desc.richTextNodes;
-    } else if (item.modules.moduleDynamic.major != null) {
-      // 动态页面 richTextNodes 层级可能与主页动态层级不同
-      richTextNodes = item.modules.moduleDynamic.major.opus.summary != null
-          ? item.modules.moduleDynamic.major.opus.summary!.richTextNodes
-          : null;
-      if (item.modules.moduleDynamic.major.opus.title != null) {
+    final moduleDynamic = item.modules?.moduleDynamic;
+    final desc = moduleDynamic?.desc;
+    final opus = moduleDynamic?.major?.opus;
+    if (desc != null) {
+      richTextNodes = desc.richTextNodes;
+    } else if (opus != null) {
+      // 动态页不同卡片的 opus/summary 可能为空，需要逐层兜底
+      richTextNodes = opus.summary?.richTextNodes;
+      if (opus.title != null) {
         spanChilds.add(
           TextSpan(
-            text: item.modules.moduleDynamic.major.opus.title + '\n',
+            text: '${opus.title}\n',
             style: Theme.of(context)
                 .textTheme
                 .titleMedium!

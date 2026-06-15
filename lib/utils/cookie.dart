@@ -12,22 +12,18 @@ class SetCookie {
       return;
     }
     try {
-      var cookies =
-          await WebviewCookieManager().getCookies(HttpString.baseUrl);
+      var cookies = await WebviewCookieManager().getCookies(HttpString.baseUrl);
       await Request.cookieManager.cookieJar
           .saveFromResponse(Uri.parse(HttpString.baseUrl), cookies);
-      var cookieString =
-          cookies.map((cookie) => '${cookie.name}=${cookie.value}').join('; ');
-      Request.dio.options.headers['cookie'] = cookieString;
 
-      cookies =
-          await WebviewCookieManager().getCookies(HttpString.apiBaseUrl);
+      cookies = await WebviewCookieManager().getCookies(HttpString.apiBaseUrl);
       await Request.cookieManager.cookieJar
           .saveFromResponse(Uri.parse(HttpString.apiBaseUrl), cookies);
 
       cookies = await WebviewCookieManager().getCookies(HttpString.tUrl);
       await Request.cookieManager.cookieJar
           .saveFromResponse(Uri.parse(HttpString.tUrl), cookies);
+      await Request.syncCookieHeader();
     } on MissingPluginException {
       // 插件未实现（如 macOS），静默忽略
       debugPrint('webview_cookie_manager 不支持当前平台，跳过 cookie 同步');

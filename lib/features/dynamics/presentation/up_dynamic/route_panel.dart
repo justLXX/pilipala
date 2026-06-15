@@ -24,6 +24,7 @@ class _UpDynamicsPageState extends State<UpDynamicsPage>
   late double contentWidth = 50;
   late List<UpItem> upList;
   late RxInt currentMid = (-1).obs;
+  late Rx<UpItem> currentUp;
   TabController? _tabController;
 
   @override
@@ -36,12 +37,18 @@ class _UpDynamicsPageState extends State<UpDynamicsPage>
     _tabController = TabController(length: upList.length, vsync: this);
 
     currentMid.value = widget.upInfo.mid!;
+    currentUp = widget.upInfo.obs;
 
     pageController.addListener(() {
-      int index = pageController.page!.round();
+      final page = pageController.page;
+      if (page == null) {
+        return;
+      }
+      int index = page.round().clamp(0, upList.length - 1);
       int mid = upList[index].mid!;
       if (mid != currentMid.value) {
         currentMid.value = mid;
+        currentUp.value = upList[index];
         _tabController?.animateTo(index,
             duration: Duration.zero, curve: Curves.linear);
         onClickUp(upList[index], index, type: 'pageChange');
@@ -60,6 +67,8 @@ class _UpDynamicsPageState extends State<UpDynamicsPage>
   }
 
   void onClickUp(data, i, {type = 'click'}) {
+    currentMid.value = data.mid!;
+    currentUp.value = data;
     if (type == 'click') {
       pageController.jumpToPage(i);
     }
@@ -71,9 +80,11 @@ class _UpDynamicsPageState extends State<UpDynamicsPage>
       appBar: AppBar(
         titleSpacing: 0,
         centerTitle: false,
-        title: Text(
-          '${widget.upInfo.uname}的动态',
-          style: Theme.of(context).textTheme.titleMedium,
+        title: Obx(
+          () => Text(
+            '${currentUp.value.uname ?? ''}的动态',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         actions: [
           IconButton(

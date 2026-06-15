@@ -9,6 +9,7 @@ import 'package:pilipala/http/video.dart';
 import 'package:pilipala/models/common/search_type.dart';
 import 'package:pilipala/utils/id_utils.dart';
 import 'package:pilipala/utils/image_save.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/utils/utils.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import '../../../common/widgets/badge.dart';
@@ -229,7 +230,7 @@ class VideoContent extends StatelessWidget {
                               content: const Text('要取消收藏吗?'),
                               actions: [
                                 TextButton(
-                                    onPressed: () => Get.back(),
+                                    onPressed: () => safeBack(),
                                     child: Text(
                                       '取消',
                                       style: TextStyle(
@@ -240,7 +241,7 @@ class VideoContent extends StatelessWidget {
                                 TextButton(
                                   onPressed: () async {
                                     await callFn!();
-                                    Get.back();
+                                    safeBack();
                                   },
                                   child: const Text('确定取消'),
                                 )

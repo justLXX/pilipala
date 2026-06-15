@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import '../common/constants.dart';
 import '../models/common/reply_type.dart';
@@ -163,6 +164,7 @@ class VideoHttp {
 
     // 免登录查看1080p
     if (userInfoCache.get('userInfoCache') == null &&
+        !Request.hasLoginCookies() &&
         setting.get(SettingBoxKey.p1080, defaultValue: true)) {
       data['try_look'] = 1;
     }
@@ -251,6 +253,7 @@ class VideoHttp {
 
   // 投币
   static Future coinVideo({required String bvid, required int multiply}) async {
+    await Request.getBuvid();
     var res = await Request().post(
       Api.coinVideo,
       data: {
@@ -295,6 +298,7 @@ class VideoHttp {
 
   // （取消）点赞
   static Future likeVideo({required String bvid, required bool type}) async {
+    await Request.getBuvid();
     var res = await Request().post(
       Api.likeVideo,
       data: {
@@ -313,6 +317,7 @@ class VideoHttp {
   // （取消）收藏
   static Future favVideo(
       {required int aid, String? addIds, String? delIds}) async {
+    await Request.getBuvid();
     var res = await Request().post(
       Api.favVideo,
       data: {
@@ -392,6 +397,7 @@ class VideoHttp {
   // 操作用户关系
   static Future relationMod(
       {required int mid, required int act, required int reSrc}) async {
+    await Request.getBuvid();
     var res = await Request().post(
       Api.relationMod,
       data: {
@@ -554,12 +560,26 @@ class VideoHttp {
   // 视频排行
   static Future getRankVideoList(int rid) async {
     try {
-      Map params = await WbiSign().makSign({
-        'rid': rid,
-        'type': 'all',
-      });
-      log('🔐 Rank WBI signed params (old): $params');
-      var res = await Request().get(Api.getRankApi, data: params);
+      Future requestRank() async {
+        Map params = await WbiSign().makSign({
+          'rid': rid,
+          'type': 'all',
+        });
+        log('🔐 Rank WBI signed params (old): $params');
+        return Request().get(
+          Api.getRankApi,
+          data: params,
+          options: Options(headers: {'referer': ''}),
+        );
+      }
+
+      var res = await requestRank();
+      if (res.data['code'] == -352) {
+        await WbiSign.clearCache();
+        await Request.getBuvid();
+        await Request.syncCookieHeader();
+        res = await requestRank();
+      }
       if (res.data['code'] == 0) {
         List<HotVideoItemModel> list = [];
         List<int> blackMidsList =

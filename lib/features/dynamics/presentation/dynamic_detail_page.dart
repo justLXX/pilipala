@@ -19,6 +19,7 @@ import 'package:pilipala/pages/video/detail/reply_new/index.dart';
 import 'package:pilipala/pages/video/detail/reply_reply/index.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/id_utils.dart';
+import 'package:pilipala/utils/responsive.dart';
 import 'package:pilipala/utils/storage.dart';
 
 import 'package:pilipala/features/dynamics/presentation/widgets/dynamic_panel.dart';
@@ -333,57 +334,68 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
           slivers: [
             if (action != 'comment')
               SliverToBoxAdapter(
-                child: DynamicPanel(
-                  item: _dynamicDetailController.item,
-                  source: 'detail',
+                child: _centerContent(
+                  context,
+                  DynamicPanel(
+                    item: _dynamicDetailController.item,
+                    source: 'detail',
+                  ),
                 ),
               ),
             SliverPersistentHeader(
               delegate: _MySliverPersistentHeaderDelegate(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    border: Border(
-                      top: BorderSide(
-                        width: 0.6,
-                        color: Theme.of(context).dividerColor.withOpacity(0.05),
-                      ),
-                    ),
-                  ),
-                  height: 45,
-                  padding: const EdgeInsets.only(left: 12, right: 6),
-                  child: Row(
-                    children: [
-                      Obx(
-                        () => AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 400),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return ScaleTransition(
-                                scale: animation, child: child);
-                          },
-                          child: Text(
-                            '${_dynamicDetailController.acount.value}',
-                            key: ValueKey<int>(
-                                _dynamicDetailController.acount.value),
+                child: Center(
+                  child: SizedBox(
+                    width: Responsive.dynamicsContentWidth(context),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        border: Border(
+                          top: BorderSide(
+                            width: 0.6,
+                            color: Theme.of(context)
+                                .dividerColor
+                                .withOpacity(0.05),
                           ),
                         ),
                       ),
-                      const Text('条回复'),
-                      const Spacer(),
-                      SizedBox(
-                        height: 35,
-                        child: TextButton.icon(
-                          onPressed: () =>
-                              _dynamicDetailController.queryBySort(),
-                          icon: const Icon(Icons.sort, size: 16),
-                          label: Obx(() => Text(
-                                _dynamicDetailController.sortTypeLabel.value,
-                                style: const TextStyle(fontSize: 13),
-                              )),
-                        ),
-                      )
-                    ],
+                      height: 45,
+                      padding: const EdgeInsets.only(left: 12, right: 6),
+                      child: Row(
+                        children: [
+                          Obx(
+                            () => AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                return ScaleTransition(
+                                    scale: animation, child: child);
+                              },
+                              child: Text(
+                                '${_dynamicDetailController.acount.value}',
+                                key: ValueKey<int>(
+                                    _dynamicDetailController.acount.value),
+                              ),
+                            ),
+                          ),
+                          const Text('条回复'),
+                          const Spacer(),
+                          SizedBox(
+                            height: 35,
+                            child: TextButton.icon(
+                              onPressed: () =>
+                                  _dynamicDetailController.queryBySort(),
+                              icon: const Icon(Icons.sort, size: 16),
+                              label: Obx(() => Text(
+                                    _dynamicDetailController
+                                        .sortTypeLabel.value,
+                                    style: const TextStyle(fontSize: 13),
+                                  )),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -404,52 +416,61 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                           ? SliverList(
                               delegate:
                                   SliverChildBuilderDelegate((context, index) {
-                                return const VideoReplySkeleton();
+                                return _centerContent(
+                                  context,
+                                  const VideoReplySkeleton(),
+                                );
                               }, childCount: 8),
                             )
                           : SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
                                   if (index == replyList.length) {
-                                    return Container(
-                                      padding: EdgeInsets.only(
-                                          bottom: MediaQuery.of(context)
-                                              .padding
-                                              .bottom),
-                                      height: MediaQuery.of(context)
-                                              .padding
-                                              .bottom +
-                                          100,
-                                      child: Center(
-                                        child: Obx(
-                                          () => Text(
-                                            _dynamicDetailController
-                                                .noMore.value,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .outline,
+                                    return _centerContent(
+                                      context,
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                            bottom: MediaQuery.of(context)
+                                                .padding
+                                                .bottom),
+                                        height: MediaQuery.of(context)
+                                                .padding
+                                                .bottom +
+                                            100,
+                                        child: Center(
+                                          child: Obx(
+                                            () => Text(
+                                              _dynamicDetailController
+                                                  .noMore.value,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .outline,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     );
                                   } else {
-                                    return ReplyItem(
-                                      replyItem: replyList[index],
-                                      showReplyRow: true,
-                                      replyLevel: '1',
-                                      replyReply:
-                                          (replyItem, currentReply, loadMore) =>
-                                              replyReply(replyItem,
-                                                  currentReply, loadMore),
-                                      replyType: ReplyType.values[replyType],
-                                      addReply: (replyItem) {
-                                        replyList[index]
-                                            .replies!
-                                            .add(replyItem);
-                                      },
+                                    return _centerContent(
+                                      context,
+                                      ReplyItem(
+                                        replyItem: replyList[index],
+                                        showReplyRow: true,
+                                        replyLevel: '1',
+                                        replyReply: (replyItem, currentReply,
+                                                loadMore) =>
+                                            replyReply(replyItem, currentReply,
+                                                loadMore),
+                                        replyType: ReplyType.values[replyType],
+                                        addReply: (replyItem) {
+                                          replyList[index]
+                                              .replies!
+                                              .add(replyItem);
+                                        },
+                                      ),
                                     );
                                   }
                                 },
@@ -468,7 +489,10 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                   // 骨架屏
                   return SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
-                      return const VideoReplySkeleton();
+                      return _centerContent(
+                        context,
+                        const VideoReplySkeleton(),
+                      );
                     }, childCount: 8),
                   );
                 }
@@ -522,6 +546,15 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                   child: const Icon(Icons.reply),
                 ),
         ),
+      ),
+    );
+  }
+
+  Widget _centerContent(BuildContext context, Widget child) {
+    return Center(
+      child: SizedBox(
+        width: Responsive.dynamicsContentWidth(context),
+        child: child,
       ),
     );
   }

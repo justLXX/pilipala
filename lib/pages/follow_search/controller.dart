@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/http/member.dart';
 
 import '../../models/follow/result.dart';
@@ -29,7 +30,7 @@ class FollowSearchController extends GetxController {
       controller.value.clear();
       searchKeyWord.value = '';
     } else {
-      Get.back();
+      safeBack();
     }
   }
 

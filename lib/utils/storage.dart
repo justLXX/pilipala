@@ -157,6 +157,7 @@ class LocalCacheKey {
       //
       wbiKeys = 'wbiKeys',
       timeStamp = 'timeStamp',
+      loginCookies = 'loginCookies',
 
       // 弹幕相关设置 屏蔽类型 显示区域 透明度 字体大小 弹幕时间 描边粗细
       danmakuBlockType = 'danmakuBlockType',

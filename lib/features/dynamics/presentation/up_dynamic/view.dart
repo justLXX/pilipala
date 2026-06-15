@@ -7,6 +7,7 @@ import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/models/dynamics/result.dart';
 import 'package:pilipala/models/dynamics/up.dart';
 import 'package:pilipala/features/dynamics/presentation/up_dynamic/index.dart';
+import 'package:pilipala/utils/responsive.dart';
 
 import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import '../widgets/dynamic_panel.dart';
@@ -119,7 +120,10 @@ class _UpDyanmicsPageState extends State<UpDyanmicsPage>
                       return SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            return DynamicPanel(item: list[index]);
+                            return _centerContent(
+                              context,
+                              DynamicPanel(item: list[index]),
+                            );
                           },
                           childCount: list.length,
                         ),
@@ -147,8 +151,17 @@ class _UpDyanmicsPageState extends State<UpDyanmicsPage>
   Widget skeleton() {
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
-        return const DynamicCardSkeleton();
+        return _centerContent(context, const DynamicCardSkeleton());
       }, childCount: 5),
+    );
+  }
+
+  Widget _centerContent(BuildContext context, Widget child) {
+    return Center(
+      child: SizedBox(
+        width: Responsive.dynamicsContentWidth(context),
+        child: child,
+      ),
     );
   }
 }
