@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/models/live/message.dart';
-import 'package:pilipala/pages/danmaku/index.dart';
+import 'package:pilipala/common/widgets/danmaku/index.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 
 import 'live_room_controller.dart';

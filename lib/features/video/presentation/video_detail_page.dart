@@ -17,7 +17,7 @@ import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/video_detail_res.dart';
 import 'package:pilipala/models/video/play/quality.dart';
 import 'package:pilipala/models/video/view_point.dart';
-import 'package:pilipala/pages/danmaku/view.dart';
+import 'package:pilipala/common/widgets/danmaku/view.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/plugin/pl_player/models/play_repeat.dart';
 import 'package:pilipala/plugin/pl_player/utils/fullscreen.dart' as fullscreen;

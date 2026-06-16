@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/media/presentation/history_search/history_search_controller.dart';
-import 'package:pilipala/pages/history/widgets/item.dart';
+import 'package:pilipala/features/media/presentation/history/widgets/item.dart';
 
 class HistorySearchPage extends StatefulWidget {
   const HistorySearchPage({super.key});

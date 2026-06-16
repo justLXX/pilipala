@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/features/user/presentation/follow/follow_controller.dart';
-import 'package:pilipala/pages/follow/widgets/follow_list.dart';
-import 'package:pilipala/pages/follow/widgets/owner_follow_list.dart';
+import 'package:pilipala/features/user/presentation/follow/widgets/follow_list.dart';
+import 'package:pilipala/features/user/presentation/follow/widgets/owner_follow_list.dart';
 
 class FollowPage extends StatefulWidget {
   const FollowPage({super.key});

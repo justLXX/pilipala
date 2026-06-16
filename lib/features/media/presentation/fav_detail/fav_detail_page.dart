@@ -8,7 +8,7 @@ import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/media/presentation/fav_detail/fav_detail_controller.dart';
-import 'package:pilipala/pages/fav_detail/widget/fav_video_card.dart';
+import 'package:pilipala/features/media/presentation/fav_detail/widgets/fav_video_card.dart';
 
 class FavDetailPage extends StatefulWidget {
   const FavDetailPage({super.key});

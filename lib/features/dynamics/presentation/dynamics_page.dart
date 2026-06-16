@@ -15,7 +15,7 @@ import 'package:pilipala/utils/responsive.dart';
 import 'package:pilipala/utils/route_push.dart';
 import 'package:pilipala/utils/storage.dart';
 
-import 'package:pilipala/pages/mine/controller.dart';
+import 'package:pilipala/features/user/presentation/mine/mine_controller.dart';
 import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import 'package:pilipala/features/dynamics/presentation/widgets/dynamic_panel.dart';
 import 'package:pilipala/features/dynamics/presentation/up_dynamic/route_panel.dart';

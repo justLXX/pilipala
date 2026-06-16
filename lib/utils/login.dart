@@ -12,7 +12,7 @@ import 'package:pilipala/http/init.dart';
 import 'package:pilipala/http/user.dart';
 import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import 'package:pilipala/features/media/presentation/media_controller.dart';
-import 'package:pilipala/pages/mine/index.dart';
+import 'package:pilipala/features/user/presentation/mine/mine_controller.dart';
 import 'package:pilipala/utils/cookie.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:uuid/uuid.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/features/user/presentation/member_seasons/member_seasons_controller.dart';
-import 'package:pilipala/pages/member_seasons/widgets/item.dart';
+import 'package:pilipala/features/user/presentation/member_seasons/widgets/item.dart';
 
 class MemberSeasonsPage extends StatefulWidget {
   const MemberSeasonsPage({super.key});

@@ -7,6 +7,12 @@ import 'package:pilipala/models/common/tab_type.dart';
 import 'package:pilipala/utils/storage.dart';
 import '../../http/index.dart';
 
+// Tab 页面对应的 Controller 和 Page
+import 'package:pilipala/pages/live/index.dart';
+import 'package:pilipala/pages/rcmd/index.dart';
+import 'package:pilipala/pages/hot/index.dart';
+import 'package:pilipala/pages/bangumi/index.dart';
+
 class HomeController extends GetxController with GetTickerProviderStateMixin {
   bool flag = false;
   late RxList tabs = [].obs;
@@ -74,6 +80,21 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
     defaultTabs.sort((a, b) => tabbarSort
         .indexOf((a['type'] as TabType).id)
         .compareTo(tabbarSort.indexOf((b['type'] as TabType).id)));
+
+    // 为每个 tab 添加 Controller 和 Page 映射
+    final tabCtrPageMap = {
+      TabType.live: {'ctr': Get.find<LiveController>, 'page': const LivePage()},
+      TabType.rcmd: {'ctr': Get.find<RcmdController>, 'page': const RcmdPage()},
+      TabType.hot: {'ctr': Get.find<HotController>, 'page': const HotPage()},
+      TabType.bangumi: {'ctr': Get.find<BangumiController>, 'page': const BangumiPage()},
+    };
+    for (var tab in defaultTabs) {
+      final mapping = tabCtrPageMap[tab['type']];
+      if (mapping != null) {
+        tab['ctr'] = mapping['ctr'];
+        tab['page'] = mapping['page'];
+      }
+    }
 
     tabs.value = defaultTabs;
 

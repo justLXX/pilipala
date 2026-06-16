@@ -9,7 +9,7 @@ import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/media/presentation/subscription_detail/sub_detail_controller.dart';
 import 'package:pilipala/models/user/sub_folder.dart';
-import 'package:pilipala/pages/subscription_detail/widget/sub_video_card.dart';
+import 'package:pilipala/features/media/presentation/subscription_detail/widgets/sub_video_card.dart';
 import 'package:pilipala/utils/utils.dart';
 
 class SubDetailPage extends StatefulWidget {

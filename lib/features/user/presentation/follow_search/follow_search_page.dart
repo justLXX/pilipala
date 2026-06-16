@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/user/presentation/follow_search/follow_search_controller.dart';
-import 'package:pilipala/pages/follow/widgets/follow_item.dart';
+import 'package:pilipala/features/user/presentation/follow/widgets/follow_item.dart';
 
 class FollowSearchPage extends StatefulWidget {
   const FollowSearchPage({super.key});

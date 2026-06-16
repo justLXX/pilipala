@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/bangumi/presentation/bangumi_controller.dart';
-import 'package:pilipala/pages/bangumi/widgets/bangumu_card_v.dart';
+import 'package:pilipala/features/bangumi/presentation/widgets/bangumu_card_v.dart';
 import 'package:pilipala/utils/main_stream.dart';
 
 class BangumiPage extends StatefulWidget {

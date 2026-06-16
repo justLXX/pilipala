@@ -30,7 +30,8 @@ import 'package:pilipala/features/user/presentation/member_seasons/member_season
 import '../pages/search_result/index.dart';
 import 'package:pilipala/features/media/presentation/subscription/sub_page.dart' as features_subscription;
 import 'package:pilipala/features/media/presentation/subscription_detail/sub_detail_page.dart' as features_sub_detail;
-import '../pages/video/detail/reply_reply/index.dart';
+import 'package:pilipala/features/video/presentation/widgets/comment/reply_reply_view.dart';
+import 'package:pilipala/features/video/presentation/widgets/comment/reply_reply_controller.dart';
 import '../pages/webview/index.dart';
 import '../utils/storage.dart';
 

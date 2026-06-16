@@ -5,7 +5,7 @@ import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/user/presentation/fan/fan_controller.dart';
 import 'package:pilipala/models/fans/result.dart';
-import 'package:pilipala/pages/fan/widgets/fan_item.dart';
+import 'package:pilipala/features/user/presentation/fan/widgets/fan_item.dart';
 
 class FansPage extends StatefulWidget {
   const FansPage({super.key});

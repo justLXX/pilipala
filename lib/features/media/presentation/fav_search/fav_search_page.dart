@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/media/presentation/fav_search/fav_search_controller.dart';
-import 'package:pilipala/pages/fav_detail/widget/fav_video_card.dart';
+import 'package:pilipala/features/media/presentation/fav_detail/widgets/fav_video_card.dart';
 
 class FavSearchPage extends StatefulWidget {
   const FavSearchPage({super.key});

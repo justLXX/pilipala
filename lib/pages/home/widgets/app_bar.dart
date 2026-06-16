@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
-import 'package:pilipala/pages/mine/view.dart';
+import 'package:pilipala/features/user/presentation/mine/mine_page.dart';
 import 'package:pilipala/utils/storage.dart';
 
 Box userInfoCache = GStrorage.userInfo;

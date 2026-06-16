@@ -6,7 +6,7 @@ import 'package:pilipala/http/video.dart';
 import 'package:pilipala/models/common/reply_type.dart';
 import 'package:pilipala/models/video/reply/item.dart';
 import 'package:pilipala/models/video/reply/emote.dart';
-import 'package:pilipala/pages/emote/view.dart';
+import 'package:pilipala/common/widgets/emote/view.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/navigation_helper.dart';
 

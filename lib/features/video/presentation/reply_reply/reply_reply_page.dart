@@ -6,8 +6,8 @@ import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/video/presentation/reply_reply/reply_reply_controller.dart';
 import 'package:pilipala/models/common/reply_type.dart';
 import 'package:pilipala/models/video/reply/item.dart';
-import 'package:pilipala/pages/video/detail/reply/widgets/reply_item.dart';
-import 'package:pilipala/pages/video/detail/reply_new/index.dart';
+import 'package:pilipala/features/video/presentation/widgets/comment/reply_item.dart';
+import 'package:pilipala/features/video/presentation/widgets/comment/reply_new_view.dart';
 import 'package:pilipala/utils/feed_back.dart';
 
 class VideoReplyReplyPage extends StatefulWidget {

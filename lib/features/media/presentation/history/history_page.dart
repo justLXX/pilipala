@@ -5,7 +5,7 @@ import 'package:pilipala/common/skeleton/video_card_h.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/media/presentation/history/history_controller.dart';
-import 'package:pilipala/pages/history/widgets/item.dart';
+import 'package:pilipala/features/media/presentation/history/widgets/item.dart';
 import 'package:pilipala/utils/route_push.dart';
 
 class HistoryPage extends StatefulWidget {

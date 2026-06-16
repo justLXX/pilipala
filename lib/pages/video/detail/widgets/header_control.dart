@@ -11,7 +11,7 @@ import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:pilipala/http/user.dart';
 import 'package:pilipala/models/video/play/quality.dart';
 import 'package:pilipala/models/video/play/url.dart';
-import 'package:pilipala/pages/dlna/index.dart';
+import 'package:pilipala/common/widgets/dlna/dlna_page.dart';
 import 'package:pilipala/pages/video/detail/index.dart';
 import 'package:pilipala/pages/video/detail/introduction/widgets/menu_row.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';

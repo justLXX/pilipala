@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/media/presentation/subscription/sub_controller.dart';
-import 'package:pilipala/pages/subscription/widgets/item.dart';
+import 'package:pilipala/features/media/presentation/subscription/widgets/item.dart';
 import 'package:pilipala/utils/route_push.dart';
 
 class SubPage extends StatefulWidget {

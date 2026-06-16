@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/user/presentation/member_dynamics/member_dynamics_controller.dart';
 import 'package:pilipala/models/dynamics/result.dart';
-import 'package:pilipala/pages/dynamics/widgets/dynamic_panel.dart';
+import 'package:pilipala/features/user/presentation/member_dynamics/widgets/dynamic_panel.dart';
 import 'package:pilipala/utils/utils.dart';
 
 class MemberDynamicsPage extends StatefulWidget {
