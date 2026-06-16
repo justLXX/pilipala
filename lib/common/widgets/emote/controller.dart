@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../http/reply.dart';
-import '../../models/video/reply/emote.dart';
+import 'package:pilipala/http/reply.dart';
+import 'package:pilipala/models/video/reply/emote.dart';
 
 class EmotePanelController extends GetxController
     with GetTickerProviderStateMixin {

@@ -4,7 +4,7 @@ import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/badge.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/models/dynamics/result.dart';
-import 'package:pilipala/pages/dynamics/index.dart';
+import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import 'package:pilipala/utils/utils.dart';
 
 import 'rich_node_panel.dart';

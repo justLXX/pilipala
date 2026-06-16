@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../models/video/reply/emote.dart';
+import 'package:pilipala/models/video/reply/emote.dart';
 import 'controller.dart';
 
 class EmotePanel extends StatefulWidget {

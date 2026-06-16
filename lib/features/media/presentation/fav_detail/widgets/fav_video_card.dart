@@ -12,7 +12,7 @@ import 'package:pilipala/utils/image_save.dart';
 import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:pilipala/utils/utils.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
-import '../../../common/widgets/badge.dart';
+import 'package:pilipala/common/widgets/badge.dart';
 
 // 收藏视频卡片 - 水平布局
 class FavVideoCardH extends StatelessWidget {

@@ -10,7 +10,7 @@ import 'package:pilipala/http/video.dart';
 import 'package:pilipala/models/common/business_type.dart';
 import 'package:pilipala/models/common/search_type.dart';
 import 'package:pilipala/models/live/item.dart';
-import 'package:pilipala/pages/history_search/index.dart';
+import 'package:pilipala/features/media/presentation/history_search/history_search_controller.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/id_utils.dart';
 import 'package:pilipala/utils/route_push.dart';

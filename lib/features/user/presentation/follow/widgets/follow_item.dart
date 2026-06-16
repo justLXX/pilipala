@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/models/follow/result.dart';
-import 'package:pilipala/pages/follow/index.dart';
-import 'package:pilipala/pages/video/detail/introduction/widgets/group_panel.dart';
+import 'package:pilipala/features/user/presentation/follow/follow_controller.dart';
+import 'package:pilipala/features/video/presentation/widgets/group_panel.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/utils.dart';
 

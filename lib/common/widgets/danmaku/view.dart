@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:ns_danmaku/ns_danmaku.dart';
 import 'package:pilipala/models/danmaku/dm.pb.dart';
-import 'package:pilipala/pages/danmaku/index.dart';
+import 'package:pilipala/common/widgets/danmaku/index.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/utils/danmaku.dart';
 import 'package:pilipala/utils/storage.dart';

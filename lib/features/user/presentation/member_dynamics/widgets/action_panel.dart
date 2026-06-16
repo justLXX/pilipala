@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/dynamics.dart';
 import 'package:pilipala/models/dynamics/result.dart';
-import 'package:pilipala/pages/dynamics/index.dart';
+import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/navigation_helper.dart';
 import 'package:status_bar_control/status_bar_control.dart';

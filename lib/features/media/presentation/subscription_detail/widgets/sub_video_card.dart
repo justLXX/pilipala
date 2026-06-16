@@ -9,8 +9,8 @@ import 'package:pilipala/models/common/search_type.dart';
 import 'package:pilipala/utils/image_save.dart';
 import 'package:pilipala/utils/utils.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
-import '../../../common/widgets/badge.dart';
-import '../../../models/user/sub_detail.dart';
+import 'package:pilipala/common/widgets/badge.dart';
+import 'package:pilipala/models/user/sub_detail.dart';
 
 // 收藏视频卡片 - 水平布局
 class SubVideoCardH extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/utils/utils.dart';
 
-import '../../../models/user/sub_folder.dart';
+import 'package:pilipala/models/user/sub_folder.dart';
 
 class SubItem extends StatelessWidget {
   final SubFolderItemData subFolderItem;
