@@ -1,19 +1,26 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/http/read.dart';
+import 'package:pilipala/features/opus/domain/opus_use_cases.dart';
 import 'package:pilipala/models/read/opus.dart';
 import 'package:pilipala/plugin/pl_gallery/hero_dialog_route.dart';
 import 'package:pilipala/plugin/pl_gallery/interactiveviewer_gallery.dart';
 
 class OpusController extends GetxController {
+  final FetchOpusDataUseCase _fetchOpusDataUseCase;
+
+  OpusController({FetchOpusDataUseCase? fetchOpusDataUseCase})
+      : _fetchOpusDataUseCase =
+            fetchOpusDataUseCase ?? Get.find<FetchOpusDataUseCase>();
+
   late String url;
   RxString title = ''.obs;
   late String id;
   late String articleType;
   Rx<OpusDataModel> opusData = OpusDataModel().obs;
   final ScrollController scrollController = ScrollController();
-  late StreamController<bool> appbarStream = StreamController<bool>.broadcast();
+  late StreamController<bool> appbarStream =
+      StreamController<bool>.broadcast();
 
   @override
   void onInit() {
@@ -28,7 +35,7 @@ class OpusController extends GetxController {
   }
 
   Future fetchOpusData() async {
-    var res = await ReadHttp.parseArticleOpus(id: id);
+    final res = await _fetchOpusDataUseCase.execute(id: id);
     if (res['status']) {
       List<String> keys = res.keys.toList();
       if (keys.contains('isCv') && res['isCv']) {

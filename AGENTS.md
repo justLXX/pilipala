@@ -39,15 +39,26 @@ The codebase is **actively migrating** from `lib/pages/` to `lib/features/`. Bot
 6. **Hive adapters**: After adding `@HiveType` annotations, you MUST run `build_runner` to regenerate
 7. **Storage class name**: `GStrorage` (note: typo is intentional, do not rename)
 
-## Migration Status (2026-06-12)
+## Migration Status (2026-06-17)
 
-All 12 features modules have full 3-layer structure + route binding. ~0 modules remain in `lib/pages/`.
+Updated based on actual code inspection.
 
-| Status | Modules |
-|--------|---------|
-| ✅ 95%+ complete | home, video, search, user, media, dynamics, rank, login, about, bangumi, blacklist, opus, html, read |
-| ✅ 65-90% complete | live, message, setting, main |
-| ⏳ pages/ unmigrated | ~0 modules (independent modules: webview) |
+| Status | Modules | Notes |
+|--------|---------|-------|
+| ✅ 95%+ complete | home, video, search, user, media, dynamics, rank, login, about, blacklist, bangumi, html, opus, read, webview, live, message, setting, main | Full 3-layer architecture (data/domain/presentation), routes registered, bindings configured |
+| 📦 Legacy in lib/pages/ | bangumi, home, hot, live, rcmd, search, search_panel, search_result, video, webview | Old code still present, needs cleanup verification |
+
+### Verification Notes
+
+- **19 modules** have complete 3-layer architecture with route bindings
+- **0 modules** only have presentation layer (migration complete!)
+- **10 old modules** still exist in `lib/pages/` (need verification before deletion)
+
+### Next Steps
+
+1. Clean up legacy `lib/pages/` modules after confirming no references remain
+2. Add unit tests for completed modules
+3. Verify refactoring by running `fvm flutter analyze` and `fvm flutter test`
 
 ## Key Entry Points
 

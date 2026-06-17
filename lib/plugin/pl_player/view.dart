@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:easy_debounce/easy_throttle.dart';
@@ -134,15 +135,24 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     enableBackgroundPlay =
         setting.get(SettingBoxKey.enableBackgroundPlay, defaultValue: false);
     Future.microtask(() async {
-      try {
-        FlutterVolumeController.updateShowSystemUI(true);
-        _volumeValue.value = (await FlutterVolumeController.getVolume())!;
-        FlutterVolumeController.addListener((double value) {
-          if (mounted && !_volumeInterceptEventStream.value) {
-            _volumeValue.value = value;
-          }
-        });
-      } catch (_) {}
+      if (Platform.isMacOS) {
+        // macOS 不支持 FlutterVolumeController，使用 media_kit 播放器音量
+        try {
+          final playerVolume =
+              widget.controller.videoPlayerController?.state.volume ?? 100.0;
+          _volumeValue.value = (playerVolume / 100.0).clamp(0.0, 1.0);
+        } catch (_) {}
+      } else {
+        try {
+          FlutterVolumeController.updateShowSystemUI(true);
+          _volumeValue.value = (await FlutterVolumeController.getVolume())!;
+          FlutterVolumeController.addListener((double value) {
+            if (mounted && !_volumeInterceptEventStream.value) {
+              _volumeValue.value = value;
+            }
+          });
+        } catch (_) {}
+      }
     });
 
     Future.microtask(() async {
@@ -158,10 +168,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   Future<void> setVolume(double value) async {
-    try {
-      FlutterVolumeController.updateShowSystemUI(false);
-      await FlutterVolumeController.setVolume(value);
-    } catch (_) {}
+    if (Platform.isMacOS) {
+      // macOS 使用 media_kit 播放器内置音量控制
+      try {
+        await widget.controller.videoPlayerController
+            ?.setVolume(value * 100.0);
+      } catch (_) {}
+    } else {
+      try {
+        FlutterVolumeController.updateShowSystemUI(false);
+        await FlutterVolumeController.setVolume(value);
+      } catch (_) {}
+    }
     _volumeValue.value = value;
     _volumeIndicator.value = true;
     _volumeInterceptEventStream.value = true;
@@ -661,16 +679,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 _distance.value = dy;
               } else {
                 // 右边区域 👈
-                EasyThrottle.throttle(
-                    'setVolume', const Duration(milliseconds: 20), () {
-                  final double level = (_.isFullScreen.value
-                      ? Get.size.height
-                      : screenWidth * 9 / 16);
-                  final double volume = _volumeValue.value -
-                      double.parse(delta.toStringAsFixed(1)) / level;
-                  final double result = volume.clamp(0.0, 1.0);
-                  setVolume(result);
-                });
+                final double level = (_.isFullScreen.value
+                        ? Get.size.height
+                        : screenWidth * 9 / 16) *
+                    3;
+                final double volume = _volumeValue.value - delta / level;
+                final double result = volume.clamp(0.0, 1.0);
+                setVolume(result);
               }
             },
             onVerticalDragEnd: (DragEndDetails details) {},

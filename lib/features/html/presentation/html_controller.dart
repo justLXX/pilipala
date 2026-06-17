@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:pilipala/http/html.dart';
-import 'package:pilipala/http/reply.dart';
+import 'package:pilipala/features/html/domain/html_use_cases.dart';
 import 'package:pilipala/models/common/reply_sort_type.dart';
 import 'package:pilipala/models/video/reply/item.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/storage.dart';
 
 class HtmlRenderController extends GetxController {
+  final FetchHtmlContentUseCase _fetchHtmlContentUseCase;
+  final FetchReplyListUseCase _fetchReplyListUseCase;
+
+  HtmlRenderController({
+    FetchHtmlContentUseCase? fetchHtmlContentUseCase,
+    FetchReplyListUseCase? fetchReplyListUseCase,
+  })  : _fetchHtmlContentUseCase =
+            fetchHtmlContentUseCase ?? Get.find<FetchHtmlContentUseCase>(),
+        _fetchReplyListUseCase =
+            fetchReplyListUseCase ?? Get.find<FetchReplyListUseCase>();
+
   late String id;
   late String dynamicType;
   late int type;
@@ -36,19 +46,17 @@ class HtmlRenderController extends GetxController {
   }
 
   Future reqHtml(id) async {
-    late dynamic res;
-    if (dynamicType == 'opus' || dynamicType == 'picture') {
-      res = await HtmlHttp.reqHtml(id, dynamicType);
-    } else {
-      res = await HtmlHttp.reqReadHtml(id, dynamicType);
-    }
+    final res = await _fetchHtmlContentUseCase.execute(
+      id: id,
+      dynamicType: dynamicType,
+    );
     response = res;
     oid.value = res['commentId'];
     return res;
   }
 
   Future queryReplyList({reqType = 'init'}) async {
-    var res = await ReplyHttp.replyList(
+    final res = await _fetchReplyListUseCase.execute(
       oid: oid.value,
       pageNum: currentPage + 1,
       type: type,

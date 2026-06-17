@@ -148,7 +148,7 @@ class CommentContent extends StatelessWidget {
                     final String title =
                         content.jumpUrl![matchStr]['title'] ?? '';
                     if (appUrlSchema.startsWith('bilibili://search')) {
-                      Get.toNamed('/searchResult',
+                      Get.toNamed('/search',
                           parameters: {'keyword': title});
                     } else if (matchStr.startsWith('https://b23.tv')) {
                       Get.toNamed(

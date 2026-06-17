@@ -734,7 +734,7 @@ InlineSpan buildContent(
                       }
                     } else {
                       if (appUrlSchema.startsWith('bilibili://search')) {
-                        Get.toNamed('/searchResult',
+                        Get.toNamed('/search',
                             parameters: {'keyword': title});
                       } else if (matchStr.startsWith('https://b23.tv')) {
                         final String redirectUrl =
@@ -789,7 +789,7 @@ InlineSpan buildContent(
                 ..onTap = () {
                   final String topic =
                       matchStr.substring(1, matchStr.length - 1);
-                  Get.toNamed('/searchResult', parameters: {'keyword': topic});
+                  Get.toNamed('/search', parameters: {'keyword': topic});
                 },
             ),
           );

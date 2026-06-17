@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import 'package:pilipala/http/black.dart';
+import 'package:pilipala/features/blacklist/domain/blacklist_use_cases.dart';
 import 'package:pilipala/models/user/black.dart';
 import 'package:pilipala/utils/storage.dart';
 
@@ -12,17 +10,27 @@ class BlackListController extends GetxController {
   RxInt total = 0.obs;
   RxList<BlackListItem> blackList = <BlackListItem>[].obs;
 
+  final GetBlacklistUseCase _getBlacklistUseCase =
+      Get.find<GetBlacklistUseCase>();
+  final RemoveFromBlacklistUseCase _removeFromBlacklistUseCase =
+      Get.find<RemoveFromBlacklistUseCase>();
+
   Future queryBlacklist({type = 'init'}) async {
     if (type == 'init') {
       currentPage = 1;
     }
-    var result = await BlackHttp.blackList(pn: currentPage, ps: pageSize);
-    if (result['status']) {
+    final result = await _getBlacklistUseCase.execute(
+      pn: currentPage,
+      ps: pageSize,
+    );
+
+    if (result['status'] == true) {
+      final data = result['data'] as BlackListDataModel;
       if (type == 'init') {
-        blackList.value = result['data'].list;
-        total.value = result['data'].total;
+        blackList.value = data.list ?? [];
+        total.value = data.total ?? 0;
       } else {
-        blackList.addAll(result['data'].list);
+        blackList.addAll(data.list ?? []);
       }
       currentPage += 1;
     }
@@ -30,11 +38,22 @@ class BlackListController extends GetxController {
   }
 
   Future removeBlack(mid) async {
-    var result = await BlackHttp.removeBlack(fid: mid);
-    if (result['status']) {
+    final result = await _removeFromBlacklistUseCase.execute(mid);
+    if (result['status'] == true) {
       blackList.removeWhere((e) => e.mid == mid);
       total.value = total.value - 1;
-      SmartDialog.showToast(result['msg']);
+      SmartDialog.showToast(result['msg'] ?? '已移除');
+    } else {
+      SmartDialog.showToast(result['msg'] ?? '移除失败');
     }
+  }
+
+  @override
+  void onClose() {
+    // Save blacklist to settings
+    List<int> blackMidsList =
+        blackList.map<int>((e) => e.mid!).toList();
+    GStrorage.setting.put('blackMidsList', blackMidsList);
+    super.onClose();
   }
 }

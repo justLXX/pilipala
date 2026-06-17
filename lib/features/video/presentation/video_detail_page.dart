@@ -44,6 +44,9 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   final ScrollController _extendNestCtr = ScrollController();
   // 保存离开页面时的播放进度，返回时恢复
   Duration _lastPosition = Duration.zero;
+  // Tracks current system-UI mode to avoid redundant SystemChrome calls on
+  // each Obx rebuild. True == immersive requested.
+  bool _systemImmersive = false;
 
   @override
   void initState() {
@@ -90,6 +93,10 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     VideoDetailPage.routeObserver.unsubscribe(this);
     _vdCtr.playerController.removeStatusLister(_playerStatusListener);
     _vdCtr.playerController.removePositionListener(_playerPositionListener);
+    // Restore normal system UI in case the page was immersive when disposed.
+    if (_systemImmersive) {
+      fullscreen.exitFullScreen();
+    }
     // playerController.dispose() 由 VideoDetailController.onClose() 统一管理，
     // 避免单例 PlPlayerController 的 _playerCount 被双重递减到 0，
     // 导致返回时 reinitPlayer 中 setDataSource 因 _playerCount==0 直接 return
@@ -363,11 +370,21 @@ class _VideoDetailPageState extends State<VideoDetailPage>
                     (isPhoneLandscape ? 0 : MediaQuery.of(context).padding.top))
                 : defaultVideoHeight;
 
-            // Enter/exit fullscreen mode for system UI
-            if (isPhoneLandscape || isFullScreen) {
-              fullscreen.enterFullScreen();
-            } else {
-              fullscreen.exitFullScreen();
+            // System UI (immersive vs. normal) is a side-effect. It must NOT
+            // run during the reactive Obx evaluation (which re-runs on every
+            // Rx change and can re-enter SystemChrome calls redundantly).
+            // Defer to post-frame and guard against repeated calls via
+            // _systemImmersive so we only toggle when the desired mode changes.
+            final wantImmersive = isPhoneLandscape || isFullScreen;
+            if (wantImmersive != _systemImmersive) {
+              _systemImmersive = wantImmersive;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (wantImmersive) {
+                  fullscreen.enterFullScreen();
+                } else {
+                  fullscreen.exitFullScreen();
+                }
+              });
             }
 
             return SliverAppBar(
@@ -690,76 +707,80 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     if (detail == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return CustomScrollView(
-      key: const PageStorageKey<String>('简介'),
-      slivers: [
-        // Video title & description
-        SliverToBoxAdapter(
-          child: HeaderControlWidget(
-            videoDetail: detail,
-            playUrl: _vdCtr.playUrl,
+    // Single Obx subscribes to relatedVideos / viewPoints / isRelatedLoading
+    // so async-loaded data refreshes this tab when it arrives (P1 loads these
+    // in parallel, fire-and-forget). Keeps _ChapterSection / _RelatedVideos
+    // reactive without per-item Obx.
+    return Obx(() {
+      final related = _vdCtr.relatedVideos;
+      final viewPoints = _vdCtr.viewPoints;
+      return CustomScrollView(
+        key: const PageStorageKey<String>('简介'),
+        slivers: [
+          // Video title & description
+          SliverToBoxAdapter(
+            child: HeaderControlWidget(
+              videoDetail: detail,
+              playUrl: _vdCtr.playUrl,
+            ),
           ),
-        ),
-        // Action bar (like, coin, collect, share)
-        SliverToBoxAdapter(
-          child: _IntroActionBar(
-            isLiked: _vdCtr.isLikedRx,
-            isCollected: _vdCtr.isCollectedRx,
-            isCoined: _vdCtr.isCoinedRx,
-            onLike: _vdCtr.toggleLike,
-            onCollect: _vdCtr.toggleCollect,
-            onCoin: _showCoinDialog,
+          // Action bar (like, coin, collect, share)
+          SliverToBoxAdapter(
+            child: _IntroActionBar(
+              isLiked: _vdCtr.isLikedRx,
+              isCollected: _vdCtr.isCollectedRx,
+              isCoined: _vdCtr.isCoinedRx,
+              onLike: _vdCtr.toggleLike,
+              onCollect: _vdCtr.toggleCollect,
+              onCoin: _showCoinDialog,
+            ),
           ),
-        ),
-        const SliverToBoxAdapter(
-          child: Divider(height: 1, indent: 12, endIndent: 12),
-        ),
-        // Chapter (ViewPoints) section
-        Obx(() {
-          if (_vdCtr.viewPoints.isNotEmpty) {
-            return SliverToBoxAdapter(
+          const SliverToBoxAdapter(
+            child: Divider(height: 1, indent: 12, endIndent: 12),
+          ),
+          // Chapter (ViewPoints) section
+          if (viewPoints.isNotEmpty)
+            SliverToBoxAdapter(
               child: _ChapterSection(
-                viewPoints: _vdCtr.viewPoints,
+                viewPoints: viewPoints,
                 currentChapterIndex: _vdCtr.currentChapterIndex,
                 onChapterTap: (ViewPoint vp) {
                   _vdCtr.playerController
                       .seekTo(Duration(seconds: vp.from ?? 0));
                 },
               ),
-            );
-          }
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }),
-        // UP master info with follow button
-        if (detail.owner != null)
-          SliverToBoxAdapter(
-            child: _UpMasterInfo(
-              owner: detail.owner!,
-              isFollowed: _vdCtr.isFollowed,
-              followStatusRx: _vdCtr.followStatusRx,
-              onFollow: _vdCtr.toggleFollow,
             ),
-          ),
-        // Pages (分P)
-        if (detail.pages != null && detail.pages!.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _PagesList(
-              pages: detail.pages!,
-              currentCid: _vdCtr.cid,
+          // UP master info with follow button
+          if (detail.owner != null)
+            SliverToBoxAdapter(
+              child: _UpMasterInfo(
+                owner: detail.owner!,
+                isFollowed: _vdCtr.isFollowed,
+                followStatusRx: _vdCtr.followStatusRx,
+                onFollow: _vdCtr.toggleFollow,
+              ),
             ),
-          ),
-        // UGC Season (合集)
-        if (detail.ugcSeason != null)
-          SliverToBoxAdapter(
-            child: _UgcSeasonInfo(ugcSeason: detail.ugcSeason!),
-          ),
-        // Related / recommended videos
-        if (_vdCtr.relatedVideos.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _RelatedVideos(videos: _vdCtr.relatedVideos),
-          ),
-      ],
-    );
+          // Pages (分P)
+          if (detail.pages != null && detail.pages!.isNotEmpty)
+            SliverToBoxAdapter(
+              child: _PagesList(
+                pages: detail.pages!,
+                currentCid: _vdCtr.cid,
+              ),
+            ),
+          // UGC Season (合集)
+          if (detail.ugcSeason != null)
+            SliverToBoxAdapter(
+              child: _UgcSeasonInfo(ugcSeason: detail.ugcSeason!),
+            ),
+          // Related / recommended videos
+          if (related.isNotEmpty)
+            SliverToBoxAdapter(
+              child: _RelatedVideos(videos: related),
+            ),
+        ],
+      );
+    });
   }
 
   // ==================== Reply Tab ====================
@@ -820,22 +841,28 @@ class _ChapterSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 106,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: viewPoints.length,
-            itemBuilder: (context, index) {
-              final vp = viewPoints[index];
-              return Obx(() => _ChapterCard(
-                    viewPoint: vp,
-                    isActive: currentChapterIndex.value == index,
-                    onTap: () => onChapterTap(vp),
-                  ));
-            },
-          ),
-        ),
+        // Single Obx reads currentChapterIndex once and passes a plain bool to
+        // each card. Without this, every chapter card had its own Obx and all
+        // of them rebuilt on each position-update of the player.
+        Obx(() {
+          final current = currentChapterIndex.value;
+          return SizedBox(
+            height: 106,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: viewPoints.length,
+              itemBuilder: (context, index) {
+                final vp = viewPoints[index];
+                return _ChapterCard(
+                  viewPoint: vp,
+                  isActive: current == index,
+                  onTap: () => onChapterTap(vp),
+                );
+              },
+            ),
+          );
+        }),
         const SizedBox(height: 8),
       ],
     );
@@ -983,37 +1010,45 @@ class _IntroActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Single Obx reads all three interaction states in one pass. Previously
+    // each button had its own Obx (three subscriptions + three rebuilds when
+    // the controller toggles multiple states together, e.g. after _query).
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Obx(() => _buildActionButton(
-                icon: isLiked.value ? Icons.thumb_up : Icons.thumb_up_outlined,
-                label: '点赞',
-                color: isLiked.value ? Colors.red : null,
-                onPressed: onLike,
-              )),
-          Obx(() => _buildActionButton(
-                icon: isCoined.value
-                    ? Icons.monetization_on
-                    : Icons.monetization_on_outlined,
-                label: '投币',
-                color: isCoined.value ? Colors.orange : null,
-                onPressed: onCoin,
-              )),
-          Obx(() => _buildActionButton(
-                icon: isCollected.value ? Icons.star : Icons.star_outline,
-                label: '收藏',
-                color: isCollected.value ? Colors.yellow.shade700 : null,
-                onPressed: onCollect,
-              )),
-          _buildActionButton(
-            icon: Icons.share_outlined,
-            label: '分享',
-            onPressed: () {},
-          ),
-        ],
-      ),
+      child: Obx(() {
+        final liked = isLiked.value;
+        final coined = isCoined.value;
+        final collected = isCollected.value;
+        return Row(
+          children: [
+            _buildActionButton(
+              icon: liked ? Icons.thumb_up : Icons.thumb_up_outlined,
+              label: '点赞',
+              color: liked ? Colors.red : null,
+              onPressed: onLike,
+            ),
+            _buildActionButton(
+              icon: coined
+                  ? Icons.monetization_on
+                  : Icons.monetization_on_outlined,
+              label: '投币',
+              color: coined ? Colors.orange : null,
+              onPressed: onCoin,
+            ),
+            _buildActionButton(
+              icon: collected ? Icons.star : Icons.star_outline,
+              label: '收藏',
+              color: collected ? Colors.yellow.shade700 : null,
+              onPressed: onCollect,
+            ),
+            _buildActionButton(
+              icon: Icons.share_outlined,
+              label: '分享',
+              onPressed: () {},
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -1356,79 +1391,96 @@ class _CommentPanelState extends State<_CommentPanel> {
                                 final double bottom =
                                     MediaQuery.of(context).padding.bottom;
                                 if (index == commentCtr.replyList.length) {
-                                  return Container(
-                                    padding: EdgeInsets.only(bottom: bottom),
-                                    height: bottom + 100,
-                                    child: Center(
-                                      child: Obx(
-                                        () => Text(
-                                          commentCtr.noMore.value,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .outline,
+                                  return RepaintBoundary(
+                                    child: Container(
+                                      padding: EdgeInsets.only(bottom: bottom),
+                                      height: bottom + 100,
+                                      child: Center(
+                                        child: Obx(
+                                          () => Text(
+                                            commentCtr.noMore.value,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .outline,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   );
                                 }
-                                return CommentItem(
-                                  replyItem: commentCtr.replyList[index],
-                                  showReplyRow: true,
-                                  replyLevel: '1',
-                                  onLike: (int rpid, int action) {
-                                    commentCtr.likeReply(rpid, action);
-                                  },
-                                  onReplyTap: (replyItem) {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      backgroundColor:
-                                          Theme.of(context).colorScheme.surface,
-                                      builder: (context) => ReplyReplyPanel(
-                                        oid: commentCtr.aid ?? 0,
-                                        rpid: replyItem.rpid ?? 0,
-                                        firstFloor: replyItem,
-                                      ),
-                                    );
-                                  },
-                                  onReply: (replyItem) {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      builder: (ctx) => Padding(
-                                        padding: EdgeInsets.only(
-                                            bottom: MediaQuery.of(ctx)
-                                                .viewInsets
-                                                .bottom),
-                                        child: CommentInputDialog(
+                                final replyItem = commentCtr.replyList[index];
+                                // CommentContent does heavy work (regex parse,
+                                // emote WidgetSpans, LayoutBuilder for images).
+                                // Wrap in RepaintBoundary so scrolling does not
+                                // repaint already-built items.
+                                return RepaintBoundary(
+                                  child: CommentItem(
+                                    replyItem: replyItem,
+                                    showReplyRow: true,
+                                    replyLevel: '1',
+                                    onLike: (int rpid, int action) {
+                                      commentCtr.likeReply(rpid, action);
+                                    },
+                                    onReplyTap: (replyItem) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor:
+                                            Theme.of(context).colorScheme.surface,
+                                        builder: (context) => ReplyReplyPanel(
                                           oid: commentCtr.aid ?? 0,
-                                          root: replyItem.rpid ?? 0,
-                                          parent: replyItem.rpid ?? 0,
-                                          replyItem: replyItem,
+                                          rpid: replyItem.rpid ?? 0,
+                                          firstFloor: replyItem,
                                         ),
-                                      ),
-                                    ).then((value) {
-                                      if (value != null &&
-                                          value['data'] != null) {
-                                        final idx = commentCtr.replyList
-                                            .indexOf(replyItem);
-                                        if (idx >= 0) {
-                                          commentCtr.replyList[idx].count =
-                                              (commentCtr.replyList[idx]
-                                                          .count ??
-                                                      0) +
-                                                  1;
-                                          commentCtr.replyList.refresh();
+                                      );
+                                    },
+                                    onReply: (replyItem) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        builder: (ctx) => Padding(
+                                          padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(ctx)
+                                                  .viewInsets
+                                                  .bottom),
+                                          child: CommentInputDialog(
+                                            oid: commentCtr.aid ?? 0,
+                                            root: replyItem.rpid ?? 0,
+                                            parent: replyItem.rpid ?? 0,
+                                            replyItem: replyItem,
+                                          ),
+                                        ),
+                                      ).then((value) {
+                                        if (value != null &&
+                                            value['data'] != null) {
+                                          final idx = commentCtr.replyList
+                                              .indexOf(replyItem);
+                                          if (idx >= 0) {
+                                            commentCtr.replyList[idx].count =
+                                                (commentCtr.replyList[idx]
+                                                            .count ??
+                                                        0) +
+                                                    1;
+                                            commentCtr.replyList.refresh();
+                                          }
                                         }
-                                      }
-                                    });
-                                  },
+                                      });
+                                    },
+                                  ),
                                 );
                               },
                               childCount: commentCtr.replyList.length + 1,
+                              // Comment items are cheap to rebuild when scrolled
+                              // back into view and carry no keep-alive state
+                              // worth preserving; disabling keep-alive lowers
+                              // memory pressure on long comment threads.
+                              addAutomaticKeepAlives: false,
+                              // Items are wrapped in RepaintBoundary above, but
+                              // keep the delegate default explicit for clarity.
+                              addRepaintBoundaries: true,
                             ),
                           );
                         });

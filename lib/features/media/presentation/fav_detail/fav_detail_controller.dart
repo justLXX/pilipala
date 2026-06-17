@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/features/media/data/media_repository.dart';
 import 'package:pilipala/features/media/domain/media_use_cases.dart';
 import 'package:pilipala/features/media/presentation/fav/fav_controller.dart';
 import 'package:pilipala/models/user/fav_detail.dart';

@@ -636,7 +636,14 @@ class PlPlayerController {
         if (type != 'slider') {
           await _videoPlayerController?.stream.buffer.first;
         }
+        final bool wasPaused = !playerStatus.playing;
         await _videoPlayerController?.seek(position);
+        // 暂停状态下 seek 后，播放器可能不会自动刷新画面和发射 position 事件
+        // 执行一次 play→pause 强制刷新
+        if (wasPaused && _videoPlayerController != null) {
+          await _videoPlayerController!.play();
+          await _videoPlayerController!.pause();
+        }
       } else {
         _timerForSeek?.cancel();
         _timerForSeek ??= _startSeekTimer(position);

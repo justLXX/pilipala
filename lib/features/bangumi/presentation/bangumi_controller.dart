@@ -1,14 +1,28 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:pilipala/http/bangumi.dart';
+import 'package:pilipala/features/bangumi/domain/bangumi_use_cases.dart';
 import 'package:pilipala/models/bangumi/list.dart';
 import 'package:pilipala/utils/storage.dart';
 
 class BangumiController extends GetxController {
   final ScrollController scrollController = ScrollController();
+  final GetBangumiListUseCase _getBangumiListUseCase;
+  final GetFollowedBangumiListUseCase _getFollowedBangumiListUseCase;
+
+  BangumiController({
+    GetBangumiListUseCase? getBangumiListUseCase,
+    GetFollowedBangumiListUseCase? getFollowedBangumiListUseCase,
+  })  : _getBangumiListUseCase =
+            getBangumiListUseCase ?? Get.find<GetBangumiListUseCase>(),
+        _getFollowedBangumiListUseCase = getFollowedBangumiListUseCase ??
+            Get.find<GetFollowedBangumiListUseCase>();
+
   RxList<BangumiListItemModel> bangumiList = <BangumiListItemModel>[].obs;
-  RxList<BangumiListItemModel> bangumiFollowList = <BangumiListItemModel>[].obs;
+  RxList<BangumiListItemModel> bangumiFollowList =
+      <BangumiListItemModel>[].obs;
   int _currentPage = 1;
   bool isLoadingMore = true;
   Box userInfoCache = GStrorage.userInfo;
@@ -30,7 +44,8 @@ class BangumiController extends GetxController {
     if (type == 'init') {
       _currentPage = 1;
     }
-    var result = await BangumiHttp.bangumiList(page: _currentPage);
+    var result =
+        await _getBangumiListUseCase.execute(page: _currentPage);
     if (result['status']) {
       if (type == 'init') {
         bangumiList.value = result['data'].list;
@@ -52,7 +67,8 @@ class BangumiController extends GetxController {
     if (userInfo == null) {
       return;
     }
-    var result = await BangumiHttp.bangumiFollow(mid: userInfo.mid);
+    var result =
+        await _getFollowedBangumiListUseCase.execute(mid: userInfo.mid);
     if (result['status']) {
       bangumiFollowList.value = result['data'].list;
     } else {}

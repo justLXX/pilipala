@@ -14,6 +14,8 @@ import 'package:pilipala/features/media/presentation/media_controller.dart' as f
 import 'package:pilipala/features/media/presentation/media_page.dart' as features_media_page;
 import 'package:pilipala/features/rank/presentation/rank_controller.dart' as features_rank;
 import 'package:pilipala/features/rank/presentation/rank_page.dart' as features_rank_page;
+import 'package:pilipala/features/main/data/main_repository.dart';
+import 'package:pilipala/features/main/domain/main_use_cases.dart';
 import 'package:pilipala/utils/event_bus.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/storage.dart';
@@ -31,7 +33,7 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
-  final MainController _mainController = Get.put(MainController());
+  late final MainController _mainController;
   features_rank.RankController? _rankController;
   features_dynamics.DynamicsController? _dynamicController;
   features_media.MediaController? _mediaController;
@@ -44,6 +46,12 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _lastSelectTime = DateTime.now().millisecondsSinceEpoch;
+    
+    // Initialize dependencies in order
+    Get.put(MainRepository());
+    Get.put(GetUnreadDynamicUseCase());
+    
+    _mainController = Get.put(MainController());
     _mainController.pageController =
         PageController(initialPage: _mainController.selectedIndex);
     enableMYBar = setting.get(SettingBoxKey.enableMYBar, defaultValue: true);

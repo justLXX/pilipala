@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/features/about/presentation/about_controller.dart';
 import 'package:pilipala/utils/cache_manage.dart';
@@ -143,7 +142,7 @@ class _AboutPageState extends State<AboutPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          onTap: () => _aboutController.qqChanel(),
+                          onTap: () => _aboutController.qqChannel(),
                           title: const Text('QQ群'),
                           trailing: Text(
                             '616150809',
@@ -151,7 +150,7 @@ class _AboutPageState extends State<AboutPage> {
                           ),
                         ),
                         ListTile(
-                          onTap: () => _aboutController.tgChanel(),
+                          onTap: () => _aboutController.tgChannel(),
                           title: const Text('TG频道'),
                           trailing: Text(
                             'https://t.me/+lm_oOVmF0RJiODk1',

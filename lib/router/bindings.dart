@@ -39,6 +39,25 @@ import 'package:pilipala/features/message/presentation/system/message_system_con
 import 'package:pilipala/features/setting/data/setting_repository.dart' as setting_repo;
 import 'package:pilipala/features/setting/domain/setting_use_cases.dart';
 import 'package:pilipala/features/setting/presentation/setting_controller.dart' as setting_ctrl;
+import 'package:pilipala/features/about/data/about_repository.dart' as about_repo;
+import 'package:pilipala/features/about/domain/about_use_cases.dart';
+import 'package:pilipala/features/about/presentation/about_controller.dart' as about_ctrl;
+import 'package:pilipala/features/blacklist/data/blacklist_repository.dart' as blacklist_repo;
+import 'package:pilipala/features/blacklist/domain/blacklist_use_cases.dart';
+import 'package:pilipala/features/blacklist/presentation/blacklist_controller.dart' as blacklist_ctrl;
+import 'package:pilipala/features/bangumi/data/bangumi_repository.dart' as bangumi_repo;
+import 'package:pilipala/features/bangumi/domain/bangumi_use_cases.dart';
+import 'package:pilipala/features/bangumi/presentation/bangumi_controller.dart' as bangumi_ctrl;
+import 'package:pilipala/features/html/data/html_repository.dart' as html_repo;
+import 'package:pilipala/features/html/domain/html_use_cases.dart';
+import 'package:pilipala/features/html/presentation/html_controller.dart' as html_ctrl;
+import 'package:pilipala/features/opus/data/opus_repository.dart' as opus_repo;
+import 'package:pilipala/features/opus/domain/opus_use_cases.dart';
+import 'package:pilipala/features/opus/presentation/opus_controller.dart' as opus_ctrl;
+import 'package:pilipala/features/read/data/read_repository.dart' as read_repo;
+import 'package:pilipala/features/read/domain/read_use_cases.dart';
+import 'package:pilipala/features/read/presentation/read_controller.dart' as read_ctrl;
+import 'package:pilipala/features/webview/presentation/webview_controller.dart' as webview_ctrl;
 
 /// Bindings for the home feature route.
 class HomeBinding extends Bindings {
@@ -249,5 +268,89 @@ class SettingBinding extends Bindings {
     Get.lazyPut<SetDynamicBadgeModeUseCase>(() => SetDynamicBadgeModeUseCase());
     Get.lazyPut<SetDefaultHomePageUseCase>(() => SetDefaultHomePageUseCase());
     Get.lazyPut<setting_ctrl.SettingController>(() => setting_ctrl.SettingController());
+  }
+}
+
+/// Bindings for the about feature route.
+class AboutBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<about_repo.AboutRepository>(() => about_repo.AboutRepository());
+    Get.lazyPut<CheckUpdateUseCase>(() => CheckUpdateUseCase());
+    Get.lazyPut<GetCurrentVersionUseCase>(() => GetCurrentVersionUseCase());
+    Get.lazyPut<about_ctrl.AboutController>(() => about_ctrl.AboutController());
+  }
+}
+
+/// Bindings for the blacklist feature route.
+class BlacklistBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<blacklist_repo.BlacklistRepository>(
+        () => blacklist_repo.BlacklistRepository());
+    Get.lazyPut<GetBlacklistUseCase>(() => GetBlacklistUseCase());
+    Get.lazyPut<RemoveFromBlacklistUseCase>(() => RemoveFromBlacklistUseCase());
+    Get.lazyPut<blacklist_ctrl.BlackListController>(
+        () => blacklist_ctrl.BlackListController());
+  }
+}
+
+/// Bindings for the bangumi feature route.
+class BangumiBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<bangumi_repo.BangumiRepository>(
+        () => bangumi_repo.BangumiRepository());
+    Get.lazyPut<GetBangumiListUseCase>(() => GetBangumiListUseCase());
+    Get.lazyPut<GetFollowedBangumiListUseCase>(
+        () => GetFollowedBangumiListUseCase());
+    Get.lazyPut<FollowBangumiUseCase>(() => FollowBangumiUseCase());
+    Get.lazyPut<UnfollowBangumiUseCase>(() => UnfollowBangumiUseCase());
+    Get.lazyPut<bangumi_ctrl.BangumiController>(
+        () => bangumi_ctrl.BangumiController());
+  }
+}
+
+/// Bindings for the html feature route.
+class HtmlBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<html_repo.HtmlRepository>(() => html_repo.HtmlRepository());
+    Get.lazyPut<FetchHtmlContentUseCase>(() => FetchHtmlContentUseCase());
+    Get.lazyPut<FetchReplyListUseCase>(() => FetchReplyListUseCase());
+    Get.lazyPut<html_ctrl.HtmlRenderController>(
+        () => html_ctrl.HtmlRenderController());
+  }
+}
+
+/// Bindings for the opus feature route.
+class OpusBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<opus_repo.OpusRepository>(() => opus_repo.OpusRepository());
+    Get.lazyPut<FetchOpusDataUseCase>(() => FetchOpusDataUseCase());
+    Get.lazyPut<opus_ctrl.OpusController>(
+        () => opus_ctrl.OpusController());
+  }
+}
+
+/// Bindings for the read feature route.
+class ReadBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<read_repo.ReadRepository>(() => read_repo.ReadRepository());
+    Get.lazyPut<FetchCvDataUseCase>(() => FetchCvDataUseCase());
+    Get.lazyPut<FetchViewInfoUseCase>(() => FetchViewInfoUseCase());
+    Get.lazyPut<read_ctrl.ReadPageController>(
+        () => read_ctrl.ReadPageController());
+  }
+}
+
+/// Bindings for the webview feature route.
+class WebviewBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<webview_ctrl.WebviewController>(
+        () => webview_ctrl.WebviewController());
   }
 }

@@ -1,19 +1,31 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/http/read.dart';
+import 'package:pilipala/features/read/domain/read_use_cases.dart';
 import 'package:pilipala/models/read/read.dart';
 import 'package:pilipala/plugin/pl_gallery/hero_dialog_route.dart';
 import 'package:pilipala/plugin/pl_gallery/interactiveviewer_gallery.dart';
 
 class ReadPageController extends GetxController {
+  final FetchCvDataUseCase _fetchCvDataUseCase;
+  final FetchViewInfoUseCase _fetchViewInfoUseCase;
+
+  ReadPageController({
+    FetchCvDataUseCase? fetchCvDataUseCase,
+    FetchViewInfoUseCase? fetchViewInfoUseCase,
+  })  : _fetchCvDataUseCase =
+            fetchCvDataUseCase ?? Get.find<FetchCvDataUseCase>(),
+        _fetchViewInfoUseCase =
+            fetchViewInfoUseCase ?? Get.find<FetchViewInfoUseCase>();
+
   late String url;
   RxString title = ''.obs;
   late String id;
   late String articleType;
   Rx<ReadDataModel> cvData = ReadDataModel().obs;
   final ScrollController scrollController = ScrollController();
-  late StreamController<bool> appbarStream = StreamController<bool>.broadcast();
+  late StreamController<bool> appbarStream =
+      StreamController<bool>.broadcast();
 
   @override
   void onInit() {
@@ -27,7 +39,7 @@ class ReadPageController extends GetxController {
   }
 
   Future fetchCvData() async {
-    var res = await ReadHttp.parseArticleCv(id: id);
+    final res = await _fetchCvDataUseCase.execute(id: id);
     if (res['status']) {
       cvData.value = res['data'];
       title.value = cvData.value.readInfo!.title!;
@@ -57,7 +69,7 @@ class ReadPageController extends GetxController {
   }
 
   void fetchViewInfo() {
-    ReadHttp.getViewInfo(id: id);
+    _fetchViewInfoUseCase.execute(id: id);
   }
 
   void onJumpWebview() {

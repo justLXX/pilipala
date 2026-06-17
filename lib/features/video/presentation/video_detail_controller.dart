@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -187,7 +189,6 @@ class VideoDetailController extends GetxController
       }
       final videoDetail = result['data'] as VideoDetailData;
       _videoDetail.value = videoDetail;
-      await _refreshUserLoginState();
 
       // Update cid from video detail if route param is missing
       if (videoDetail.cid != null && cid == 0) {
@@ -199,39 +200,43 @@ class VideoDetailController extends GetxController
         tabs.value = ['简介', '评论 ${videoDetail.stat!.reply}'];
       }
 
-      // 2. Query like/coin/collect status if logged in
-      if (_userLogin) {
-        _queryInteractionStatus();
-      }
-
-      // 3. Load play URL
-      if (videoDetail.cid != null) {
-        await loadPlayUrl(
-          avid: videoDetail.aid ?? 0,
-          cid: videoDetail.cid!,
-          bvid: bvid,
-        );
-
-        // Initialize player with play URL
-        await _initPlayer(bvid: bvid, cid: videoDetail.cid!);
-      }
-
-      // 4. Initialize comment controller
+      // 4. Initialize comment controller (auto-loads comments in onInit).
+      // Started early — comment fetching does not depend on playUrl.
       final int oid = videoDetail.aid ?? 0;
       if (oid > 0) {
         commentController =
             Get.put(CommentController(aid: oid), tag: 'comment_$oid');
       }
 
-      // 5. Load related videos
-      loadRelatedVideos();
+      // Parallel fan-out: side data that does not block playback.
+      // These run concurrently with the critical path (login refresh + play
+      // URL + player init) below, so first-paint is gated only by the player.
+      // Fire-and-forget — failures are swallowed inside each method.
+      unawaited(loadRelatedVideos());
+      unawaited(loadViewPoints());
 
-      // 6. Load chapters (view points)
-      loadViewPoints();
+      // Critical path (serial): login state -> play URL -> player init.
+      // login state must resolve first because interaction/follow status
+      // queries depend on it.
+      final loggedIn = await _refreshUserLoginState();
 
-      // 7. Query follow status if logged in
-      if (_userLogin && videoDetail.owner?.mid != null) {
-        queryFollowStatus();
+      // 2. Query like/coin/collect status if logged in (independent of player)
+      if (loggedIn) {
+        _queryInteractionStatus();
+        // 7. Query follow status if logged in
+        if (videoDetail.owner?.mid != null) {
+          queryFollowStatus();
+        }
+      }
+
+      // 3. Load play URL and initialize player (gates first-paint)
+      if (videoDetail.cid != null) {
+        await loadPlayUrl(
+          avid: videoDetail.aid ?? 0,
+          cid: videoDetail.cid!,
+          bvid: bvid,
+        );
+        await _initPlayer(bvid: bvid, cid: videoDetail.cid!);
       }
     } catch (e) {
       _error.value = e.toString();

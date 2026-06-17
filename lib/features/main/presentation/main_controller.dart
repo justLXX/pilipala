@@ -5,11 +5,11 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:pilipala/http/common.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:pilipala/utils/utils.dart';
 import 'package:pilipala/models/common/dynamic_badge_mode.dart';
 import 'package:pilipala/models/common/nav_bar_config.dart';
+import 'package:pilipala/features/main/domain/main_use_cases.dart';
 
 /// MainController - 重构版主页面控制器
 ///
@@ -32,6 +32,13 @@ class MainController extends GetxController {
   late Rx<DynamicBadgeMode> dynamicBadgeType = DynamicBadgeMode.number.obs;
   late bool enableGradientBg;
   bool imgPreviewStatus = false;
+
+  // Dependencies
+  late final GetUnreadDynamicUseCase _getUnreadDynamic;
+
+  MainController({
+    GetUnreadDynamicUseCase? getUnreadDynamic,
+  }) : _getUnreadDynamic = getUnreadDynamic ?? Get.find<GetUnreadDynamicUseCase>();
 
   @override
   void onInit() {
@@ -75,7 +82,7 @@ class MainController extends GetxController {
     }
     int dynamicItemIndex =
         navigationBars.indexWhere((item) => item['label'] == "动态");
-    var res = await CommonHttp.unReadDynamic();
+    var res = await _getUnreadDynamic.execute();
     var data = res['data'];
     if (dynamicItemIndex != -1) {
       navigationBars[dynamicItemIndex]['count'] =

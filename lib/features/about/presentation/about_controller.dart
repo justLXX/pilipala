@@ -1,66 +1,76 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pilipala/http/index.dart';
+import 'package:pilipala/features/about/domain/about_use_cases.dart';
 import 'package:pilipala/models/github/latest.dart';
-import 'package:pilipala/utils/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:pilipala/utils/utils.dart';
 
 class AboutController extends GetxController {
   RxString currentVersion = ''.obs;
   RxString remoteVersion = ''.obs;
-  late LatestDataModel remoteAppInfo;
+  LatestDataModel? remoteAppInfo;
   RxBool isUpdate = false.obs;
   RxBool isLoading = true.obs;
-  late LatestDataModel data;
+  LatestDataModel? data;
+
+  final CheckUpdateUseCase _checkUpdateUseCase = Get.find<CheckUpdateUseCase>();
+  final GetCurrentVersionUseCase _getCurrentVersionUseCase =
+      Get.find<GetCurrentVersionUseCase>();
 
   @override
   void onInit() {
     super.onInit();
+    loadAppInfo();
+  }
+
+  Future<void> loadAppInfo() async {
     getCurrentApp();
-    getRemoteApp();
+    await getRemoteApp();
   }
 
-  Future getCurrentApp() async {
-    var result = await PackageInfo.fromPlatform();
-    currentVersion.value = result.version;
+  Future<void> getCurrentApp() async {
+    currentVersion.value = await _getCurrentVersionUseCase.execute();
   }
 
-  Future getRemoteApp() async {
-    var result = await Request().get(Api.latestApp, extra: {'ua': 'pc'});
+  Future<void> getRemoteApp() async {
+    isLoading.value = true;
+    final result = await _checkUpdateUseCase.execute(currentVersion.value);
     isLoading.value = false;
-    if (result.data == null || result.data.isEmpty) {
-      SmartDialog.showToast('获取远程版本失败，请检查网络');
-      return;
+
+    if (result['status'] == true) {
+      data = result['data'];
+      remoteAppInfo = data;
+      remoteVersion.value = result['remoteVersion'] ?? '';
+      isUpdate.value = result['needUpdate'] ?? false;
+    } else {
+      SmartDialog.showToast(result['msg'] ?? '获取远程版本失败，请检查网络');
     }
-    data = LatestDataModel.fromJson(result.data);
-    remoteAppInfo = data;
-    remoteVersion.value = data.tagName!;
-    isUpdate.value =
-        Utils.needUpdate(currentVersion.value, remoteVersion.value);
   }
 
-  Future onUpdate() async {
-    Utils.matchVersion(data);
+  Future<void> onUpdate() async {
+    if (data != null) {
+      Utils.matchVersion(data!);
+    }
   }
 
-  githubUrl() {
+  void githubUrl() {
     launchUrl(
       Uri.parse('https://github.com/guozhigq/pilipala'),
       mode: LaunchMode.externalApplication,
     );
   }
 
-  githubRelease() {
+  void githubRelease() {
     launchUrl(
       Uri.parse('https://github.com/guozhigq/pilipala/releases'),
       mode: LaunchMode.externalApplication,
     );
   }
 
-  panDownload() {
+  void panDownload() {
     Clipboard.setData(
       const ClipboardData(text: 'pili'),
     );
@@ -75,21 +85,21 @@ class AboutController extends GetxController {
     );
   }
 
-  feedback() {
+  void feedback() {
     launchUrl(
       Uri.parse('https://github.com/guozhigq/pilipala/issues'),
       mode: LaunchMode.externalApplication,
     );
   }
 
-  qqChanel() {
+  void qqChannel() {
     Clipboard.setData(
       const ClipboardData(text: '616150809'),
     );
     SmartDialog.showToast('已复制QQ群号');
   }
 
-  tgChanel() {
+  void tgChannel() {
     Clipboard.setData(
       const ClipboardData(text: 'https://t.me/+lm_oOVmF0RJiODk1'),
     );
@@ -104,7 +114,7 @@ class AboutController extends GetxController {
     );
   }
 
-  aPay() {
+  void aPay() {
     try {
       launchUrl(
         Uri.parse(
@@ -116,21 +126,21 @@ class AboutController extends GetxController {
     }
   }
 
-  webSiteUrl() {
+  void webSiteUrl() {
     launchUrl(
       Uri.parse('https://pilipalanet.mysxl.cn'),
       mode: LaunchMode.externalApplication,
     );
   }
 
-  qimiao() {
+  void qimiao() {
     launchUrl(
       Uri.parse('https://www.magicalapk.com/home'),
       mode: LaunchMode.externalApplication,
     );
   }
 
-  logs() {
+  void logs() {
     Get.toNamed('/logs');
   }
 }

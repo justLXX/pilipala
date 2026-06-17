@@ -10,6 +10,7 @@ import 'package:pilipala/features/opus/presentation/opus_page.dart' as features_
 import 'package:pilipala/features/read/presentation/read_page.dart' as features_read;
 
 import 'package:pilipala/features/about/presentation/about_page.dart' as features_about;
+import 'package:pilipala/features/bangumi/presentation/bangumi_page.dart' as features_bangumi;
 import 'package:pilipala/features/blacklist/presentation/blacklist_page.dart' as features_blacklist;
 import 'package:pilipala/features/user/presentation/fan/fan_page.dart' as features_fan;
 import 'package:pilipala/features/media/presentation/fav/fav_page.dart' as features_fav;
@@ -18,7 +19,6 @@ import 'package:pilipala/features/media/presentation/fav_search/fav_search_page.
 import 'package:pilipala/features/user/presentation/follow/follow_page.dart' as features_follow;
 import 'package:pilipala/features/media/presentation/history/history_page.dart' as features_history;
 import 'package:pilipala/features/media/presentation/history_search/history_search_page.dart' as features_history_search;
-import '../pages/home/index.dart';
 import 'package:pilipala/features/html/presentation/html_page.dart' as features_html;
 import 'package:pilipala/features/media/presentation/later/later_page.dart' as features_later;
 import 'package:pilipala/features/user/presentation/member_archive/member_archive_page.dart' as features_member_archive;
@@ -27,12 +27,11 @@ import 'package:pilipala/features/user/presentation/member_dynamics/member_dynam
 import 'package:pilipala/features/user/presentation/member_like/member_like_page.dart' as features_member_like;
 import 'package:pilipala/features/user/presentation/member_search/member_search_page.dart' as features_member_search;
 import 'package:pilipala/features/user/presentation/member_seasons/member_seasons_page.dart' as features_member_seasons;
-import '../pages/search_result/index.dart';
 import 'package:pilipala/features/media/presentation/subscription/sub_page.dart' as features_subscription;
 import 'package:pilipala/features/media/presentation/subscription_detail/sub_detail_page.dart' as features_sub_detail;
 import 'package:pilipala/features/video/presentation/widgets/comment/reply_reply_view.dart';
 import 'package:pilipala/features/video/presentation/widgets/comment/reply_reply_controller.dart';
-import '../pages/webview/index.dart';
+import '../features/webview/presentation/webview_page.dart';
 import '../utils/storage.dart';
 
 // 新重构 features 页面 (使用别名避免命名冲突)
@@ -206,17 +205,19 @@ class Routes {
 
     // ===== 以下为旧路由，保持不变 =====
 
-    // 首页(推荐) - 旧版 (兼容)
-    CustomGetPage(name: '/', page: () => const HomePage()),
-    CustomGetPage(name: '/webview', page: () => const WebviewPage()),
+    // 首页 - 重定向到 MainApp
+    CustomGetPage(name: '/', page: () => const features_main.MainApp()),
+    CustomGetPage(
+      name: '/webview',
+      page: () => const WebviewPage(),
+      binding: WebviewBinding(),
+    ),
     CustomGetPage(name: '/fav', page: () => const features_fav.FavPage()),
     CustomGetPage(name: '/favDetail', page: () => const features_fav_detail.FavDetailPage()),
     // 稍后再看
     CustomGetPage(name: '/later', page: () => const features_later.LaterPage()),
     // 历史记录
     CustomGetPage(name: '/history', page: () => const features_history.HistoryPage()),
-    // 搜索结果 (旧版)
-    CustomGetPage(name: '/searchResult', page: () => const SearchResultPage()),
     // 关注
     CustomGetPage(name: '/follow', page: () => const features_follow.FollowPage()),
     // 粉丝
@@ -237,7 +238,11 @@ class Routes {
     // 其他设置
     CustomGetPage(name: '/extraSetting', page: () => const ExtraSetting()),
     //
-    CustomGetPage(name: '/blackListPage', page: () => const features_blacklist.BlackListPage()),
+    CustomGetPage(
+      name: '/blackListPage',
+      page: () => const features_blacklist.BlackListPage(),
+      binding: BlacklistBinding(),
+    ),
     CustomGetPage(name: '/colorSetting', page: () => const ColorSelectPage()),
     // 首页tabbar
     CustomGetPage(name: '/tabbarSetting', page: () => const TabbarSetPage()),
@@ -247,9 +252,23 @@ class Routes {
     CustomGetPage(
         name: '/displayModeSetting', page: () => const SetDiaplayMode()),
     // 关于
-    CustomGetPage(name: '/about', page: () => const features_about.AboutPage()),
+    CustomGetPage(
+      name: '/about',
+      page: () => const features_about.AboutPage(),
+      binding: AboutBinding(),
+    ),
+    // 番剧
+    CustomGetPage(
+      name: '/bangumi',
+      page: () => const features_bangumi.BangumiPage(),
+      binding: BangumiBinding(),
+    ),
     //
-    CustomGetPage(name: '/htmlRender', page: () => const features_html.HtmlRenderPage()),
+    CustomGetPage(
+      name: '/htmlRender',
+      page: () => const features_html.HtmlRenderPage(),
+      binding: HtmlBinding(),
+    ),
     // 历史记录搜索
     CustomGetPage(
         name: '/historySearch', page: () => const features_history_search.HistorySearchPage()),
@@ -291,8 +310,12 @@ class Routes {
     CustomGetPage(name: '/favEdit', page: () => const features_fav_edit.FavEditPage()),
 
     // 专栏
-    CustomGetPage(name: '/opus', page: () => const features_opus.OpusPage()),
-    CustomGetPage(name: '/read', page: () => const features_read.ReadPage()),
+    CustomGetPage(
+      name: '/opus',
+      page: () => const features_opus.OpusPage(),
+      binding: OpusBinding(),
+    ),
+    CustomGetPage(name: '/read', page: () => const features_read.ReadPage(), binding: ReadBinding()),
     // 用户专栏
     CustomGetPage(
         name: '/memberArticle', page: () => const features_member_article.MemberArticlePage()),

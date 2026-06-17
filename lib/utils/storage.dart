@@ -17,6 +17,17 @@ class GStrorage {
       await Hive.initFlutter();
     } else {
       final Directory dir = await getApplicationSupportDirectory();
+      final hiveDir = Directory('${dir.path}/hive');
+      // 清理残留的 .lock 文件，防止上次异常退出导致锁文件未释放
+      if (hiveDir.existsSync()) {
+        for (final file in hiveDir.listSync()) {
+          if (file is File && file.path.endsWith('.lock')) {
+            try {
+              file.deleteSync();
+            } catch (_) {}
+          }
+        }
+      }
       await Hive.initFlutter('${dir.path}/hive');
     }
     regAdapter();
