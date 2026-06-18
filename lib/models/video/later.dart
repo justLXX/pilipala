@@ -31,6 +31,7 @@ class MediaVideoItemModel {
     this.forbidFav,
     this.moreType,
     this.businessOid,
+    this.stat,
   });
 
   int? id;
@@ -64,43 +65,134 @@ class MediaVideoItemModel {
   bool? forbidFav;
   int? moreType;
   int? businessOid;
+  VideoStat? stat;
 
-  factory MediaVideoItemModel.fromJson(Map<String, dynamic> json) =>
-      MediaVideoItemModel(
-        id: json["id"],
-        aid: json["id"],
-        offset: json["offset"],
-        index: json["index"],
-        intro: json["intro"],
-        attr: json["attr"],
-        tid: json["tid"],
-        copyRight: json["copy_right"],
-        cntInfo: json["cnt_info"],
-        cover: json["cover"],
-        duration: json["duration"],
-        pubtime: json["pubtime"],
-        likeState: json["like_state"],
-        favState: json["fav_state"],
-        page: json["page"],
-        cid: json["pages"] == null ? -1 : json["pages"].first['id'],
-        // json["pages"] 可能为null
-        pages: json["pages"] == null
-            ? []
-            : List<Page>.from(json["pages"].map((x) => Page.fromJson(x))),
-        title: json["title"],
-        type: json["type"],
-        upper: Upper.fromJson(json["upper"]),
-        link: json["link"],
-        bvid: json["bv_id"],
-        shortLink: json["short_link"],
-        rights: Rights.fromJson(json["rights"]),
-        elecInfo: json["elec_info"],
-        coin: Coin.fromJson(json["coin"]),
-        progressPercent: json["progress_percent"].toDouble(),
-        badge: json["badge"],
-        forbidFav: json["forbid_fav"],
-        moreType: json["more_type"],
-        businessOid: json["business_oid"],
+  // getter 兼容 VideoCardH 使用的字段名
+  String get pic => cover ?? '';
+  Upper? get owner => upper;
+
+  factory MediaVideoItemModel.fromJson(Map<String, dynamic> json) {
+    // 兼容两种 API 格式：收藏夹 API 和 稍后再看 API
+    final isLaterFormat = json.containsKey('pic') || json.containsKey('owner');
+
+    // 解析 cid：稍后再看有 cid 字段，收藏夹从 pages 取
+    int? parsedCid = json['cid'];
+    List<Page>? parsedPages;
+    int? parsedPage;
+    if (isLaterFormat) {
+      parsedCid = json['cid'];
+      parsedPage = 1;
+      // 解析 page 对象
+      if (json['page'] is Map) {
+        final pageMap = json['page'] as Map<String, dynamic>;
+        parsedCid ??= pageMap['cid'];
+      }
+    } else {
+      parsedCid =
+          json['pages'] == null ? -1 : json['pages'].first['id'];
+      parsedPages = json['pages'] == null
+          ? []
+          : List<Page>.from(
+              json['pages'].map((x) => Page.fromJson(x)));
+      parsedPage = json['page'];
+    }
+
+    // 解析 upper/owner
+    Upper? parsedUpper;
+    if (json['upper'] is Map) {
+      parsedUpper = Upper.fromJson(json['upper']);
+    } else if (json['owner'] is Map) {
+      final owner = json['owner'] as Map<String, dynamic>;
+      parsedUpper = Upper(
+        mid: owner['mid'],
+        name: owner['name'],
+        face: owner['face'],
+      );
+    }
+
+    // 解析 stat（稍后再看 API 有 stat 字段）
+    VideoStat? parsedStat;
+    if (json['stat'] is Map) {
+      parsedStat = VideoStat.fromJson(json['stat']);
+    }
+
+    // 解析 progressPercent（稍后再看 API 用 progress 表示秒数）
+    double? progressPercent;
+    if (json['progress_percent'] != null) {
+      progressPercent = (json['progress_percent'] as num).toDouble();
+    } else if (json['progress'] != null && json['duration'] != null) {
+      final progress = json['progress'] as num;
+      final duration = json['duration'] as num;
+      progressPercent =
+          duration > 0 ? (progress / duration * 100).toDouble() : 0.0;
+    }
+
+    return MediaVideoItemModel(
+      id: json['id'] ?? json['aid'],
+      aid: json['id'] ?? json['aid'],
+      offset: json['offset'],
+      index: json['index'],
+      intro: json['intro'] ?? json['desc'],
+      attr: json['attr'],
+      tid: json['tid'],
+      copyRight: json['copy_right'] ?? json['copyright'],
+      cntInfo: json['cnt_info'],
+      cover: json['cover'] ?? json['pic'],
+      duration: json['duration'],
+      pubtime: json['pubtime'] ?? json['pubdate'],
+      likeState: json['like_state'],
+      favState: json['fav_state'],
+      page: parsedPage,
+      cid: parsedCid,
+      pages: parsedPages,
+      title: json['title'],
+      type: json['type'],
+      upper: parsedUpper,
+      link: json['link'],
+      bvid: json['bv_id'] ?? json['bvid'],
+      shortLink: json['short_link'] ?? json['short_link_v2'],
+      rights: json['rights'] is Map
+          ? Rights.fromJson(json['rights'])
+          : null,
+      elecInfo: json['elec_info'],
+      coin: json['coin'] is Map ? Coin.fromJson(json['coin']) : null,
+      progressPercent: progressPercent,
+      badge: json['badge'],
+      forbidFav: json['forbid_fav'],
+      moreType: json['more_type'],
+      businessOid: json['business_oid'],
+      stat: parsedStat,
+    );
+  }
+}
+
+class VideoStat {
+  VideoStat({
+    this.view,
+    this.danmaku,
+    this.reply,
+    this.favorite,
+    this.coin,
+    this.share,
+    this.like,
+  });
+
+  int? view;
+  int? danmaku;
+  int? reply;
+  int? favorite;
+  int? coin;
+  int? share;
+  int? like;
+
+  factory VideoStat.fromJson(Map<String, dynamic> json) => VideoStat(
+        view: json['view'],
+        danmaku: json['danmaku'],
+        reply: json['reply'],
+        favorite: json['favorite'],
+        coin: json['coin'],
+        share: json['share'],
+        like: json['like'],
       );
 }
 

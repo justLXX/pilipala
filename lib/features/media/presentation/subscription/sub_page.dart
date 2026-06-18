@@ -7,33 +7,60 @@ import 'package:pilipala/features/media/presentation/subscription/sub_controller
 import 'package:pilipala/features/media/presentation/subscription/widgets/item.dart';
 import 'package:pilipala/utils/route_push.dart';
 
-class SubPage extends StatefulWidget {
+class SubPage extends StatelessWidget {
   const SubPage({super.key});
 
   @override
-  State<SubPage> createState() => _SubPageState();
+  Widget build(BuildContext context) {
+    // 使用 GetX 管理生命周期，避免重复注册警告
+    final SubController subController = Get.put(SubController(), permanent: false);
+    final Future futureBuilderFuture = subController.querySubFolder();
+
+    return _SubPageBody(
+      subController: subController,
+      futureBuilderFuture: futureBuilderFuture,
+    );
+  }
 }
 
-class _SubPageState extends State<SubPage> {
-  final SubController _subController = Get.put(SubController());
-  late Future _futureBuilderFuture;
+class _SubPageBody extends StatefulWidget {
+  final SubController subController;
+  final Future futureBuilderFuture;
+
+  const _SubPageBody({
+    required this.subController,
+    required this.futureBuilderFuture,
+    super.key,
+  });
+
+  @override
+  State<_SubPageBody> createState() => _SubPageBodyState();
+}
+
+class _SubPageBodyState extends State<_SubPageBody> {
   late ScrollController scrollController;
+  late Future _futureBuilderFuture;
 
   @override
   void initState() {
     super.initState();
-    _futureBuilderFuture = _subController.querySubFolder();
-    scrollController = _subController.scrollController;
-    scrollController.addListener(
-      () {
-        if (scrollController.position.pixels >=
-            scrollController.position.maxScrollExtent - 300) {
-          EasyThrottle.throttle('history', const Duration(seconds: 1), () {
-            _subController.onLoad();
-          });
-        }
-      },
-    );
+    _futureBuilderFuture = widget.futureBuilderFuture;
+    scrollController = widget.subController.scrollController;
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 300) {
+        EasyThrottle.throttle('sub_load_more', const Duration(seconds: 1),
+            () {
+          widget.subController.onLoad();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,35 +69,41 @@ class _SubPageState extends State<SubPage> {
       appBar: AppBar(
         centerTitle: false,
         titleSpacing: 0,
-        title: Obx(() => Text(
-              '${_subController.isOwner.value ? '我' : 'Ta'}的订阅',
-              style: Theme.of(context).textTheme.titleMedium,
-            )),
+        title: Obx(
+          () => Text(
+            '${widget.subController.isOwner.value ? '我' : 'Ta'}的订阅',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
       ),
       body: FutureBuilder(
         future: _futureBuilderFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            Map? data = snapshot.data;
+            final Map? data = snapshot.data;
             if (data != null && data['status']) {
-              if (_subController.subFolderData.value.list!.isNotEmpty) {
+              if (widget.subController.subFolderData.value.list!.isNotEmpty) {
                 return Obx(
                   () => ListView.builder(
                     controller: scrollController,
-                    itemCount: _subController.subFolderData.value.list!.length,
+                    itemCount:
+                        widget.subController.subFolderData.value.list!.length,
                     itemBuilder: (context, index) {
                       return SubItem(
-                          subFolderItem:
-                              _subController.subFolderData.value.list![index],
-                          isOwner: _subController.isOwner.value,
-                          cancelSub: _subController.cancelSub);
+                        subFolderItem: widget
+                            .subController.subFolderData.value.list![index],
+                        isOwner: widget.subController.isOwner.value,
+                        cancelSub: widget.subController.cancelSub,
+                      );
                     },
                   ),
                 );
               } else {
                 return const CustomScrollView(
                   physics: NeverScrollableScrollPhysics(),
-                  slivers: [HttpError(errMsg: '', btnText: '没有数据', fn: null)],
+                  slivers: [
+                    HttpError(errMsg: '', btnText: '没有数据', fn: null)
+                  ],
                 );
               }
             } else {
@@ -86,7 +119,7 @@ class _SubPageState extends State<SubPage> {
                       } else {
                         setState(() {
                           _futureBuilderFuture =
-                              _subController.querySubFolder();
+                              widget.subController.querySubFolder();
                         });
                       }
                     },

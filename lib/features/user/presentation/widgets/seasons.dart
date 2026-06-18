@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/models/member/seasons.dart';
+import 'package:pilipala/utils/utils.dart';
 
-/// SeasonsWidget displays the user's seasons.
 class SeasonsWidget extends StatelessWidget {
+  final int mid;
   final List<MemberSeasonsList> seasons;
 
   const SeasonsWidget({
     super.key,
+    required this.mid,
     required this.seasons,
   });
 
@@ -16,11 +20,12 @@ class SeasonsWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final List<MemberSeasonsList> preview = seasons.take(4).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
           child: Text(
             '合集',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -31,20 +36,35 @@ class SeasonsWidget extends StatelessWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: seasons.length,
+          itemCount: preview.length,
           itemBuilder: (context, index) {
-            final season = seasons[index];
+            final season = preview[index];
+            final meta = season.meta;
+            final String category = meta?.category?.toString() ?? '0';
+            final String seasonName = Uri.encodeComponent(meta?.name ?? '');
             return ListTile(
-              title: Text(season.meta?.name ?? ''),
-              subtitle: Text('${season.meta?.total ?? 0} 个视频'),
-              leading: season.meta?.cover != null
-                  ? Image.network(
-                      season.meta!.cover!,
-                      width: 80,
-                      height: 60,
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+              onTap: () => Get.toNamed(
+                '/memberSeasons?mid=$mid'
+                '&category=$category'
+                '&seasonId=${meta?.seasonId ?? 0}'
+                '&seriesId=${meta?.seriesId ?? 0}'
+                '&seasonName=$seasonName',
+              ),
+              title: Text(
+                meta?.name ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text('${Utils.numFormat(meta?.total)} 个视频'),
+              leading: SizedBox(
+                width: 80,
+                height: 52,
+                child: NetworkImgLayer(
+                  src: meta?.cover,
+                  width: 80,
+                  height: 52,
+                ),
+              ),
             );
           },
         ),

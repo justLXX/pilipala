@@ -35,7 +35,7 @@ class MemberInfoModel {
     isFollowed = json['is_followed'];
     topPhoto = json['top_photo'];
     official = json['official'];
-    vip = Vip.fromJson(json['vip']);
+    vip = json['vip'] != null ? Vip.fromJson(json['vip']) : null;
     liveRoom =
         json['live_room'] != null ? LiveRoom.fromJson(json['live_room']) : null;
   }
@@ -61,9 +61,10 @@ class Vip {
     status = json['status'];
     dueDate = json['due_date'];
     label = json['label'];
-    nicknameColor = json['nickname_color'] == ''
-        ? null
-        : int.parse("0xFF${json['nickname_color'].replaceAll('#', '')}");
+    nicknameColor =
+        json['nickname_color'] == null || json['nickname_color'] == ''
+            ? null
+            : int.parse("0xFF${json['nickname_color'].replaceAll('#', '')}");
   }
 }
 

@@ -33,20 +33,33 @@ class SubController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    mid = int.parse(Get.parameters['mid'] ?? '-1');
-    userInfo = userInfoCache.get('userInfoCache');
-    ownerMid = userInfo != null ? userInfo!.mid! : -1;
+    // 安全解析 mid，无效值默认为 -1
+    mid = int.tryParse(Get.parameters['mid'] ?? '-1') ?? -1;
+    userInfo = userInfoCache.get('userInfoCache') as UserInfoData?;
+    // 校验 ownerMid：必须是正整数，且不超过 10 位（B站 UID 范围）
+    if (userInfo != null && userInfo!.mid != null && userInfo!.mid! > 0 && userInfo!.mid! < 10000000000) {
+      ownerMid = userInfo!.mid!;
+    } else {
+      ownerMid = -1;
+    }
     isOwner.value = mid == -1 || mid == ownerMid;
   }
 
   Future<dynamic> querySubFolder({type = 'init'}) async {
+    // 校验 userInfo 和 mid 有效性
     if (userInfo == null) {
       return {'status': false, 'msg': '账号未登录', 'code': -101};
     }
+    final int targetMid = isOwner.value ? ownerMid : mid;
+    if (targetMid <= 0 || targetMid >= 10000000000) {
+      print('SubController: 无效的 mid=$targetMid，无法请求订阅列表');
+      return {'status': false, 'msg': '无效的用户ID', 'code': -1};
+    }
 
     try {
+      print('SubController: 请求订阅列表 mid=$targetMid page=$currentPage');
       final data = await _getSubFolder.execute(
-        mid: isOwner.value ? ownerMid : mid,
+        mid: targetMid,
         page: currentPage,
         pageSize: pageSize,
       );

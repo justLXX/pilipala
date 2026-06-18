@@ -57,7 +57,7 @@ class _MemberArticlePageState extends State<MemberArticlePage> {
             if (snapshot.data != null) {
               return _buildContent(snapshot.data as Map);
             } else {
-              return _buildError(snapshot.data['msg']);
+              return _buildError(snapshot.error?.toString() ?? '请求异常');
             }
           } else {
             return ListView.builder(
