@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:pilipala/features/read/data/read_repository.dart';
-import 'package:pilipala/models/read/read.dart';
 
 /// Use case for fetching CV article data.
 class FetchCvDataUseCase {

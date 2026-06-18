@@ -12,7 +12,6 @@ import 'package:pilipala/features/home/presentation/home_controller.dart'
     as home_ctrl;
 import 'package:pilipala/features/login/presentation/login_controller.dart'
     as login_ctrl;
-import 'package:pilipala/features/video/presentation/video_detail_controller.dart';
 import 'package:pilipala/features/search/presentation/search_controller.dart';
 import 'package:pilipala/features/user/presentation/user_controller.dart';
 import 'package:pilipala/features/media/data/media_repository.dart' as media_repo;

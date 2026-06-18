@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:pilipala/features/html/data/html_repository.dart';
-import 'package:pilipala/models/video/reply/item.dart';
 
 /// Use case for fetching HTML content.
 class FetchHtmlContentUseCase {

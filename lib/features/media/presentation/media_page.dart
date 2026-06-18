@@ -45,51 +45,77 @@ class _MediaPageState extends State<MediaPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final Color primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       appBar: AppBar(toolbarHeight: 30),
       body: SingleChildScrollView(
         controller: _mediaController.scrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Padding(
-              padding: const EdgeInsets.only(left: 20, top: 8, bottom: 4),
-              child: Text(
-                '媒体库',
-                style: TextStyle(
-                  fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            // Navigation items
-            for (var item in _mediaController.navList) ...[
-              ListTile(
-                onTap: () => item['onTap'](),
-                dense: true,
-                leading: Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: Icon(item['icon'], color: primary),
-                ),
-                contentPadding:
-                    const EdgeInsets.only(left: 15, top: 2, bottom: 2),
-                minLeadingWidth: 0,
-                title: Text(item['title'], style: const TextStyle(fontSize: 15)),
-              ),
-            ],
-            // Favorites folder section (only shown when logged in)
-            Obx(() => _mediaController.userLogin.value
-                ? _buildFavFolderSection(context)
-                : const SizedBox()),
-            SizedBox(
-              height: MediaQuery.of(context).padding.bottom +
-                  kBottomNavigationBarHeight,
-            ),
-          ],
+        child: MediaLibraryContent(
+          mediaController: _mediaController,
+          favFolderFuture: _favFolderFuture,
+          onRefreshFavFolder: () {
+            setState(() {
+              _favFolderFuture = _mediaController.queryFavFolder();
+            });
+          },
+          bottomPadding: MediaQuery.of(context).padding.bottom +
+              kBottomNavigationBarHeight,
         ),
       ),
+    );
+  }
+}
+
+class MediaLibraryContent extends StatelessWidget {
+  const MediaLibraryContent({
+    super.key,
+    required this.mediaController,
+    required this.favFolderFuture,
+    required this.onRefreshFavFolder,
+    this.showTitle = true,
+    this.bottomPadding = 0,
+  });
+
+  final MediaController mediaController;
+  final Future favFolderFuture;
+  final VoidCallback onRefreshFavFolder;
+  final bool showTitle;
+  final double bottomPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color primary = Theme.of(context).colorScheme.primary;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showTitle)
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 8, bottom: 4),
+            child: Text(
+              '媒体库',
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        for (var item in mediaController.navList) ...[
+          ListTile(
+            onTap: () => item['onTap'](),
+            dense: true,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: Icon(item['icon'], color: primary),
+            ),
+            contentPadding: const EdgeInsets.only(left: 15, top: 2, bottom: 2),
+            minLeadingWidth: 0,
+            title: Text(item['title'], style: const TextStyle(fontSize: 15)),
+          ),
+        ],
+        Obx(() => mediaController.userLogin.value
+            ? _buildFavFolderSection(context)
+            : const SizedBox()),
+        SizedBox(height: bottomPadding),
+      ],
     );
   }
 
@@ -118,9 +144,9 @@ class _MediaPageState extends State<MediaPage>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (_mediaController.favFolderData.value.count != null)
+                    if (mediaController.favFolderData.value.count != null)
                       TextSpan(
-                        text: _mediaController.favFolderData.value.count
+                        text: mediaController.favFolderData.value.count
                             .toString(),
                         style: TextStyle(
                           fontSize:
@@ -134,11 +160,7 @@ class _MediaPageState extends State<MediaPage>
             ),
           ),
           trailing: IconButton(
-            onPressed: () {
-              setState(() {
-                _favFolderFuture = _mediaController.queryFavFolder();
-              });
-            },
+            onPressed: onRefreshFavFolder,
             icon: const Icon(Icons.refresh, size: 20),
           ),
         ),
@@ -146,7 +168,7 @@ class _MediaPageState extends State<MediaPage>
           width: double.infinity,
           height: MediaQuery.textScalerOf(context).scale(200),
           child: FutureBuilder(
-            future: _favFolderFuture,
+            future: favFolderFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.data == null) {
@@ -155,13 +177,12 @@ class _MediaPageState extends State<MediaPage>
                 Map data = snapshot.data as Map;
                 if (data['status'] == true) {
                   List<FavFolderItemData> favFolderList =
-                      _mediaController.favFolderData.value.list ?? [];
+                      mediaController.favFolderData.value.list ?? [];
                   int favFolderCount =
-                      _mediaController.favFolderData.value.count ?? 0;
+                      mediaController.favFolderData.value.count ?? 0;
                   bool hasMore = favFolderCount > favFolderList.length;
                   return Obx(() {
-                    final list =
-                        _mediaController.favFolderData.value.list ?? [];
+                    final list = mediaController.favFolderData.value.list ?? [];
                     return ListView.builder(
                       itemCount: list.length + (hasMore ? 1 : 0),
                       itemBuilder: (context, index) {

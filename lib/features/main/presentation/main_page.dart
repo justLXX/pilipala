@@ -8,12 +8,20 @@ import 'package:pilipala/features/home/data/video_repository.dart'
 import 'package:pilipala/features/home/presentation/home_controller.dart'
     as features_home;
 import 'package:pilipala/models/common/dynamic_badge_mode.dart';
-import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart' as features_dynamics;
-import 'package:pilipala/features/dynamics/presentation/dynamics_page.dart' as features_dynamics_page;
-import 'package:pilipala/features/media/presentation/media_controller.dart' as features_media;
-import 'package:pilipala/features/media/presentation/media_page.dart' as features_media_page;
-import 'package:pilipala/features/rank/presentation/rank_controller.dart' as features_rank;
-import 'package:pilipala/features/rank/presentation/rank_page.dart' as features_rank_page;
+import 'package:pilipala/features/dynamics/presentation/dynamics_controller.dart'
+    as features_dynamics;
+import 'package:pilipala/features/dynamics/presentation/dynamics_page.dart'
+    as features_dynamics_page;
+import 'package:pilipala/features/media/presentation/media_controller.dart'
+    as features_media;
+import 'package:pilipala/features/media/presentation/media_page.dart'
+    as features_media_page;
+import 'package:pilipala/features/rank/presentation/rank_controller.dart'
+    as features_rank;
+import 'package:pilipala/features/rank/presentation/rank_page.dart'
+    as features_rank_page;
+import 'package:pilipala/features/user/presentation/mine/mine_page.dart'
+    as features_mine_page;
 import 'package:pilipala/features/main/data/main_repository.dart';
 import 'package:pilipala/features/main/domain/main_use_cases.dart';
 import 'package:pilipala/utils/event_bus.dart';
@@ -46,11 +54,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _lastSelectTime = DateTime.now().millisecondsSinceEpoch;
-    
+
     // Initialize dependencies in order
     Get.put(MainRepository());
     Get.put(GetUnreadDynamicUseCase());
-    
+
     _mainController = Get.put(MainController());
     _mainController.pageController =
         PageController(initialPage: _mainController.selectedIndex);
@@ -92,7 +100,8 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
       _dynamicController?.flag = false;
     }
 
-    if (currentPage is features_media_page.MediaPage) {
+    if (currentPage is features_media_page.MediaPage ||
+        currentPage is features_mine_page.MinePage) {
       _mediaController!.queryFavFolder();
     }
   }

@@ -139,11 +139,9 @@ class _MemberArticlePageState extends State<MemberArticlePage> {
     return CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
       slivers: [
-        SliverToBoxAdapter(
-          child: HttpError(
-            errMsg: errMsg,
-            fn: () {},
-          ),
+        HttpError(
+          errMsg: errMsg,
+          fn: () {},
         ),
       ],
     );

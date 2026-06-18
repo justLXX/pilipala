@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:pilipala/features/bangumi/data/bangumi_repository.dart';
-import 'package:pilipala/models/bangumi/list.dart';
 
 /// Use case for getting bangumi list.
 class GetBangumiListUseCase {

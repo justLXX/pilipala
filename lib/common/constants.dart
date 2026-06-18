@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 class StyleString {
   static const double cardSpace = 8;
   static const double safeSpace = 12;
-  static BorderRadius mdRadius = BorderRadius.circular(10);
-  static const Radius imgRadius = Radius.circular(10);
+  static const double itemSpace = 8;
+  static const double sectionSpace = 18;
+  static const double touchTarget = 44;
+  static BorderRadius smRadius = BorderRadius.circular(6);
+  static BorderRadius mdRadius = BorderRadius.circular(8);
+  static BorderRadius lgRadius = BorderRadius.circular(16);
+  static const Radius imgRadius = Radius.circular(8);
   static const double aspectRatio = 16 / 10;
 }
 

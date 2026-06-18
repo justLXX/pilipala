@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:get/get.dart';
 import 'package:pilipala/models/github/latest.dart';
 
 /// AboutRepository provides a clean interface for about-related data operations.

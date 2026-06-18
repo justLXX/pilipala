@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:pilipala/features/blacklist/data/blacklist_repository.dart';
-import 'package:pilipala/models/user/black.dart';
 
 /// Use case for getting blacklist.
 class GetBlacklistUseCase {

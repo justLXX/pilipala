@@ -49,7 +49,9 @@ class _MemberPageState extends State<MemberPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: FutureBuilder(
@@ -141,9 +143,14 @@ class _MemberHeader extends StatelessWidget {
     final String name = info.name ?? '';
     final String encodedName = Uri.encodeComponent(name);
     final bool isFollowed = info.isFollowed ?? false;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 350,
+      stretch: true,
+      expandedHeight: 372,
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      surfaceTintColor: Colors.transparent,
       title: Text(
         name,
         style: Theme.of(context).textTheme.titleMedium,
@@ -162,49 +169,100 @@ class _MemberHeader extends StatelessWidget {
             return Stack(
               fit: StackFit.expand,
               children: [
-                if (topPhoto.isNotEmpty)
-                  NetworkImgLayer(
-                    src: topPhoto,
-                    width: constraints.maxWidth,
-                    height: 180,
-                  )
-                else
-                  Container(
-                      color: Theme.of(context).colorScheme.surfaceContainer),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 220,
+                  child: topPhoto.isNotEmpty
+                      ? NetworkImgLayer(
+                          src: topPhoto,
+                          width: constraints.maxWidth,
+                          height: 220,
+                          quality: 40,
+                        )
+                      : Container(color: colorScheme.surfaceContainer),
+                ),
                 DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Theme.of(context).colorScheme.surface.withAlpha(20),
-                        Theme.of(context).colorScheme.surface,
+                        colorScheme.surface.withAlpha(12),
+                        colorScheme.surface.withAlpha(220),
+                        colorScheme.surface,
                       ],
+                      stops: const [0, 0.55, 0.78],
                     ),
                   ),
                 ),
                 SafeArea(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 118, 16, 0),
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 124, 16, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Hero(
-                              tag: Utils.makeHeroTag(info.mid),
-                              child: CircleAvatar(
-                                radius: 42,
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.surface,
-                                backgroundImage: info.face == null
-                                    ? null
-                                    : NetworkImage(info.face!),
-                              ),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Hero(
+                                  tag: Utils.makeHeroTag(info.mid),
+                                  child: Container(
+                                    width: 86,
+                                    height: 86,
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surface,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: CircleAvatar(
+                                      backgroundColor:
+                                          colorScheme.surfaceContainerHighest,
+                                      backgroundImage: info.face == null
+                                          ? null
+                                          : NetworkImage(info.face!),
+                                    ),
+                                  ),
+                                ),
+                                if (info.liveRoom?.liveStatus == 1)
+                                  Positioned(
+                                    left: 8,
+                                    right: 8,
+                                    bottom: -8,
+                                    child: Container(
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: const Text(
+                                        '直播中',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                             const Spacer(),
-                            _StatItem(label: '关注', value: stat['following']),
+                            InkWell(
+                              onTap: () =>
+                                  Get.toNamed('/follow?mid=${info.mid}'),
+                              borderRadius: BorderRadius.circular(8),
+                              child: _StatItem(
+                                label: '关注',
+                                value: stat['following'],
+                              ),
+                            ),
                             _StatItem(label: '粉丝', value: stat['follower']),
                             _StatItem(
                                 label: '动态', value: stat['dynamic_count']),
@@ -277,21 +335,36 @@ class _MemberHeader extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: FilledButton.tonal(
+                              child: FilledButton(
                                 onPressed: onFollow,
                                 child: Text(isFollowed ? '已关注' : '关注'),
                               ),
                             ),
-                            if (info.liveRoom?.liveStatus == 1) ...[
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: FilledButton(
-                                  onPressed: () => Get.toNamed(
-                                      '/liveRoom?roomid=${info.liveRoom?.roomId}'),
-                                  child: const Text('进入直播间'),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton.tonal(
+                                onPressed: info.liveRoom?.liveStatus == 1
+                                    ? () => Get.toNamed(
+                                          '/liveRoom?roomid=${info.liveRoom?.roomId}',
+                                        )
+                                    : () => Get.toNamed(
+                                          '/whisperDetail',
+                                          parameters: {
+                                            'talkerId': info.mid.toString(),
+                                            'name': info.name ?? '',
+                                            'face': info.face ?? '',
+                                            'mid': info.mid.toString(),
+                                            'heroTag':
+                                                Utils.makeHeroTag(info.mid),
+                                          },
+                                        ),
+                                child: Text(
+                                  info.liveRoom?.liveStatus == 1
+                                      ? '进入直播间'
+                                      : '发消息',
                                 ),
                               ),
-                            ],
+                            ),
                           ],
                         ),
                       ],
@@ -315,25 +388,26 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: label == '关注'
-          ? () => Get.toNamed('/follow?mid=${Get.parameters['mid']}')
-          : null,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        child: Column(
-          children: [
-            Text(
-              Utils.numFormat(value),
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            Text(label, style: Theme.of(context).textTheme.labelMedium),
-          ],
-        ),
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Column(
+        children: [
+          Text(
+            Utils.numFormat(value),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -348,7 +422,7 @@ class _MemberEntrances extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
       child: Row(
         children: [
           _EntranceButton(
@@ -389,22 +463,31 @@ class _EntranceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          height: 56,
+          height: 52,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: colorScheme.surfaceContainerHighest.withAlpha(
+              colorScheme.brightness == Brightness.dark ? 110 : 150,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 19),
+              Icon(icon, size: 19, color: colorScheme.primary),
               const SizedBox(width: StyleString.safeSpace / 2),
-              Text(label),
+              Text(
+                label,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),

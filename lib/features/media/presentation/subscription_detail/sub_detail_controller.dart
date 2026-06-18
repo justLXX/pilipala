@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:pilipala/features/media/data/media_repository.dart';
 import 'package:pilipala/features/media/domain/media_use_cases.dart';
 import 'package:pilipala/models/user/sub_detail.dart';
 import 'package:pilipala/models/user/sub_folder.dart';

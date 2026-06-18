@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:pilipala/http/api_log_interceptor.dart';
 import 'package:pilipala/http/init.dart';
@@ -86,20 +87,29 @@ class DioApiClient implements ApiClient {
         options: options,
       );
 
-      if (response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        final code = data['code'] as int? ?? -1;
-        final message = data['message'] as String?;
+      dynamic rawData = response.data;
+      // Dio 未自动解析 JSON 时，手动解析
+      if (rawData is String) {
+        try {
+          rawData = json.decode(rawData);
+        } catch (_) {}
+      }
+
+      if (rawData is Map<String, dynamic>) {
+        final code = rawData['code'] as int? ?? -1;
+        final message = rawData['message'] as String? ?? rawData['msg'] as String?;
 
         if (code == 0) {
           await Request.syncCookieHeader();
-          return ApiResponse.success(data['data'] as T, code: 200);
+          // 优先返回 data 字段，不存在则返回整个响应（兼容非标准 API）
+          final result = rawData.containsKey('data') ? rawData['data'] : rawData;
+          return ApiResponse.success(result as T, code: 200);
         } else {
           return ApiResponse.error(msg: message ?? 'Unknown error', code: code);
         }
       }
 
-      return ApiResponse.success(response.data as T);
+      return ApiResponse.success(rawData as T);
     } on DioException catch (e) {
       return ApiResponse.error(
         msg: e.message ?? 'Network error',
@@ -123,14 +133,22 @@ class DioApiClient implements ApiClient {
         options: options,
       );
 
-      if (response.data is Map<String, dynamic>) {
-        final responseData = response.data as Map<String, dynamic>;
-        final code = responseData['code'] as int? ?? -1;
-        final message = responseData['message'] as String?;
+      dynamic rawData = response.data;
+      // Dio 未自动解析 JSON 时，手动解析
+      if (rawData is String) {
+        try {
+          rawData = json.decode(rawData);
+        } catch (_) {}
+      }
+
+      if (rawData is Map<String, dynamic>) {
+        final code = rawData['code'] as int? ?? -1;
+        final message = rawData['message'] as String? ?? rawData['msg'] as String?;
 
         if (code == 0) {
           await Request.syncCookieHeader();
-          return ApiResponse.success(responseData['data'] as T, code: 200);
+          final result = rawData.containsKey('data') ? rawData['data'] : rawData;
+          return ApiResponse.success(result as T, code: 200);
         } else {
           return ApiResponse.error(
             msg: message ?? 'Unknown error',
@@ -139,7 +157,7 @@ class DioApiClient implements ApiClient {
         }
       }
 
-      return ApiResponse.success(response.data as T);
+      return ApiResponse.success(rawData as T);
     } on DioException catch (e) {
       return ApiResponse.error(
         msg: e.message ?? 'Network error',

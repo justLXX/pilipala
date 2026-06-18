@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:pilipala/features/opus/data/opus_repository.dart';
-import 'package:pilipala/models/read/opus.dart';
 
 /// Use case for fetching opus article data.
 class FetchOpusDataUseCase {

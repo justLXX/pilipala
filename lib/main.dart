@@ -223,37 +223,119 @@ class BuildMainApp extends StatelessWidget {
   final ThemeType currentThemeValue;
   final double textScale;
 
+  ThemeData _buildTheme(ColorScheme colorScheme) {
+    final bool isDark = colorScheme.brightness == Brightness.dark;
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: colorScheme.surface,
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        titleTextStyle: TextStyle(
+          color: colorScheme.onSurface,
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        elevation: 0,
+        height: 64,
+        backgroundColor: colorScheme.surface,
+        indicatorColor: colorScheme.primaryContainer,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final bool selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            color: selected ? colorScheme.primary : colorScheme.outline,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final bool selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            size: 24,
+            color: selected ? colorScheme.primary : colorScheme.outline,
+          );
+        }),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(44, 44),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          minimumSize: const Size(44, 36),
+          foregroundColor: colorScheme.primary,
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(44, 44),
+          foregroundColor: colorScheme.onSurface,
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        minTileHeight: 56,
+        iconColor: colorScheme.onSurfaceVariant,
+        textColor: colorScheme.onSurface,
+        subtitleTextStyle: TextStyle(
+          color: colorScheme.outline,
+          fontSize: 12,
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        dividerColor: colorScheme.outlineVariant,
+        indicatorColor: colorScheme.primary,
+        labelColor: colorScheme.primary,
+        unselectedLabelColor: colorScheme.onSurfaceVariant,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+      ),
+      dividerTheme: DividerThemeData(
+        color: colorScheme.outlineVariant.withAlpha(isDark ? 90 : 120),
+        thickness: 0.5,
+        space: 1,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        actionTextColor: colorScheme.primary,
+        backgroundColor: colorScheme.secondaryContainer,
+        closeIconColor: colorScheme.secondary,
+        contentTextStyle: TextStyle(color: colorScheme.secondary),
+        elevation: 20,
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: ZoomPageTransitionsBuilder(
+            allowEnterRouteSnapshotting: false,
+          ),
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final SnackBarThemeData snackBarTheme = SnackBarThemeData(
-      actionTextColor: lightColorScheme.primary,
-      backgroundColor: lightColorScheme.secondaryContainer,
-      closeIconColor: lightColorScheme.secondary,
-      contentTextStyle: TextStyle(color: lightColorScheme.secondary),
-      elevation: 20,
-    );
+    final ColorScheme themeColorScheme = currentThemeValue == ThemeType.dark
+        ? darkColorScheme
+        : lightColorScheme;
+    final ColorScheme darkThemeColorScheme =
+        currentThemeValue == ThemeType.light
+            ? lightColorScheme
+            : darkColorScheme;
 
     return GetMaterialApp(
       title: 'PiliPala',
-      theme: ThemeData(
-        colorScheme: currentThemeValue == ThemeType.dark
-            ? darkColorScheme
-            : lightColorScheme,
-        snackBarTheme: snackBarTheme,
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: <TargetPlatform, PageTransitionsBuilder>{
-            TargetPlatform.android: ZoomPageTransitionsBuilder(
-              allowEnterRouteSnapshotting: false,
-            ),
-          },
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: currentThemeValue == ThemeType.light
-            ? lightColorScheme
-            : darkColorScheme,
-        snackBarTheme: snackBarTheme,
-      ),
+      theme: _buildTheme(themeColorScheme),
+      darkTheme: _buildTheme(darkThemeColorScheme),
       localizationsDelegates: const [
         GlobalCupertinoLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

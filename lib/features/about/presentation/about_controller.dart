@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pilipala/features/about/domain/about_use_cases.dart';
 import 'package:pilipala/models/github/latest.dart';
 import 'package:url_launcher/url_launcher.dart';

@@ -1,6 +1,4 @@
-import 'package:get/get.dart';
 import 'package:pilipala/http/read.dart';
-import 'package:pilipala/models/read/read.dart';
 
 /// Repository for read (CV article) feature.
 /// Handles API calls related to CV articles.

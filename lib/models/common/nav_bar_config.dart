@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../features/home/presentation/home_page.dart' as features;
-import '../../features/media/presentation/media_page.dart' as features_media;
-import '../../features/dynamics/presentation/dynamics_page.dart' as features_dynamics;
+import '../../features/dynamics/presentation/dynamics_page.dart'
+    as features_dynamics;
 import '../../features/rank/presentation/rank_page.dart' as features_rank;
+import '../../features/user/presentation/mine/mine_page.dart' as features_mine;
 
 List defaultNavigationBars = [
   {
@@ -51,15 +52,15 @@ List defaultNavigationBars = [
   {
     'id': 3,
     'icon': const Icon(
-      Icons.video_collection_outlined,
+      Icons.person_outline,
       size: 20,
     ),
     'selectIcon': const Icon(
-      Icons.video_collection,
+      Icons.person,
       size: 21,
     ),
-    'label': "媒体库",
+    'label': "我的",
     'count': 0,
-    'page': const features_media.MediaPage(),
+    'page': const features_mine.MinePage(),
   }
 ];

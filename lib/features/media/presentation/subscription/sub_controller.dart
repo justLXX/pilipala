@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:pilipala/features/media/data/media_repository.dart';
 import 'package:pilipala/features/media/domain/media_use_cases.dart';
 import 'package:pilipala/models/user/info.dart';
 import 'package:pilipala/models/user/sub_folder.dart';

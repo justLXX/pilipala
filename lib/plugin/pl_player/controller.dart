@@ -532,12 +532,22 @@ class PlPlayerController {
   List<StreamSubscription> subscriptions = [];
   final List<Function(Duration position)> _positionListeners = [];
   final List<Function(PlayerStatus status)> _statusListeners = [];
+  /// When true, the [stream.playing] listener ignores the next state event.
+  /// Used during seek-in-pause to suppress the spurious playing→paused
+  /// broadcast caused by the play+pause frame-refresh trick.
+  bool _suppressPlayingBroadcast = false;
 
   /// 播放事件监听
   void startListeners() {
     subscriptions.addAll(
       [
         videoPlayerController!.stream.playing.listen((event) {
+          // Suppress transient state changes caused by seek-in-pause
+          // frame-refresh (play→pause). Keep the status as paused.
+          if (_suppressPlayingBroadcast) {
+            _suppressPlayingBroadcast = false;
+            return;
+          }
           if (event) {
             playerStatus.status.value = PlayerStatus.playing;
           } else {
@@ -639,8 +649,10 @@ class PlPlayerController {
         final bool wasPaused = !playerStatus.playing;
         await _videoPlayerController?.seek(position);
         // 暂停状态下 seek 后，播放器可能不会自动刷新画面和发射 position 事件
-        // 执行一次 play→pause 强制刷新
+        // 执行一次 play→pause 强制刷新。通过 _suppressPlayingBroadcast
+        // 抑制中间状态的广播，避免 UI 闪烁(暂停图标短暂闪为播放图标)。
         if (wasPaused && _videoPlayerController != null) {
+          _suppressPlayingBroadcast = true;
           await _videoPlayerController!.play();
           await _videoPlayerController!.pause();
         }
