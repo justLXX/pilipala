@@ -36,22 +36,14 @@
 
 | 页面 | 路由 | 文件 | 说明 |
 |------|------|------|------|
-| 用户中心 | `/member` | `lib/pages/member/view.dart` | 用户信息主页面 |
-| 我的 | `/media` | `lib/pages/mine/view.dart` | 当前登录用户中心 |
-| 关注列表 | `/follow` | `lib/pages/follow/view.dart` | 关注用户列表 |
-| 粉丝列表 | `/fan` | `lib/pages/fan/view.dart` | 粉丝列表 |
-| 用户投稿 | `/memberArchive` | `lib/pages/member_archive/view.dart` | 用户投稿视频 |
-| 用户专栏 | `/memberArticle` | `lib/pages/member_article/view.dart` | 用户专栏 |
-| 用户动态 | `/memberDynamics` | `lib/pages/member_dynamics/view.dart` | 用户动态 |
-| 用户投币 | `/memberCoin` | `lib/pages/member_coin/view.dart` | 用户最近投币 |
-| 用户喜欢 | `/memberLike` | `lib/pages/member_like/view.dart` | 用户最近喜欢 |
-| 用户合集 | `/memberSeasons` | `lib/pages/member_seasons/view.dart` | 用户合集 |
+| 用户中心 | `/member` | `lib/features/user/presentation/member_page.dart` | 用户信息主页面 |
+| 我的 | `/media` | `lib/features/user/presentation/mine/mine_page.dart` | 当前登录用户中心 |
 
 ## 4. Controller 职责
 
 ### 4.1 MemberController
 
-文件：`lib/pages/member/controller.dart`
+文件：`lib/features/user/presentation/user_controller.dart`
 
 职责：
 - 管理用户信息
@@ -74,7 +66,7 @@ class MemberController extends GetxController {
 
 ### 4.2 MineController
 
-文件：`lib/pages/mine/controller.dart`
+文件：`lib/features/user/presentation/mine/mine_controller.dart`
 
 职责：
 - 管理当前登录用户信息
@@ -198,15 +190,12 @@ GET /x/space/arc/search
 - 支持查看用户的各种互动记录（投币、喜欢等）
 - 用户头像支持点击进入大图
 
-## 9. 迁移状态
+## 9. 开发状态
 
-- ✅ 旧代码功能完成
-- ✅ 三层架构迁移（UserRepository + UseCases + UserController）
-- ✅ MemberPage + 4 widgets 迁移到 `lib/features/user/presentation/`
-- ✅ 路由注册（`/member`）
-- ✅ 模型字段修正（owner/pic 等）
-- ✅ coins/likes/seasons widget 接入 MemberPage
-- ✅ CSRF token 实现（统一使用 Request.getCsrf()）
-- ⬜ member 子页面迁移（投稿、专栏、动态、关注/粉丝等）
-- ⬜ 依赖注入注册
-- ⬜ 单元测试
+- [x] 三层架构迁移完成（data/domain/presentation）
+- [x] 路由注册（`/member`）
+- [x] 依赖注入注册（UserBinding）
+- [x] coins/likes/seasons widget 接入
+- [x] 子页面迁移（fan, follow, member_archive 等 11 个）
+- [x] CSRF token 实现
+- [ ] 单元测试

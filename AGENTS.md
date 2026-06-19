@@ -19,13 +19,9 @@ flutter build apk --release --split-per-abi   # Android (CI pattern)
 flutter build ios --release --no-codesign     # iOS
 ```
 
-## Architecture: Two Parallel Structures
+## Architecture
 
-The codebase is **actively migrating** from `lib/pages/` to `lib/features/`. Both exist simultaneously.
-
-- **New modules** → `lib/features/<name>/` with `data/`, `domain/`, `presentation/` subdirs
-- **Legacy modules** → `lib/pages/<name>/` with `controller.dart`, `view.dart`, `widgets/`
-- Check `lib/features/` first for a module before falling back to `lib/pages/`
+All modules use `lib/features/<name>/` with `data/`, `domain/`, `presentation/` subdirs. The old `lib/pages/` has been fully removed.
 
 ## Non-Obvious Conventions
 
@@ -41,12 +37,10 @@ The codebase is **actively migrating** from `lib/pages/` to `lib/features/`. Bot
 
 ## Migration Status (2026-06-19)
 
-Updated based on actual code inspection.
-
 | Status | Modules | Notes |
 |--------|---------|-------|
 | ✅ 100% complete | home, video, search, user, media, dynamics, rank, login, about, blacklist, bangumi, html, opus, read, webview, live, message, setting, main | Full 3-layer architecture (data/domain/presentation), routes registered, bindings configured |
-| 🗑️ Ready for deletion | bangumi, home, hot, live, rcmd, search, search_panel, search_result, video, webview | Legacy modules in `lib/pages/` — zero code references remain (only mentioned in comments). Safe to delete. |
+| ✅ Deleted (2026-06-19) | bangumi, home, hot, live, rcmd, search, search_panel, search_result, video, webview | `lib/pages/` fully deleted. All references were only in comments. |
 
 ### Verification Notes
 
@@ -54,19 +48,19 @@ Updated based on actual code inspection.
 - **0 modules** only have presentation layer (migration complete!)
 - **0 active references** to `lib/pages/` in codebase (only in doc comments)
 - `lib/router/app_pages.dart` fully migrated to `lib/features/` imports
+- `lib/pages/` directory confirmed deleted
 
 ### Analyze Status (2026-06-19)
 
 - **0 errors**
-- **26 warnings** (all minor: unused variables/imports, wrong `@override` annotations)
-- **~285 info** items (deprecation warnings from Flutter SDK updates, e.g. `withOpacity` → `withValues`)
+- **0 warnings** ✅ (all 25 fixed)
+- **~289 info** items (deprecation warnings from Flutter SDK updates, e.g. `withOpacity` → `withValues`)
 
 ### Next Steps
 
-1. **Delete `lib/pages/`** — safe to remove, no active references
-2. **Fix 26 warnings** — mostly unused imports/variables in video feature and intro_page.dart `@override` fixes
-3. **Add unit tests** for completed modules
-4. **Upgrade deprecated APIs** — `withOpacity` → `withValues`, `MaterialStateProperty` → `WidgetStateProperty`
+1. **Upgrade deprecated APIs** — `withOpacity` → `withValues`, `MaterialStateProperty` → `WidgetStateProperty` (~289 info)
+2. **Add unit tests** for completed modules
+3. **Clean up `avoid_print`** — replace `print()` with proper logging (~10 info)
 
 ## Key Entry Points
 

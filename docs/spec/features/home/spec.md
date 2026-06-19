@@ -30,32 +30,22 @@
 
 | 页面 | 路由 | 文件 | 说明 |
 |------|------|------|------|
-| 首页 | `/` | `lib/pages/home/view.dart` | 包含 Tab 切换的主页面 |
-| 推荐页 | `/` (Tab) | `lib/pages/rcmd/view.dart` | 推荐视频流页面 |
+| 首页 | `/` | `lib/features/home/presentation/home_page.dart` | 包含 Tab 切换的主页面 |
+| 推荐页 | `/` (Tab) | `lib/features/home/presentation/rcmd_page.dart` | 推荐视频流页面 |
+| 热门页 | `/hot` | `lib/features/home/presentation/hot_page.dart` | 热门视频流页面 |
 
 ## 4. Controller 职责
 
 ### 4.1 RcmdController
 
-文件：`lib/pages/rcmd/controller.dart`
+文件：`lib/features/home/presentation/home_controller.dart`
 
 职责：
 - 管理推荐视频列表状态
 - 处理推荐类型切换（Web/App/未登录）
+- 管理热门视频列表
 - 实现下拉刷新和上拉加载
 - 应用推荐过滤规则（时长、点赞率）
-
-```dart
-class RcmdController extends GetxController {
-  RxList<RecVideoItemModel> videoList = <RecVideoItemModel>[].obs;
-  RxBool isLoading = false.obs;
-  String currentRcmdType = 'web'; // 'web' | 'app' | 'notLogin'
-  
-  Future<void> queryRcmdFeed(String type) async;
-  Future<void> onRefresh() async;
-  Future<void> onLoad() async;
-}
-```
 
 ## 5. 数据模型
 
@@ -147,14 +137,10 @@ GET https://app.bilibili.com/x/v2/feed/index
 - 切换推荐类型时清空列表并重新加载
 - 过滤规则在加载时实时应用
 
-## 9. 迁移状态
+## 9. 开发状态
 
-- ✅ 旧代码功能完成
-- ✅ 三层架构迁移（VideoRepository + UseCases + HomeController）
-- ✅ HotPage、RcmdPage、HomePage 迁移到 `lib/features/home/presentation/`
-- ✅ 路由注册（`/` `/hot`）
-- ✅ CSRF token 实现（统一使用 Request.getCsrf()）
-- ⬜ 底部导航栏切换（nav_bar_config 仍引用旧 pages/home/）
-- ⬜ 依赖注入注册（Repository/UseCase/Controller 未注册到 GetX）
-- ⬜ 推荐过滤逻辑（黑名单、时长、点赞率）
-- ⬜ 单元测试
+- [x] 三层架构迁移完成（data/domain/presentation）
+- [x] 路由注册（`/` `/hot`）
+- [x] 依赖注入注册（HomeBinding）
+- [x] CSRF token 实现
+- [ ] 单元测试

@@ -4,6 +4,7 @@ enum BottomControlType {
   next,
   time,
   space,
+  danmaku,
   episode,
   fit,
   speed,

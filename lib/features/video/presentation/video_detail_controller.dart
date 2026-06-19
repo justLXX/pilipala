@@ -69,6 +69,7 @@ class VideoDetailController extends GetxController
     BottomControlType.playOrPause,
     BottomControlType.time,
     BottomControlType.space,
+    BottomControlType.danmaku,
     BottomControlType.fit,
     BottomControlType.fullscreen,
   ].obs;

@@ -167,7 +167,7 @@ class _ReplyReplyPanelState extends State<ReplyReplyPanel> {
                   SliverToBoxAdapter(
                     child: Divider(
                       height: 20,
-                      color: Theme.of(context).dividerColor.withOpacity(0.1),
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                       thickness: 6,
                     ),
                   ),

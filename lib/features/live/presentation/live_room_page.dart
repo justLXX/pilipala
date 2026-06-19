@@ -191,7 +191,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               ),
               PopScope(
                 canPop: plPlayerController.isFullScreen.value != true,
-                onPopInvoked: (bool didPop) {
+                onPopInvokedWithResult: (bool didPop, _) {
                   if (plPlayerController.isFullScreen.value == true) {
                     plPlayerController.triggerFullScreen(status: false);
                   }
@@ -265,37 +265,58 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                   Map data = snapshot.data as Map;
                   if (data['status']) {
                     return Obx(
-                      () => Row(
-                        children: [
-                          NetworkImgLayer(
-                            width: 34,
-                            height: 34,
-                            type: 'avatar',
-                            src: _liveRoomController
-                                .roomInfoH5.value.anchorInfo!.baseInfo!.face,
-                          ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      () => InkWell(
+                        onTap: () {
+                          final uid = _liveRoomController
+                              .roomInfoH5.value.roomInfo?.uid;
+                          if (uid != null) {
+                            Get.toNamed(
+                              '/member?mid=$uid',
+                              arguments: {
+                                'face': _liveRoomController.roomInfoH5.value
+                                    .anchorInfo?.baseInfo?.face,
+                              },
+                            );
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 6),
+                          child: Row(
                             children: [
-                              Text(
-                                _liveRoomController.roomInfoH5.value.anchorInfo!
-                                    .baseInfo!.uname!,
-                                style: const TextStyle(fontSize: 14),
+                              NetworkImgLayer(
+                                width: 34,
+                                height: 34,
+                                type: 'avatar',
+                                src: _liveRoomController
+                                    .roomInfoH5.value.anchorInfo!.baseInfo!.face,
                               ),
-                              const SizedBox(height: 1),
-                              if (_liveRoomController
-                                      .roomInfoH5.value.watchedShow !=
-                                  null)
-                                Text(
-                                  _liveRoomController.roomInfoH5.value
-                                          .watchedShow!['text_large'] ??
-                                      '',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
+                              const SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _liveRoomController.roomInfoH5.value
+                                        .anchorInfo!.baseInfo!.uname!,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 1),
+                                  if (_liveRoomController
+                                          .roomInfoH5.value.watchedShow !=
+                                      null)
+                                    Text(
+                                      _liveRoomController.roomInfoH5.value
+                                              .watchedShow!['text_large'] ??
+                                          '',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                ],
+                              ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     );
                   } else {
@@ -335,11 +356,11 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                     top: 4,
                     bottom: MediaQuery.of(context).padding.bottom + 20),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   borderRadius: const BorderRadius.all(Radius.circular(20)),
                   border: Border(
                     top: BorderSide(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                     ),
                   ),
                 ),
@@ -354,7 +375,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                             padding: WidgetStateProperty.all(EdgeInsets.zero),
                             backgroundColor: WidgetStateProperty.resolveWith(
                                 (Set<WidgetState> states) {
-                              return Colors.grey.withOpacity(0.1);
+                              return Colors.grey.withValues(alpha: 0.1);
                             }),
                           ),
                           onPressed: () {
@@ -380,7 +401,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                         decoration: InputDecoration(
                           hintText: '发送弹幕',
                           hintStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                           ),
                           border: InputBorder.none,
                         ),
@@ -426,20 +447,19 @@ Widget buildMessageListUI(
   LiveRoomController liveRoomController,
   ScrollController scrollController,
 ) {
-  return Expanded(
-    child: Obx(
-      () => MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        removeBottom: true,
-        child: ShaderMask(
+  return Obx(
+    () => MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      child: ShaderMask(
           shaderCallback: (Rect bounds) {
             return LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.black.withOpacity(0.5),
+                Colors.black.withValues(alpha: 0.5),
                 Colors.black,
               ],
               stops: const [0.01, 0.05, 0.2],
@@ -461,8 +481,8 @@ Widget buildMessageListUI(
                   child: Container(
                     decoration: BoxDecoration(
                       color: liveRoomController.isPortrait.value
-                          ? Colors.black.withOpacity(0.3)
-                          : Colors.grey.withOpacity(0.1),
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: const BorderRadius.all(Radius.circular(20)),
                     ),
                     margin: EdgeInsets.only(
@@ -480,9 +500,9 @@ Widget buildMessageListUI(
                         style: const TextStyle(color: Colors.white),
                         children: [
                           TextSpan(
-                            text: '${liveMsgItem.userName}: ',
+                            text: '${_sanitizeUtf16(liveMsgItem.userName ?? '')}: ',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withValues(alpha: 0.6),
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
@@ -504,8 +524,35 @@ Widget buildMessageListUI(
           ),
         ),
       ),
-    ),
   );
+}
+
+/// Sanitize text to ensure it is well-formed UTF-16.
+/// Removes unpaired surrogates that cause rendering crashes.
+String _sanitizeUtf16(String input) {
+  final codeUnits = input.codeUnits;
+  final sanitized = <int>[];
+  for (int i = 0; i < codeUnits.length; i++) {
+    final cu = codeUnits[i];
+    if (cu >= 0xD800 && cu <= 0xDBFF) {
+      // High surrogate – must be followed by a low surrogate
+      if (i + 1 < codeUnits.length) {
+        final next = codeUnits[i + 1];
+        if (next >= 0xDC00 && next <= 0xDFFF) {
+          sanitized.add(cu);
+          sanitized.add(next);
+          i++;
+        }
+        // else: skip unpaired high surrogate
+      }
+      // else: skip unpaired high surrogate at end
+    } else if (cu >= 0xDC00 && cu <= 0xDFFF) {
+      // Skip unpaired low surrogate
+    } else {
+      sanitized.add(cu);
+    }
+  }
+  return String.fromCharCodes(sanitized);
 }
 
 List<InlineSpan> buildMessageTextSpan(
@@ -516,7 +563,7 @@ List<InlineSpan> buildMessageTextSpan(
 
   if (liveMsgItem.emots == null) {
     inlineSpanList.add(
-      TextSpan(text: liveMsgItem.message ?? ''),
+      TextSpan(text: _sanitizeUtf16(liveMsgItem.message ?? '')),
     );
   } else {
     final List<String> emotsKeys = liveMsgItem.emots!.keys.toList();
@@ -542,7 +589,7 @@ List<InlineSpan> buildMessageTextSpan(
       },
       onNonMatch: (String nonMatch) {
         inlineSpanList.add(
-          TextSpan(text: nonMatch),
+          TextSpan(text: _sanitizeUtf16(nonMatch)),
         );
         return nonMatch;
       },

@@ -48,12 +48,6 @@ class HistoryController extends GetxController {
     if (userInfo == null) {
       return {'status': false, 'msg': '账号未登录', 'code': -101};
     }
-    int max = 0;
-    int viewAt = 0;
-    if (type == 'onload') {
-      max = historyList.last.history!.oid!;
-      viewAt = historyList.last.viewAt!;
-    }
     isLoadingMore.value = true;
 
     try {

@@ -36,7 +36,7 @@ class IdUtils {
       '0'
     ];
     int bvIndex = bytes.length - 1;
-    BigInt tmp = (MAX_AID | BigInt.from(aid)) ^ XOR_CODE;
+    BigInt tmp = (MAX_AID | BigInt.from(aidInt)) ^ XOR_CODE;
     while (tmp > BigInt.zero) {
       bytes[bvIndex] = data[(tmp % BASE).toInt()];
       tmp = tmp ~/ BASE;

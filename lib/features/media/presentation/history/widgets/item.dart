@@ -203,8 +203,8 @@ class HistoryItem extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(
                                         StyleString.imgRadius.x),
-                                    color: Colors.black.withOpacity(
-                                        ctr!.enableMultiple.value &&
+                                    color: Colors.black.withValues(
+                                        alpha: ctr!.enableMultiple.value &&
                                                 videoItem.checked
                                             ? 0.6
                                             : 0),
@@ -227,7 +227,7 @@ class HistoryItem extends StatelessWidget {
                                                     .resolveWith(
                                               (states) {
                                                 return Colors.white
-                                                    .withOpacity(0.8);
+                                                    .withValues(alpha: 0.8);
                                               },
                                             ),
                                           ),

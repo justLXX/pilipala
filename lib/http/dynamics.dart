@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../models/dynamics/result.dart';
 import '../models/dynamics/up.dart';
 import 'index.dart';
@@ -30,7 +31,7 @@ class DynamicsHttp {
           'data': DynamicsDataModel.fromJson(res.data['data']),
         };
       } catch (err) {
-        print(err);
+        debugPrint('$err');
         return {
           'status': false,
           'data': [],

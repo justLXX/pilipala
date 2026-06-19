@@ -2,13 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/http/dynamics.dart';
-import 'package:pilipala/http/video.dart';
 import 'package:pilipala/models/common/reply_type.dart';
-import 'package:pilipala/models/video/reply/emote.dart';
 import 'package:pilipala/models/video/reply/item.dart';
-import 'package:pilipala/common/widgets/emote/index.dart';
-import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/navigation_helper.dart';
 
 class Debouncer {
@@ -47,10 +42,7 @@ class _VideoReplyNewDialogState extends State<VideoReplyNewDialog>
     with WidgetsBindingObserver {
   final TextEditingController _replyContentController = TextEditingController();
   final FocusNode replyContentFocusNode = FocusNode();
-  final GlobalKey _formKey = GlobalKey<FormState>();
   late double emoteHeight = 0.0;
-  double keyboardHeight = 0.0;
-  final _debouncer = Debouncer(milliseconds: 200);
   String toolbarType = 'input';
   RxBool isForward = false.obs;
   RxBool showForward = false.obs;
@@ -125,7 +117,7 @@ class _VideoReplyNewDialogState extends State<VideoReplyNewDialog>
                     focusNode: replyContentFocusNode,
                     maxLines: 3,
                     minLines: 1,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '写评论...',
                       border: InputBorder.none,
                     ),

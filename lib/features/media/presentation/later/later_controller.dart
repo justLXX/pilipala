@@ -72,7 +72,7 @@ class LaterController extends GetxController {
               onPressed: () async {
                 try {
                   if (bvid != null) {
-                    await _removeFromWatchLater.execute(bvid: bvid!);
+                    await _removeFromWatchLater.execute(bvid: bvid);
                     laterList.removeWhere((e) => e.bvid == bvid);
                   } else {
                     for (var item in laterList) {

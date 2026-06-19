@@ -30,7 +30,7 @@ class TextHelper {
           color: node.word?.color != null
               ? Color(int.parse(node.word!.color!.substring(1, 7), radix: 16) +
                   0xFF000000)
-              : Theme.of(context).colorScheme.onBackground,
+              : Theme.of(context).colorScheme.onSurface,
         ),
       );
     } else {
@@ -50,7 +50,7 @@ class TextHelper {
                   ? Color(
                       int.parse(node.word!.color!.substring(1, 7), radix: 16) +
                           0xFF000000)
-                  : Theme.of(context).colorScheme.onBackground,
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           );
         default:

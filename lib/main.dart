@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_platform/universal_platform.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:pilipala/plugin/pl_player/controller.dart';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
@@ -33,6 +34,8 @@ import './services/loggeer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
+    // Hot restart 时清理残留的 native 播放器资源，防止仍有声音
+    await PlPlayerController.disposeInstance();
     MediaKit.ensureInitialized();
   }
   await SystemChrome.setPreferredOrientations(
@@ -209,7 +212,7 @@ class OtherApp extends StatelessWidget {
   }
 }
 
-class BuildMainApp extends StatelessWidget {
+class BuildMainApp extends StatefulWidget {
   const BuildMainApp({
     super.key,
     required this.lightColorScheme,
@@ -222,6 +225,31 @@ class BuildMainApp extends StatelessWidget {
   final ColorScheme darkColorScheme;
   final ThemeType currentThemeValue;
   final double textScale;
+
+  @override
+  State<BuildMainApp> createState() => _BuildMainAppState();
+}
+
+class _BuildMainAppState extends State<BuildMainApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Hot restart 时会触发 detached，此时清理 native 播放器资源
+    if (state == AppLifecycleState.detached) {
+      PlPlayerController.disposeInstance();
+    }
+  }
 
   ThemeData _buildTheme(ColorScheme colorScheme) {
     final bool isDark = colorScheme.brightness == Brightness.dark;
@@ -324,13 +352,13 @@ class BuildMainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme themeColorScheme = currentThemeValue == ThemeType.dark
-        ? darkColorScheme
-        : lightColorScheme;
+    final ColorScheme themeColorScheme = widget.currentThemeValue == ThemeType.dark
+        ? widget.darkColorScheme
+        : widget.lightColorScheme;
     final ColorScheme darkThemeColorScheme =
-        currentThemeValue == ThemeType.light
-            ? lightColorScheme
-            : darkColorScheme;
+        widget.currentThemeValue == ThemeType.light
+            ? widget.lightColorScheme
+            : widget.darkColorScheme;
 
     return GetMaterialApp(
       title: 'PiliPala',
@@ -351,7 +379,7 @@ class BuildMainApp extends StatelessWidget {
           toastBuilder: (String msg) => CustomToast(msg: msg),
           child: MediaQuery(
             data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(textScale)),
+                .copyWith(textScaler: TextScaler.linear(widget.textScale)),
             child: child!,
           ),
         );

@@ -30,7 +30,6 @@ class _SubPageBody extends StatefulWidget {
   const _SubPageBody({
     required this.subController,
     required this.futureBuilderFuture,
-    super.key,
   });
 
   @override

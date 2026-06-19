@@ -19,7 +19,6 @@ class VideoIntroPanel extends StatefulWidget {
 
   const VideoIntroPanel({super.key, required this.bvid, this.cid});
 
-  @override
   State<VideoIntroPanel> createState() => _VideoIntroPanelState();
 }
 
@@ -30,10 +29,8 @@ class _VideoIntroPanelState extends State<VideoIntroPanel>
   VideoDetailData? videoDetail;
   late Future? _futureBuilderFuture;
 
-  @override
   bool get wantKeepAlive => true;
 
-  @override
   void initState() {
     super.initState();
     heroTag = Get.arguments['heroTag'];
@@ -45,13 +42,11 @@ class _VideoIntroPanelState extends State<VideoIntroPanel>
     });
   }
 
-  @override
   void dispose() {
     videoIntroController.onClose();
     super.dispose();
   }
 
-  @override
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder(
@@ -106,7 +101,6 @@ class VideoInfo extends StatefulWidget {
     required this.bvid,
   }) : super(key: key);
 
-  @override
   State<VideoInfo> createState() => _VideoInfoState();
 }
 
@@ -123,7 +117,6 @@ class _VideoInfoState extends State<VideoInfo> {
   RxBool isExpand = false.obs;
   late ExpandableController _expandableCtr;
 
-  @override
   void initState() {
     super.initState();
     heroTag = widget.heroTag!;
@@ -135,7 +128,6 @@ class _VideoInfoState extends State<VideoInfo> {
     _expandableCtr = ExpandableController(initialExpanded: false);
   }
 
-  @override
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: const EdgeInsets.only(top: 10),

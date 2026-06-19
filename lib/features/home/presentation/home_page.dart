@@ -51,7 +51,13 @@ class _HomePageState extends State<HomePage>
               titleSpacing: 14,
               backgroundColor: Theme.of(context).colorScheme.surface,
               title: GestureDetector(
-                onTap: () => Get.toNamed('/search'),
+                onTap: () {
+                  final keyword = _homeController.defaultSearch.value;
+                  Get.toNamed(
+                    '/search',
+                    parameters: keyword.isNotEmpty ? {'keyword': keyword} : null,
+                  );
+                },
                 child: Container(
                   height: 44,
                   padding: const EdgeInsets.symmetric(horizontal: 14),

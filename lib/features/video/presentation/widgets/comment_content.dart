@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
+import 'package:pilipala/features/main/presentation/main_controller.dart';
 import 'package:pilipala/plugin/pl_gallery/index.dart';
 import 'package:pilipala/models/video/reply/content.dart';
 import 'package:pilipala/utils/utils.dart';
@@ -247,6 +248,8 @@ class CommentContent extends StatelessWidget {
                 } catch (_) {}
                 return GestureDetector(
                   onTap: () {
+                    final mainCtrl = Get.find<MainController>();
+                    mainCtrl.imgPreviewStatus = true;
                     Navigator.of(context).push(
                       HeroDialogRoute<void>(
                         builder: (BuildContext context) =>
@@ -254,6 +257,9 @@ class CommentContent extends StatelessWidget {
                           sources: picList,
                           initIndex: 0,
                           onPageChanged: (int pageIndex) {},
+                          onDismissed: (_) {
+                            mainCtrl.imgPreviewStatus = false;
+                          },
                         ),
                       ),
                     );
@@ -286,6 +292,8 @@ class CommentContent extends StatelessWidget {
               builder: (context, BoxConstraints box) {
                 return GestureDetector(
                   onTap: () {
+                    final mainCtrl = Get.find<MainController>();
+                    mainCtrl.imgPreviewStatus = true;
                     Navigator.of(context).push(
                       HeroDialogRoute<void>(
                         builder: (BuildContext context) =>
@@ -293,6 +301,9 @@ class CommentContent extends StatelessWidget {
                           sources: picList,
                           initIndex: index,
                           onPageChanged: (int pageIndex) {},
+                          onDismissed: (_) {
+                            mainCtrl.imgPreviewStatus = false;
+                          },
                         ),
                       ),
                     );
@@ -368,7 +379,7 @@ class CommentContent extends StatelessWidget {
       TextSpan(children: spanChildren),
       style: const TextStyle(height: 1.75),
       maxLines: maxLines,
-      overflow: TextOverflow.ellipsis,
+      overflow: maxLines != null ? TextOverflow.ellipsis : null,
     );
   }
 }

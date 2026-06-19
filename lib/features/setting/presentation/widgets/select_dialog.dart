@@ -30,8 +30,17 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
     return AlertDialog(
       title: Text(widget.title),
       contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
-      content: StatefulBuilder(builder: (context, StateSetter setState) {
-        return SingleChildScrollView(
+      content: SingleChildScrollView(
+        child: RadioGroup<T>(
+          groupValue: _tempValue,
+          onChanged: (T? value) {
+            if (value != null) {
+              setState(() {
+                _tempValue = value;
+              });
+              Navigator.pop(context, _tempValue);
+            }
+          },
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -39,19 +48,12 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
                 RadioListTile(
                   value: i['value'],
                   title: Text(i['title'], style: titleStyle),
-                  groupValue: _tempValue,
-                  onChanged: (value) {
-                    setState(() {
-                      _tempValue = value as T;
-                    });
-                    Navigator.pop(context, _tempValue);
-                  },
                 ),
               ]
             ],
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

@@ -7,7 +7,7 @@ import 'package:pilipala/models/video/reply/item.dart';
 import 'package:pilipala/utils/utils.dart';
 import 'comment_content.dart';
 
-class CommentItem extends StatelessWidget {
+class CommentItem extends StatefulWidget {
   const CommentItem({
     required this.replyItem,
     this.replyLevel = '1',
@@ -26,10 +26,22 @@ class CommentItem extends StatelessWidget {
   final Function(ReplyItemModel replyItem)? onReply;
 
   @override
+  State<CommentItem> createState() => _CommentItemState();
+}
+
+class _CommentItemState extends State<CommentItem> {
+  bool _expanded = false;
+  static const int _maxLines = 6;
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final String heroTag = Utils.makeHeroTag(replyItem.mid ?? 0);
+    final String heroTag = Utils.makeHeroTag(widget.replyItem.mid ?? 0);
+
+    // 只有一级文字评论才限制行数
+    final bool isLimited = widget.replyItem.content?.isText == true &&
+        widget.replyLevel == '1';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 14, 8, 5),
@@ -37,42 +49,38 @@ class CommentItem extends StatelessWidget {
         border: Border(
           bottom: BorderSide(
             width: 1,
-            color: colorScheme.onInverseSurface.withOpacity(0.5),
+            color: colorScheme.onInverseSurface.withValues(alpha: 0.5),
           ),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 头像行 + 右侧列
+          // 1. 头像行
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              Get.toNamed('/member?mid=${replyItem.mid}', arguments: {
-                'face': replyItem.member?.avatar ?? '',
+              Get.toNamed('/member?mid=${widget.replyItem.mid}', arguments: {
+                'face': widget.replyItem.member?.avatar ?? '',
                 'heroTag': heroTag,
               });
             },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 头像
                 NetworkImgLayer(
-                  src: replyItem.member?.avatar,
+                  src: widget.replyItem.member?.avatar,
                   width: 34,
                   height: 34,
                   type: 'avatar',
                 ),
                 const SizedBox(width: 12),
-                // 右侧列
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // a. 用户名行
                       _buildUserNameRow(context, colorScheme),
                       const SizedBox(height: 2),
-                      // b. 时间行
                       _buildTimeRow(context, colorScheme, textTheme),
                     ],
                   ),
@@ -80,54 +88,21 @@ class CommentItem extends StatelessWidget {
               ],
             ),
           ),
-          // c. 评论内容
+          // 2. 评论内容
           Container(
             margin: const EdgeInsets.only(
                 top: 10, left: 45, right: 6, bottom: 4),
-            child: Text.rich(
-              style: const TextStyle(height: 1.75),
-              maxLines:
-                  replyItem.content?.isText == true && replyLevel == '1'
-                      ? 3
-                      : 999,
-              overflow: TextOverflow.ellipsis,
-              TextSpan(
-                children: [
-                  // e. 置顶/热评标签
-                  if (replyItem.isTop == true)
-                    const WidgetSpan(
-                      alignment: PlaceholderAlignment.top,
-                      child: PBadge(
-                        text: 'TOP',
-                        size: 'small',
-                        stack: 'normal',
-                        type: 'line',
-                        fs: 9,
-                      ),
-                    ),
-                  // 评论富文本内容
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: CommentContent(
-                      content: replyItem.content!,
-                      maxLines:
-                          replyItem.content?.isText == true &&
-                                  replyLevel == '1'
-                              ? 3
-                              : null,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: isLimited
+                ? _buildLimitedContent(context, colorScheme)
+                : CommentContent(content: widget.replyItem.content!),
           ),
-          // d. 操作行
+          // 3. 操作行
           _buildActionRow(context, colorScheme, textTheme),
-          // 热评标签（在操作行之后）
-          if (replyItem.cardLabel != null &&
-              replyItem.cardLabel!.isNotEmpty &&
-              replyItem.cardLabel!.any((e) => e.toString().contains('热评')))
+          // 热评标签
+          if (widget.replyItem.cardLabel != null &&
+              widget.replyItem.cardLabel!.isNotEmpty &&
+              widget.replyItem.cardLabel!
+                  .any((e) => e.toString().contains('热评')))
             Padding(
               padding: const EdgeInsets.only(left: 45, top: 2),
               child: Text(
@@ -138,24 +113,79 @@ class CommentItem extends StatelessWidget {
                 ),
               ),
             ),
-          // 3. 二级评论预览
-          if (replyItem.replies != null &&
-              replyItem.replies!.isNotEmpty &&
-              showReplyRow)
+          // 4. 二级评论预览
+          if (widget.replyItem.replies != null &&
+              widget.replyItem.replies!.isNotEmpty &&
+              widget.showReplyRow)
             _buildSubRepliesPreview(context, colorScheme),
         ],
       ),
     );
   }
 
-  /// 用户名行：用户名 + 等级徽章 + UP主标签 + VIP标记
+  /// 带行数限制的评论内容：先测量是否溢出，再决定是否显示展开按钮
+  Widget _buildLimitedContent(BuildContext context, ColorScheme colorScheme) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final text = widget.replyItem.content?.message ?? '';
+        final span = TextSpan(
+          text: text,
+          style: const TextStyle(height: 1.75),
+        );
+        final tp = TextPainter(
+          text: span,
+          maxLines: _maxLines,
+          textDirection: TextDirection.ltr,
+        );
+        tp.layout(maxWidth: constraints.maxWidth);
+        final didOverflow = tp.didExceedMaxLines;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CommentContent(
+              content: widget.replyItem.content!,
+              maxLines: _expanded ? null : _maxLines,
+            ),
+            if (didOverflow)
+              GestureDetector(
+                onTap: () => setState(() => _expanded = !_expanded),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _expanded ? '收起' : '展开',
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Icon(
+                        _expanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        size: 16,
+                        color: colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildUserNameRow(BuildContext context, ColorScheme colorScheme) {
-    final bool isVip =
-        replyItem.member?.vip != null && replyItem.member!.vip!['vipStatus'] == 1;
+    final bool isVip = widget.replyItem.member?.vip != null &&
+        widget.replyItem.member!.vip!['vipStatus'] == 1;
     return Row(
       children: [
         Text(
-          replyItem.member?.uname ?? '',
+          widget.replyItem.member?.uname ?? '',
           style: TextStyle(
             color: isVip ? const Color(0xFFFB7299) : colorScheme.outline,
             fontSize: 13,
@@ -164,11 +194,11 @@ class CommentItem extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 6, right: 6),
           child: Image.asset(
-            'assets/images/lv/lv${replyItem.member?.level ?? 0}.png',
+            'assets/images/lv/lv${widget.replyItem.member?.level ?? 0}.png',
             height: 11,
           ),
         ),
-        if (replyItem.isUp == true)
+        if (widget.replyItem.isUp == true)
           const PBadge(
             text: 'UP',
             size: 'small',
@@ -179,24 +209,23 @@ class CommentItem extends StatelessWidget {
     );
   }
 
-  /// 时间行：发布时间 + IP属地
   Widget _buildTimeRow(
       BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
     return RichText(
       text: TextSpan(
         children: [
           TextSpan(
-            text: Utils.dateFormat(replyItem.ctime),
+            text: Utils.dateFormat(widget.replyItem.ctime),
             style: TextStyle(
               fontSize: textTheme.labelSmall?.fontSize,
               color: colorScheme.outline,
             ),
           ),
-          if (replyItem.replyControl != null &&
-              replyItem.replyControl!.location != null &&
-              replyItem.replyControl!.location!.isNotEmpty)
+          if (widget.replyItem.replyControl != null &&
+              widget.replyItem.replyControl!.location != null &&
+              widget.replyItem.replyControl!.location!.isNotEmpty)
             TextSpan(
-              text: ' • ${replyItem.replyControl!.location}',
+              text: ' • ${widget.replyItem.replyControl!.location}',
               style: TextStyle(
                 fontSize: textTheme.labelSmall?.fontSize,
                 color: colorScheme.outline,
@@ -207,39 +236,38 @@ class CommentItem extends StatelessWidget {
     );
   }
 
-  /// 操作行：点赞按钮 + 回复数
   Widget _buildActionRow(
       BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
     return Row(
       children: [
         const SizedBox(width: 32),
-        // 点赞按钮
         SizedBox(
           height: 32,
           child: TextButton(
             onPressed: () {
-              final int newAction = replyItem.action == 0 ? 1 : 0;
-              onLike?.call(replyItem.rpid ?? 0, newAction);
+              final int newAction =
+                  widget.replyItem.action == 0 ? 1 : 0;
+              widget.onLike?.call(widget.replyItem.rpid ?? 0, newAction);
             },
             child: Row(
               children: [
                 Icon(
-                  replyItem.action == 1
+                  widget.replyItem.action == 1
                       ? Icons.thumb_up
                       : Icons.thumb_up_outlined,
                   size: 14,
-                  color: replyItem.action == 1
+                  color: widget.replyItem.action == 1
                       ? colorScheme.primary
                       : colorScheme.outline,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  replyItem.like != null && replyItem.like! > 0
-                      ? '${replyItem.like}'
+                  widget.replyItem.like != null && widget.replyItem.like! > 0
+                      ? '${widget.replyItem.like}'
                       : '点赞',
                   style: TextStyle(
                     fontSize: textTheme.labelSmall?.fontSize,
-                    color: replyItem.action == 1
+                    color: widget.replyItem.action == 1
                         ? colorScheme.primary
                         : colorScheme.outline,
                   ),
@@ -248,10 +276,9 @@ class CommentItem extends StatelessWidget {
             ),
           ),
         ),
-        // 回复按钮
         const SizedBox(width: 16),
         GestureDetector(
-          onTap: () => onReply?.call(replyItem),
+          onTap: () => widget.onReply?.call(widget.replyItem),
           child: Icon(
             Icons.comment_outlined,
             size: 14,
@@ -260,7 +287,7 @@ class CommentItem extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         GestureDetector(
-          onTap: () => onReply?.call(replyItem),
+          onTap: () => widget.onReply?.call(widget.replyItem),
           child: Text(
             '回复',
             style: TextStyle(
@@ -269,15 +296,14 @@ class CommentItem extends StatelessWidget {
             ),
           ),
         ),
-        // 回复数
-        if (replyItem.count != null &&
-            replyItem.count! > 0 &&
-            showReplyRow) ...[
+        if (widget.replyItem.count != null &&
+            widget.replyItem.count! > 0 &&
+            widget.showReplyRow) ...[
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () => onReplyTap?.call(replyItem),
+            onTap: () => widget.onReplyTap?.call(widget.replyItem),
             child: Text(
-              '共${replyItem.count}条回复',
+              '共${widget.replyItem.count}条回复',
               style: TextStyle(
                 fontSize: textTheme.labelSmall?.fontSize,
                 color: colorScheme.primary,
@@ -290,10 +316,9 @@ class CommentItem extends StatelessWidget {
     );
   }
 
-  /// 二级评论预览：显示前3条子评论的简略文字
   Widget _buildSubRepliesPreview(
       BuildContext context, ColorScheme colorScheme) {
-    final List replies = replyItem.replies!;
+    final List replies = widget.replyItem.replies!;
     final int showCount = replies.length > 3 ? 3 : replies.length;
 
     return Container(
@@ -310,7 +335,7 @@ class CommentItem extends StatelessWidget {
             _buildSubReplyItem(context, replies[i] as ReplyItemModel),
           if (replies.length > 3)
             GestureDetector(
-              onTap: () => onReplyTap?.call(replyItem),
+              onTap: () => widget.onReplyTap?.call(widget.replyItem),
               child: Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
@@ -328,7 +353,6 @@ class CommentItem extends StatelessWidget {
     );
   }
 
-  /// 单条二级评论简略文字（"用户名：内容" 格式，单行省略）
   Widget _buildSubReplyItem(BuildContext context, ReplyItemModel subReply) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String userName = subReply.member?.uname ?? '';
@@ -336,37 +360,40 @@ class CommentItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Text.rich(
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        TextSpan(
-          children: [
-            TextSpan(
-              text: '$userName：',
-              style: TextStyle(
-                fontSize:
-                    Theme.of(context).textTheme.titleSmall?.fontSize,
-                color: colorScheme.primary,
+      child: GestureDetector(
+        onTap: () => widget.onReplyTap?.call(widget.replyItem),
+        child: Text.rich(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          TextSpan(
+            children: [
+              TextSpan(
+                text: '$userName：',
+                style: TextStyle(
+                  fontSize:
+                      Theme.of(context).textTheme.titleSmall?.fontSize,
+                  color: colorScheme.primary,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    Get.toNamed(
+                        '/member?mid=${subReply.mid}',
+                        arguments: {
+                          'face': subReply.member?.avatar ?? '',
+                          'heroTag': Utils.makeHeroTag(subReply.mid),
+                        });
+                  },
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  Get.toNamed(
-                      '/member?mid=${subReply.mid}',
-                      arguments: {
-                        'face': subReply.member?.avatar ?? '',
-                        'heroTag': Utils.makeHeroTag(subReply.mid),
-                      });
-                },
-            ),
-            TextSpan(
-              text: message,
-              style: TextStyle(
-                fontSize:
-                    Theme.of(context).textTheme.bodySmall?.fontSize,
-                color: colorScheme.onSurface,
+              TextSpan(
+                text: message,
+                style: TextStyle(
+                  fontSize:
+                      Theme.of(context).textTheme.bodySmall?.fontSize,
+                  color: colorScheme.onSurface,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

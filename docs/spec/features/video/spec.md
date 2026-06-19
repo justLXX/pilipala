@@ -45,14 +45,14 @@
 
 | 页面 | 路由 | 文件 | 说明 |
 |------|------|------|------|
-| 视频详情 | `/video` | `lib/pages/video/detail/view.dart` | 视频详情主页面 |
-| 评论回复 | `/replyReply` | `lib/pages/video/detail/reply_reply/view.dart` | 二级评论页面 |
+| 视频详情 | `/video` | `lib/features/video/presentation/video_detail_page.dart` | 视频详情主页面 |
+| 评论回复 | `/replyReply` | `lib/features/video/presentation/reply_reply_page.dart` | 二级评论页面 |
 
 ## 4. Controller 职责
 
 ### 4.1 VideoDetailController
 
-文件：`lib/pages/video/detail/controller.dart`
+文件：`lib/features/video/presentation/video_detail_controller.dart`
 
 职责：
 - 管理视频播放状态
@@ -215,16 +215,14 @@ POST /x/web-interface/archive/like
 - 支持弹幕显示（通过 ns_danmaku）
 - 视频详情页支持手势操作（滑动调节音量/亮度）
 
-## 9. 迁移状态
+## 9. 开发状态
 
-- ✅ 旧代码功能完成
-- ✅ 三层架构迁移（VideoDetailRepository + UseCases + VideoDetailController）
-- ✅ VideoDetailPage 迁移到 `lib/features/video/presentation/`
-- ✅ 路由注册（`/video`）
-- ✅ 模型类型修正（PlayUrlModel、Api.favVideo）
-- ✅ CSRF token 实现（统一使用 Request.getCsrf()）
-- ✅ 点赞/收藏 API 调用（LikeVideoUseCase、CollectVideoUseCase）
-- ⬜ 视频播放器集成（media_kit）
-- ⬜ 评论列表 UI 展示
-- ⬜ 依赖注入注册
-- ⬜ 单元测试
+- [x] 三层架构迁移完成（data/domain/presentation）
+- [x] 路由注册（`/video`）
+- [x] 依赖注入注册（VideoDetailBinding）
+- [x] 模型类型修正（PlayUrlModel、Api.favVideo）
+- [x] CSRF token 实现
+- [x] 点赞/收藏 API 调用
+- [x] 视频播放器集成
+- [x] 评论列表 UI 展示
+- [ ] 单元测试

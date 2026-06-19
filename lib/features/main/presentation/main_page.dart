@@ -139,7 +139,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     }
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) async {
+      onPopInvokedWithResult: (bool didPop, _) async {
         _mainController.onBackPressed(context);
       },
       child: Scaffold(
@@ -162,12 +162,12 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
                             Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.7),
+                                .withValues(alpha: 0.7),
                             Theme.of(context).colorScheme.surface,
                             Theme.of(context)
                                 .colorScheme
                                 .surface
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,

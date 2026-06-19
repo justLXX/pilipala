@@ -36,75 +36,24 @@
 
 | 页面 | 路由 | 文件 | 说明 |
 |------|------|------|------|
-| 媒体库 | `/media` | `lib/pages/media/view.dart` | 媒体库主页面（Tab） |
-| 稍后再看 | `/later` | `lib/pages/later/view.dart` | 稍后再看列表 |
-| 历史记录 | `/history` | `lib/pages/history/view.dart` | 历史记录列表 |
-| 历史搜索 | `/historySearch` | `lib/pages/history_search/view.dart` | 历史记录搜索 |
-| 收藏 | `/fav` | `lib/pages/fav/view.dart` | 收藏夹列表 |
-| 收藏详情 | `/favDetail` | `lib/pages/fav_detail/view.dart` | 收藏夹详情 |
-| 收藏搜索 | `/favSearch` | `lib/pages/fav_search/view.dart` | 收藏夹搜索 |
-| 收藏编辑 | `/favEdit` | `lib/pages/fav_edit/view.dart` | 编辑收藏夹 |
+| 媒体库 | `/media` | `lib/features/media/presentation/media_page.dart` | 媒体库主页面（Tab） |
+| 稍后再看 | `/later` | `lib/features/media/presentation/later_page.dart` | 稍后再看列表 |
+| 历史记录 | `/history` | `lib/features/media/presentation/history_page.dart` | 历史记录列表 |
+| 历史搜索 | `/historySearch` | `lib/features/media/presentation/history_search_page.dart` | 历史记录搜索 |
+| 收藏 | `/fav` | `lib/features/media/presentation/fav_page.dart` | 收藏夹列表 |
+| 收藏详情 | `/favDetail` | `lib/features/media/presentation/fav_detail_page.dart` | 收藏夹详情 |
+| 收藏搜索 | `/favSearch` | `lib/features/media/presentation/fav_search_page.dart` | 收藏夹搜索 |
+| 收藏编辑 | `/favEdit` | `lib/features/media/presentation/fav_edit_page.dart` | 编辑收藏夹 |
 
 ## 4. Controller 职责
 
-### 4.1 LaterController
+### 4.1 MediaController
 
-文件：`lib/pages/later/controller.dart`
-
-职责：
-- 管理稍后再看列表
-- 实现删除功能
-
-```dart
-class LaterController extends GetxController {
-  RxList<HotVideoItemModel> laterList = <HotVideoItemModel>[].obs;
-  RxBool isLoading = false.obs;
-  int count = 0;
-  
-  Future<void> queryLaterList() async;
-  Future<void> deleteLaterItem(int aid) async;
-}
-```
-
-### 4.2 HistoryController
-
-文件：`lib/pages/history/controller.dart`
+文件：`lib/features/media/presentation/media_controller.dart`
 
 职责：
-- 管理历史记录列表
-- 实现搜索功能
-
-```dart
-class HistoryController extends GetxController {
-  RxList<HistoryItem> historyList = <HistoryItem>[].obs;
-  RxBool isLoading = false.obs;
-  
-  Future<void> queryHistoryList() async;
-  Future<void> searchHistory(String keyword) async;
-  Future<void> deleteHistory(int aid) async;
-}
-```
-
-### 4.3 FavController
-
-文件：`lib/pages/fav/controller.dart`
-
-职责：
-- 管理收藏夹列表
-- 管理收藏夹内容
-
-```dart
-class FavController extends GetxController {
-  RxList<FavFolder> favList = <FavFolder>[].obs;
-  RxList<VideoItem> favDetailList = <VideoItem>[].obs;
-  
-  Future<void> queryFavList() async;
-  Future<void> queryFavDetail(int mediaId) async;
-  Future<void> createFavFolder(String title, String intro) async;
-  Future<void> editFavFolder(String mediaId, String title, String intro) async;
-  Future<void> deleteFavFolder(String mediaId) async;
-}
-```
+- 管理媒体库列表
+- 处理稍后再看、历史记录、收藏夹操作
 
 ## 5. 数据模型
 
@@ -226,14 +175,11 @@ GET /x/v3/fav/resource/list
 - 收藏夹支持创建、编辑、删除
 - 删除操作需要确认对话框
 
-## 9. 迁移状态
+## 9. 开发状态
 
-- [x] 旧代码功能完成
-- [x] 三层架构迁移（MediaRepository + UseCases + MediaController + MediaPage）
+- [x] 三层架构迁移完成（data/domain/presentation）
+- [x] 路由注册（`/media` `/fav` `/favDetail` `/favEdit` `/favSearch` `/history` `/historySearch` `/later` `/subscription` `/subDetail`）
+- [x] 依赖注入注册（MediaBinding）
 - [x] 模型类型修正（HisListItem、FavFolderItemData、FavDetailItemData）
 - [x] API 端点修正（seeYouLater、toViewLater、toViewDel、userFavFolderDetail）
-- [ ] 收藏 tab 实现（当前空实现）
-- [ ] 子路由注册（稍后再看/历史/收藏页面）
-- [ ] 底部导航栏切换
-- [ ] 依赖注入注册
-- [ ] CSRF token 实现
+- [ ] 单元测试

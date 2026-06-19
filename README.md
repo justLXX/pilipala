@@ -25,17 +25,7 @@
 
 Xcode 13.4 不支持 ```auto_orientation```，请注释相关代码
 
-```bash
-[✓] Flutter (Channel stable, 3.19.6, on macOS 14.1.2 23B92 darwin-arm64, locale
-    zh-Hans-CN)
-[✓] Android toolchain - develop for Android devices (Android SDK version 34.0.0)
-[✓] Xcode - develop for iOS and macOS (Xcode 15.1)
-[✓] Chrome - develop for the web
-[✓] Android Studio (version 2022.3)
-[✓] VS Code (version 1.87.2)
-[✓] Connected device (3 available)
-[✓] Network resources
-```
+Flutter 3.41.9 (via FVM)
 
 ## 技术交流
 
@@ -119,26 +109,21 @@ QQ 频道: https://pd.qq.com/s/365esodk3
   - [x] 自动全屏
 - [ ] 等等
 
-## 架构迁移状态
+## 架构状态
 
-项目正在从传统的 `pages/` 扁平结构迁移到 `features/` 三层架构（data/domain/presentation）。
+项目已完成从传统 `pages/` 扁平结构到 `features/` 三层架构（data/domain/presentation）的迁移。所有 19 个功能模块均已迁移到 `lib/features/`，`lib/pages/` 旧代码已全部删除。
 
-### 当前进度
+### 模块列表
 
-| 指标 | 状态 | 说明 |
+| 模块 | 状态 | 说明 |
 |------|------|------|
-| 已迁移模块 | 12个 | home, video, search, user, media, login, dynamics, rank, main, live, message, setting |
-| ✅ **已完成模块** | **16个** | **home, video, search, user, media, dynamics, rank, login, about, bangumi, blacklist, opus, html, read 达到95%完成度** |
-| 待迁移模块 | ~0个 | 均无Spec，主要在独立模块 |
-| 路由接入 | ✅ 12/12 | 全部已通过 app_pages.dart 注册路由 |
-| 依赖注入 | ✅ 12/12 | 全部已通过 bindings.dart 注册到 GetX |
-| ✅ CSRF Token | ✅ 已修复 | 所有POST请求可正常携带token |
+| home, video, search, user, dynamics | ✅ 100% | 核心功能模块 |
+| media, rank, live, message, setting | ✅ 100% | 完整三层架构 + 路由/DI |
+| login, about, bangumi, blacklist | ✅ 100% | 独立模块 |
+| html, opus, read, webview | ✅ 100% | 内容展示模块 |
+| main | ✅ 100% | App Shell 框架 |
 
-### 迁移策略
-
-1. **优先级排序**：P0 已完成 → P1 user/media 子模块 → P2 video 插件/独立模块 → P3 清理
-2. **迁移步骤**：创建三层结构 → 迁移逻辑 → 注册路由和DI → 清理旧代码
-3. **详细进度**：见 [Spec 文档](docs/spec/README.md)
+详细进度见 [Spec 文档](docs/spec/README.md)
 
 ## 下载
 

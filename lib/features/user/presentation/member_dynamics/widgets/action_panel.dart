@@ -179,12 +179,12 @@ class _ActionPanelState extends State<ActionPanel>
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
       decoration: BoxDecoration(
         color:
-            Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4),
+            Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(6),
         border: Border(
           left: BorderSide(
               width: 4,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.8)),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)),
         ),
       ),
       child: Padding(

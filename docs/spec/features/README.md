@@ -8,18 +8,17 @@
 
 | 模块 | Spec 路径 | 代码路径 | 页面 | 代码状态 | 优先级 |
 |------|----------|----------|------|----------|--------|
-| 首页推荐 | `features/home/` | `lib/features/home/` | HomePage, RcmdPage | ✅ 已迁移 (100%) | P0 |
-| 热门排行 | `features/hot/` | `lib/features/home/` + `lib/features/rank/` | HotPage, RankPage | ✅ 已迁移 (热门在home, 排行榜独立) | P0 |
-| 视频详情 | `features/video/` | `lib/features/video/` | VideoDetailPage | ✅ 已迁移 (100%) | P0 |
-| 搜索 | `features/search/` | `lib/features/search/` | SearchPage | ✅ 已迁移 (100%) | P0 |
-| 动态 | `features/dynamics/` | `lib/features/dynamics/` | DynamicsPage, DynamicDetailPage | ✅ 已迁移 (95%) | P1 |
-| 用户中心 | `features/user/` | `lib/features/user/` | MemberPage | ✅ 已迁移 (100%) | P1 |
-| 媒体库 | `features/media/` | `lib/features/media/` | MediaPage | ✅ 已迁移 (~65%) | P1 |
-| 消息 | `features/message/` | `lib/pages/message/` | Message 相关页面 | ❌ 未迁移（有 spec） | P1 |
-| 直播 | `features/live/` | `lib/pages/live/` | LivePage, LiveRoomPage | ❌ 未迁移（有 spec） | P1 |
-| 设置 | `features/setting/` | `lib/pages/setting/` | SettingPage 及子页面 | ❌ 未迁移（有 spec） | P2 |
-| 登录 | `features/login/` | `lib/features/login/` | LoginPage | ✅ 已迁移 (~45%) | P2 |
-| App Shell | — | `lib/features/main/` | MainApp | ✅ 已迁移 (90%) | P0 |
+| 首页推荐 | `features/home/spec.md` | `lib/features/home/` | HomePage, RcmdPage, HotPage | ✅ 已完成 (100%) | P0 |
+| 视频详情 | `features/video/spec.md` | `lib/features/video/` | VideoDetailPage | ✅ 已完成 (100%) | P0 |
+| 搜索 | `features/search/spec.md` | `lib/features/search/` | SearchPage | ✅ 已完成 (100%) | P0 |
+| 用户中心 | `features/user/spec.md` | `lib/features/user/` | MemberPage, MinePage | ✅ 已完成 (100%) | P1 |
+| 动态 | `features/dynamics/spec.md` | `lib/features/dynamics/` | DynamicsPage, DynamicDetailPage | ✅ 已完成 (100%) | P1 |
+| 媒体库 | `features/media/spec.md` | `lib/features/media/` | MediaPage | ✅ 已完成 (100%) | P1 |
+| 登录 | `features/login/spec.md` | `lib/features/login/` | LoginPage | ✅ 已完成 (95%) | P2 |
+| 直播 | `features/live/spec.md` | `lib/features/live/` | LivePage, LiveRoomPage | ✅ 已完成 (100%) | P1 |
+| 消息 | `features/message/spec.md` | `lib/features/message/` | Whisper, Reply, At, Like, System | ✅ 已完成 (100%) | P1 |
+| 设置 | `features/setting/spec.md` | `lib/features/setting/` | SettingPage + 7 个子页面 | ✅ 已完成 (100%) | P2 |
+| 热门排行 | `features/hot/spec.md` | `lib/features/home/` + `lib/features/rank/` | HotPage, RankPage | ✅ 已完成 (100%) | P0 |
 
 ## 模块依赖关系
 

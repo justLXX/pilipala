@@ -38,6 +38,16 @@ class PlPlayerController {
   // 添加一个私有静态变量来保存实例
   static PlPlayerController? _instance;
 
+  /// Hot restart 时清理残留的 native 播放器资源
+  static Future<void> disposeInstance() async {
+    if (_instance != null) {
+      try {
+        await _instance!.dispose(type: 'all');
+      } catch (_) {}
+      _instance = null;
+    }
+  }
+
   // 流事件  监听播放状态变化
   StreamSubscription? _playerEventSubs;
 

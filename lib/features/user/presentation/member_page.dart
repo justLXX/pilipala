@@ -147,7 +147,7 @@ class _MemberHeader extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       stretch: true,
-      expandedHeight: 372,
+      expandedHeight: 450,
       backgroundColor: colorScheme.surface,
       foregroundColor: colorScheme.onSurface,
       surfaceTintColor: Colors.transparent,

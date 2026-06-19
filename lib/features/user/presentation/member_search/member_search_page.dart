@@ -37,10 +37,6 @@ class _MemberSearchPageState extends State<MemberSearchPage>
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

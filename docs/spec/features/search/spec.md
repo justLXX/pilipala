@@ -33,15 +33,13 @@
 
 | 页面 | 路由 | 文件 | 说明 |
 |------|------|------|------|
-| 搜索页 | `/search` | `lib/pages/search/view.dart` | 搜索主页面（热搜、建议、历史） |
-| 搜索结果页 | `/searchResult` | `lib/pages/search_result/view.dart` | 搜索结果展示 |
-| 搜索面板 | - | `lib/pages/search_panel/view.dart` | 搜索输入面板 |
+| 搜索页 | `/search` | `lib/features/search/presentation/search_page.dart` | 搜索主页面（热搜、建议、历史） |
 
 ## 4. Controller 职责
 
 ### 4.1 SearchController
 
-文件：`lib/pages/search/controller.dart`
+文件：`lib/features/search/presentation/search_controller.dart`
 
 职责：
 - 管理搜索关键词
@@ -65,7 +63,7 @@ class SearchController extends GetxController {
 
 ### 4.2 SearchResultController
 
-文件：`lib/pages/search_result/controller.dart`
+文件：`lib/features/search/presentation/search_result_controller.dart`
 
 职责：
 - 管理搜索结果
@@ -197,14 +195,11 @@ GET /x/web-interface/wbi/search/all/v2
 - 支持按排序方式排序（综合/播放多/新发布/弹幕多/收藏多）
 - 搜索结果支持分页加载
 
-## 9. 迁移状态
+## 9. 开发状态
 
-- ✅ 旧代码功能完成
-- ✅ 三层架构迁移（SearchRepository + UseCases + PiliSearchController）
-- ✅ SearchPage + widgets 迁移到 `lib/features/search/presentation/`
-- ✅ 路由注册（`/search`）
-- ✅ 类名重命名为 `PiliSearchController`（避免与 Flutter 内置冲突）
-- ✅ 搜索结果 UI 展示（SearchResultsWidget）
-- ⬜ 搜索分类（视频/番剧/用户等）
-- ⬜ 依赖注入注册
-- ⬜ 单元测试
+- [x] 三层架构迁移完成（data/domain/presentation）
+- [x] 路由注册（`/search`）
+- [x] 依赖注入注册（SearchBinding）
+- [x] 类名重命名为 `PiliSearchController`
+- [x] 搜索结果 UI 展示
+- [ ] 单元测试

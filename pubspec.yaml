@@ -155,6 +155,7 @@ dependencies:
   # 文本语法高亮
   re_highlight: ^0.0.3
 
+  http: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

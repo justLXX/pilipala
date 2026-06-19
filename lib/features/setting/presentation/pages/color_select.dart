@@ -42,30 +42,28 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
         centerTitle: false,
         title: const Text('选择应用主题'),
       ),
-      body: ListView(
-        children: [
-          Obx(
-            () => RadioListTile(
-              value: 0,
-              title: const Text('动态取色'),
-              groupValue: ctr.type.value,
-              onChanged: (dynamic val) async {
-                ctr.type.value = 0;
-                ctr.setting.put(SettingBoxKey.dynamicColor, true);
-              },
+      body: RadioGroup<int>(
+        groupValue: ctr.type.value,
+        onChanged: (int? value) {
+          if (value != null) {
+            ctr.type.value = value;
+            ctr.setting.put(SettingBoxKey.dynamicColor, value == 0);
+          }
+        },
+        child: ListView(
+          children: [
+            Obx(
+              () => RadioListTile(
+                value: 0,
+                title: const Text('动态取色'),
+              ),
             ),
-          ),
-          Obx(
-            () => RadioListTile(
-              value: 1,
-              title: const Text('指定颜色'),
-              groupValue: ctr.type.value,
-              onChanged: (dynamic val) async {
-                ctr.type.value = 1;
-                ctr.setting.put(SettingBoxKey.dynamicColor, false);
-              },
+            Obx(
+              () => RadioListTile(
+                value: 1,
+                title: const Text('指定颜色'),
+              ),
             ),
-          ),
           Obx(
             () {
               int type = ctr.type.value;
@@ -137,6 +135,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
           ),
         ],
       ),
+    ),
     );
   }
 }

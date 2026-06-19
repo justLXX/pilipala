@@ -10,7 +10,7 @@ PiliPala 是一个基于 Flutter 的第三方 Bilibili 客户端，采用 GetX �
 
 | 层级 | 技术选型 | 说明 |
 |------|---------|------|
-| UI 框架 | Flutter 3.19.6 | 跨平台移动应用框架 |
+| UI 框架 | Flutter (stable) | 跨平台移动应用框架 |
 | 状态管理 | GetX 4.6.5 | 响应式状态管理、路由、依赖注入 |
 | 网络请求 | Dio 5.4.1 | HTTP 客户端 |
 | 本地存储 | Hive 2.2.3 | 轻量级键值存储 |
@@ -97,16 +97,28 @@ lib/
 │   ├── network/     #   ApiClient 抽象 + Dio 实现
 │   ├── storage/     #   StorageService (Hive 封装)
 │   └── theme/       #   ThemeService
-├── features/        # 新功能模块（data/domain/presentation 三层架构）
+├── features/        # 功能模块（data/domain/presentation 三层架构）
+│   ├── about/       #   关于
+│   ├── bangumi/     #   番剧
+│   ├── blacklist/   #   黑名单
+│   ├── dynamics/    #   动态
 │   ├── home/        #   首页推荐 + 热门
+│   ├── html/        #   HTML 页面
+│   ├── live/        #   直播
 │   ├── login/       #   登录
+│   ├── main/        #   主框架入口
 │   ├── media/       #   媒体库
+│   ├── message/     #   消息
+│   ├── opus/        #   专栏文章
+│   ├── rank/        #   排行榜
+│   ├── read/        #   阅读页面
 │   ├── search/      #   搜索
+│   ├── setting/     #   设置
 │   ├── user/        #   用户中心
-│   └── video/       #   视频详情
+│   ├── video/       #   视频详情
+│   └── webview/     #   WebView 页面
 ├── http/            # HTTP 层（API、请求初始化、拦截器）
 ├── models/          # 数据模型（按业务域分组）
-├── pages/           # 旧页面（待迁移到 features/）
 ├── plugin/          # 可复用插件（播放器、画廊等）
 ├── router/          # 路由配置
 ├── scripts/         # 脚本
@@ -115,10 +127,7 @@ lib/
 └── utils/           # 工具类
 ```
 
-> **迁移说明**：项目正在从 `lib/pages/`（扁平结构）迁移到 `lib/features/`（三层架构）。
-> 当前 6 个模块已迁移，48 个目录待迁移。详见 [Spec README](../README.md) 的迁移状态表。
-
-### 2.2 features 目录规范（新架构）
+### 2.2 features 目录规范
 
 每个 feature 模块遵循三层架构：
 
@@ -135,17 +144,7 @@ features/<module>/
     widgets/                 # 页面级子组件
 ```
 
-### 2.3 pages 目录规范（旧架构，待迁移）
-
-```
-pages/<feature>/
-  index.dart      # 导出文件（export controller + view）
-  controller.dart # GetxController，业务逻辑
-  view.dart       # StatelessWidget/StatefulWidget，UI 渲染
-  widgets/        # 页面级子组件
-```
-
-### 2.4 模型目录规范
+### 2.3 模型目录规范
 
 ```
 models/
@@ -154,7 +153,7 @@ models/
     <entity>.dart # 数据实体
 ```
 
-### 2.5 HTTP 目录规范
+### 2.4 HTTP 目录规范
 
 ```
 http/
@@ -215,54 +214,32 @@ flutter test
 
 ## 6. 版本信息
 
-- **Flutter**: 3.19.6 (stable)
+- **Flutter**: 3.41.9 (FVM)
 - **Dart SDK**: >=3.0.0 <4.0.0
 - **App Version**: 1.0.28+1028
 
-## 7. 迁移进度
+## 7. 模块状态
 
-### 7.1 整体状态
+所有 19 个模块已完成迁移至 `lib/features/`，采用 data/domain/presentation 三层架构：
 
-| 层级 | 旧架构 (`pages/`) | 新架构 (`features/`) | 状态 |
-|------|-------------------|---------------------|------|
-| 路由层 | `app_pages.dart` 引用旧页面 | 已切换到 features 页面 | ✅ 已切换 |
-| 底部导航 | `nav_bar_config.dart` 引用旧页面 | 未切换 | ❌ 未切换 |
-| 启动注册 | `main/view.dart` 注册旧 Controller | 未切换 | ❌ 未切换 |
-| 依赖注入 | `dependency_injection.dart` 只注册核心服务 | 未注册 feature 层 | ❌ 未连接 |
-
-### 7.2 模块迁移状态
-
-**已迁移模块（6个）**：
-
-| 模块 | 路径 | 完成度 | 文件数 | 路由接入 | 状态 |
-|------|------|--------|--------|----------|------|
-| 首页推荐 | `features/home/` | ✅ 100% | 7 | ✅ `/` `/hot` | ✅ CSRF已修复，HotPage/RcmdPage共用HomeController |
-| 视频详情 | `features/video/` | ✅ 100% | 7 | ✅ `/video` | ✅ CSRF已修复，点赞/收藏API已调用，播放器widget待集成 |
-| 搜索 | `features/search/` | ✅ 100% | 8 | ✅ `/search` | ✅ Controller命名已修复，搜索结果UI已添加 |
-| 用户中心 | `features/user/` | ✅ 100% | 9 | ✅ `/member` | ✅ coins/likes/seasons widgets已集成 |
-| 媒体库 | `features/media/` | ~65% | 5 | ❌ 未注册 | 收藏 tab 空实现；子路由未注册 |
-| 登录 | `features/login/` | ~45% | 4 | ❌ 未注册 | 无 UI；SMS/QR 登录 UseCase 缺失；token 持久化 TODO |
-
-**待迁移模块（49个）**：
-
-- **有 Spec（5个）**：热门排行、动态、直播、消息、设置
-- **无 Spec（44个）**：详见 [Spec README](../README.md) 的功能模块列表
-
-### 7.3 迁移策略
-
-1. **优先级排序**：
-   - P0：热门排行（归入 `features/home/`）
-   - P1：动态、直播、消息
-   - P2：设置、媒体库子模块
-
-2. **迁移步骤**：
-   - 创建 `features/<module>/` 三层结构
-   - 迁移 Controller 逻辑到 UseCase/Repository
-   - 迁移 View 到 presentation 层
-   - 注册路由和依赖注入
-   - 清理旧 `pages/` 代码
-
-3. **注意事项**：
-   - 保持向后兼容，旧代码暂时保留
-   - 优先修复 CSRF token 问题
-   - 确保新旧代码共存期间不破坏现有功能
+| 模块 | 路径 | 说明 |
+|------|------|------|
+| 首页推荐 | `features/home/` | 含推荐和热门 |
+| 视频详情 | `features/video/` | 播放器、评论、相关推荐 |
+| 搜索 | `features/search/` | 搜索、热搜、搜索建议 |
+| 用户中心 | `features/user/` | 关注、粉丝、投稿 |
+| 动态 | `features/dynamics/` | 关注动态、转发 |
+| 排行榜 | `features/rank/` | 全站排行、分区排行 |
+| 直播 | `features/live/` | 直播列表、直播间 |
+| 消息 | `features/message/` | 私信、通知 |
+| 设置 | `features/setting/` | 应用设置 |
+| 登录 | `features/login/` | 登录、注册 |
+| App Shell | `features/main/` | 主框架入口 |
+| 媒体库 | `features/media/` | 收藏、历史、稍后再看 |
+| 关于 | `features/about/` | 应用信息 |
+| 黑名单 | `features/blacklist/` | 黑名单管理 |
+| 番剧 | `features/bangumi/` | 番剧列表 |
+| HTML | `features/html/` | HTML 页面 |
+| Opus | `features/opus/` | 专栏文章 |
+| Read | `features/read/` | 阅读页面 |
+| WebView | `features/webview/` | WebView 页面 |

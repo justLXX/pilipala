@@ -44,11 +44,8 @@ class _TabbarSetPageState extends State<TabbarSetPage> {
     SmartDialog.showToast('保存成功，下次启动时生效');
   }
 
-  void onReorder(int oldIndex, int newIndex) {
+  void onReorderItem(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final tabsItem = defaultTabs.removeAt(oldIndex);
       defaultTabs.insert(newIndex, tabsItem);
     });
@@ -85,7 +82,7 @@ class _TabbarSetPageState extends State<TabbarSetPage> {
         ],
       ),
       body: ReorderableListView(
-        onReorder: onReorder,
+        onReorderItem: onReorderItem,
         physics: const NeverScrollableScrollPhysics(),
         footer: SizedBox(
           height: MediaQuery.of(context).padding.bottom + 30,

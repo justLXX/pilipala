@@ -275,6 +275,28 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       /// 空白占位
       BottomControlType.space: const Spacer(),
 
+      /// 弹幕开关
+      BottomControlType.danmaku: SizedBox(
+        height: 30,
+        width: 30,
+        child: Obx(
+          () => IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              _.isOpenDanmu.value
+                  ? Icons.subtitles_outlined
+                  : Icons.subtitles_off_outlined,
+              color: _.isOpenDanmu.value ? Colors.white : Colors.white54,
+              size: 18,
+            ),
+            onPressed: () {
+              _.isOpenDanmu.value = !_.isOpenDanmu.value;
+              setting.put(SettingBoxKey.enableShowDanmaku, _.isOpenDanmu.value);
+            },
+          ),
+        ),
+      ),
+
       /// 选集
       BottomControlType.episode: SizedBox(
         height: 30,
@@ -550,7 +572,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           color: widget.controller.subtitleContent.value != ''
-                              ? Colors.black.withOpacity(0.6)
+                              ? Colors.black.withValues(alpha: 0.6)
                               : Colors.transparent,
                         ),
                         padding: widget.controller.subTitleCode.value != -1
@@ -760,9 +782,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 buffered: Duration(seconds: buffer),
                 total: Duration(seconds: max),
                 progressBarColor: colorTheme,
-                baseBarColor: Colors.white.withOpacity(0.2),
+                baseBarColor: Colors.white.withValues(alpha: 0.2),
                 bufferedBarColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                 timeLabelLocation: TimeLabelLocation.none,
                 thumbColor: colorTheme,
                 barHeight: 3,

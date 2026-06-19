@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:pilipala/utils/parse_utils.dart';
 
 class DynamicsDataModel {
   DynamicsDataModel({

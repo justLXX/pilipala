@@ -34,13 +34,13 @@
 
 | 页面 | 路由 | 文件 | 说明 |
 |------|------|------|------|
-| 登录页 | `/loginPage` | `lib/pages/login/view.dart` | 登录主页面 |
+| 登录页 | `/loginPage` | `lib/features/login/presentation/login_page.dart` | 登录主页面 |
 
 ## 4. Controller 职责
 
 ### 4.1 LoginController
 
-文件：`lib/pages/login/controller.dart`
+文件：`lib/features/login/presentation/login_controller.dart`
 
 职责：
 - 管理登录状态
@@ -173,13 +173,12 @@ GET https://api.bilibili.com/x/web-interface/nav
 - 支持自动登录（记住密码）
 - 登录状态变更通过 EventBus 通知其他模块
 
-## 9. 迁移状态
+## 9. 开发状态
 
-- [x] 旧代码功能完成
-- [x] 三层架构迁移（LoginRepository + UseCases + LoginController）
-- [x] API 端点修正（loginInByWebPwd、qrCodeApi、loginInByQrcode）
-- [ ] 登录页面 UI（LoginPage 未创建）
-- [ ] SMS 登录 / 扫码登录 UseCase
-- [ ] Token 持久化（登录信息保存/清除）
-- [ ] 路由注册
-- [ ] 依赖注入注册
+- [x] 三层架构迁移完成（data/domain/presentation）
+- [x] 路由注册（`/loginPage`）
+- [x] 依赖注入注册（LoginBinding）
+- [x] API 端点修正
+- [x] 登录页面 UI（手机输入、密码表单、短信验证码、扫码登录）
+- [x] 8 个 UseCase 已注册
+- [ ] 单元测试

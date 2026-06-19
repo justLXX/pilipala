@@ -89,7 +89,7 @@ class ReplyItem extends StatelessWidget {
                   bottom: BorderSide(
             width: 1,
             color:
-                Theme.of(context).colorScheme.onInverseSurface.withOpacity(0.5),
+                Theme.of(context).colorScheme.onInverseSurface.withValues(alpha: 0.5),
           ))),
           child: content(context),
         ),
@@ -318,7 +318,7 @@ class ReplyItem extends StatelessWidget {
             child: Row(children: [
               if (!replySave!) ...[
                 Icon(Icons.reply,
-                    size: 18, color: colorScheme.outline.withOpacity(0.8)),
+                    size: 18, color: colorScheme.outline.withValues(alpha: 0.8)),
                 const SizedBox(width: 3),
                 Text(
                   '回复',

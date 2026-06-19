@@ -42,11 +42,8 @@ class _ActionMenuSetPageState extends State<ActionMenuSetPage> {
     SmartDialog.showToast('操作成功');
   }
 
-  void onReorder(int oldIndex, int newIndex) {
+  void onReorderItem(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final tabsItem = allLabels.removeAt(oldIndex);
       allLabels.insert(newIndex, tabsItem);
     });
@@ -90,7 +87,7 @@ class _ActionMenuSetPageState extends State<ActionMenuSetPage> {
         ],
       ),
       body: ReorderableListView(
-        onReorder: onReorder,
+        onReorderItem: onReorderItem,
         physics: const NeverScrollableScrollPhysics(),
         footer: SizedBox(
           height: MediaQuery.of(context).padding.bottom + 30,

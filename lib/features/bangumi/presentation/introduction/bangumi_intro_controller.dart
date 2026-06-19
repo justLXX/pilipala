@@ -32,7 +32,6 @@ class BangumiIntroController extends GetxController {
   List addMediaIdsNew = [];
   List delMediaIdsNew = [];
   RxMap followStatus = {}.obs;
-  int _tempThemeValue = -1;
   var userInfo;
   PersistentBottomSheetController? bottomSheetController;
 

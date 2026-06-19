@@ -37,7 +37,7 @@ flutter test
 flutter test test/widget_test.dart
 ```
 
-Flutter version pinned at **3.19.6** (channel stable). Dart SDK: `>=3.0.0 <4.0.0`.
+Flutter version pinned at **3.41.9** (via FVM). Dart SDK: `>=3.0.0 <4.0.0`.
 
 ## Architecture
 
@@ -50,15 +50,20 @@ The app uses **GetX** for state management, routing, and dependency injection.
 - **Bindings**: Formal GetX `Bindings` classes in `lib/router/bindings.dart` register Repository/UseCase/Controller via `Get.lazyPut()`.
 - Navigation uses `GetMaterialApp` with named routes defined in `lib/router/app_pages.dart` via `CustomGetPage`.
 
-### Page Structure Convention
+### Feature Module Convention
 
-Every page under `lib/pages/` follows this pattern:
+Every module under `lib/features/` follows this pattern:
 ```
-pages/<feature>/
-  index.dart      # barrel export (controller + view)
-  controller.dart # GetxController
-  view.dart       # StatelessWidget or StatefulWidget
-  widgets/        # page-specific sub-widgets
+features/<module>/
+  <module>.dart              # barrel file (exports layer public interfaces)
+  data/
+    <module>_repository.dart # Repository (wraps ApiClient calls, returns ApiResponse<T>)
+  domain/
+    <module>_use_cases.dart  # UseCase (wraps business logic, calls Repository)
+  presentation/
+    <module>_controller.dart # GetxController (injects UseCase, manages reactive state)
+    <module>_page.dart       # StatelessWidget/StatefulWidget (UI rendering)
+    widgets/                 # page-level sub-widgets
 ```
 
 ### HTTP / API Layer
@@ -69,6 +74,15 @@ pages/<feature>/
 - **WBI signing**: `lib/utils/wbi_sign.dart` — signs API requests requiring `w_rid`/`wts` parameters. Keys are cached daily in Hive.
 - **Interceptors**: `ApiInterceptor` handles 302 redirects (extracts `access_key`), error toast display, and network status checks.
 - **Cookie management**: `PersistCookieJar` with `dio_cookie_manager`. CSRF token (`bili_jct`) extracted from cookies for POST requests.
+
+### Features Architecture
+
+All modules are in `lib/features/<module>/` with data/domain/presentation layers:
+- **data/**: Repository (API calls, data sources)
+- **domain/**: UseCase (business logic)
+- **presentation/**: Controller + Page + widgets
+
+Key modules: home, video, search, user, media, dynamics, rank, login, about, blacklist, bangumi, html, opus, read, webview, live, message, setting, main
 
 ### Local Storage: Hive
 
@@ -97,11 +111,19 @@ Hive adapters are registered in `GStrorage.regAdapter()`. Run `build_runner` aft
 
 ### Main Navigation
 
-`lib/pages/main/view.dart` — bottom navigation with 4 tabs: Home (推荐), Rank (排行榜), Dynamics (动态), Media (我的). Tab order is configurable via settings.
+`lib/features/main/presentation/main_page.dart` — bottom navigation with 4 tabs: Home (推荐), Rank (排行榜), Dynamics (动态), Media (我的). Tab order is configurable via settings.
 
 ### Models
 
 `lib/models/` — data classes for API responses. Common enum/config models in `lib/models/common/` (tab types, theme types, color types, etc.). No code generation for JSON serialization; models are hand-parsed.
+
+### Other Key Patterns
+
+- **Event bus**: `lib/utils/event_bus.dart` — simple pub/sub for cross-widget events (e.g., `loginEvent`).
+- **Global data cache**: `lib/utils/global_data_cache.dart` — loads settings from Hive into memory at startup.
+- **Recommend filter**: `lib/utils/recommend_filter.dart` — filters recommended videos by duration/like ratio based on user settings.
+- **App scheme**: `lib/utils/app_scheme.dart` — handles deep links (`bilibili://` etc.).
+- **Custom route page**: `CustomGetPage` in `lib/router/app_pages.dart` wraps `GetPage` with `Transition.native` and optional fullscreen dialog mode.
 
 ### Plugins
 
