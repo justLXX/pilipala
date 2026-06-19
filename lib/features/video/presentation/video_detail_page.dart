@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_reply.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/video/presentation/video_detail_controller.dart';
 import 'package:pilipala/features/video/presentation/widgets/comment_controller.dart';
 import 'package:pilipala/features/video/presentation/widgets/comment_input_dialog.dart';
 import 'package:pilipala/features/video/presentation/widgets/comment_item.dart';
 import 'package:pilipala/features/video/presentation/widgets/reply_reply_panel.dart';
 import 'package:pilipala/features/video/presentation/widgets/header_control.dart';
+import 'package:pilipala/features/main/presentation/main_controller.dart';
 import 'package:pilipala/models/model_hot_video_item.dart';
 import 'package:pilipala/models/video_detail_res.dart';
 import 'package:pilipala/models/video/play/quality.dart';
@@ -44,6 +45,9 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   final ScrollController _extendNestCtr = ScrollController();
   // 保存离开页面时的播放进度，返回时恢复
   Duration _lastPosition = Duration.zero;
+  bool _didPushImagePreview = false;
+  int _lastChapterCheckSecond = -1;
+  PageRoute<dynamic>? _subscribedRoute;
   // Tracks current system-UI mode to avoid redundant SystemChrome calls on
   // each Obx rebuild. True == immersive requested.
   bool _systemImmersive = false;
@@ -58,22 +62,19 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     _vdCtr = Get.put(VideoDetailController(), tag: _heroTag);
     _vdCtr.playerController.addStatusLister(_playerStatusListener);
     _vdCtr.playerController.addPositionListener(_playerPositionListener);
-    _vdCtr
-        .loadVideoDetail(
+    _vdCtr.loadVideoDetail(
       bvid: bvid,
       aid: Get.parameters['aid'] != null
           ? int.parse(Get.parameters['aid']!)
           : null,
-    )
-        .then((_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    );
   }
 
   void _playerPositionListener(Duration position) {
-    _vdCtr.updateCurrentChapter(position.inSeconds);
+    final second = position.inSeconds;
+    if (second == _lastChapterCheckSecond) return;
+    _lastChapterCheckSecond = second;
+    _vdCtr.updateCurrentChapter(second);
   }
 
   void _playerStatusListener(PlayerStatus status) {
@@ -108,12 +109,25 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    VideoDetailPage.routeObserver
-        .subscribe(this, ModalRoute.of(context)! as PageRoute);
+    final route = ModalRoute.of(context);
+    if (route is PageRoute<dynamic> && route != _subscribedRoute) {
+      if (_subscribedRoute != null) {
+        VideoDetailPage.routeObserver.unsubscribe(this);
+      }
+      _subscribedRoute = route;
+      VideoDetailPage.routeObserver.subscribe(this, route);
+    }
   }
 
   @override
   void didPushNext() {
+    final bool isImagePreview = Get.isRegistered<MainController>() &&
+        Get.find<MainController>().imgPreviewStatus;
+    if (isImagePreview) {
+      _didPushImagePreview = true;
+      super.didPushNext();
+      return;
+    }
     // 离开页面：保存进度，移除监听，暂停播放
     if (_vdCtr.playerController.videoPlayerController != null) {
       _lastPosition = _vdCtr.playerController.position.value;
@@ -125,6 +139,11 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 
   @override
   void didPopNext() {
+    if (_didPushImagePreview) {
+      _didPushImagePreview = false;
+      super.didPopNext();
+      return;
+    }
     // 返回页面：重新初始化播放器，恢复进度
     if (_vdCtr.playerController.videoPlayerController != null &&
         _vdCtr.playUrl != null) {
@@ -664,37 +683,50 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   // ==================== Tab Bar ====================
 
   Widget _buildTabBar() {
-    return Container(
-      width: double.infinity,
-      height: 45,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            width: 1,
-            color: Theme.of(context).dividerColor.withOpacity(0.1),
-          ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+      child: Container(
+        width: double.infinity,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(999),
         ),
-      ),
-      child: Material(
-        child: Obx(
-          () {
-            // Use commentController.count if available, otherwise fall back to tabs
-            final commentCtr = _vdCtr.commentController;
-            final List<String> tabLabels;
-            if (commentCtr != null && commentCtr.count.value > 0) {
-              tabLabels = ['简介', '评论 ${commentCtr.count}'];
-            } else {
-              tabLabels = _vdCtr.tabs;
-            }
-            return TabBar(
-              padding: EdgeInsets.zero,
-              controller: _vdCtr.tabController,
-              labelStyle: const TextStyle(fontSize: 13),
-              labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-              dividerColor: Colors.transparent,
-              tabs: tabLabels.map((name) => Tab(text: name)).toList(),
-            );
-          },
+        child: Material(
+          color: Colors.transparent,
+          child: Obx(
+            () {
+              // Use commentController.count if available, otherwise fall back to tabs
+              final commentCtr = _vdCtr.commentController;
+              final List<String> tabLabels;
+              if (commentCtr != null && commentCtr.count.value > 0) {
+                tabLabels = ['简介', '评论 ${commentCtr.count}'];
+              } else {
+                tabLabels = _vdCtr.tabs;
+              }
+              return TabBar(
+                padding: const EdgeInsets.all(3),
+                controller: _vdCtr.tabController,
+                labelStyle:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                unselectedLabelStyle:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                labelColor: Theme.of(context).colorScheme.primary,
+                unselectedLabelColor: Theme.of(context).colorScheme.outline,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                tabs: tabLabels.map((name) => Tab(text: name)).toList(),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -716,6 +748,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
       final viewPoints = _vdCtr.viewPoints;
       return CustomScrollView(
         key: const PageStorageKey<String>('简介'),
+        physics: const ClampingScrollPhysics(),
         slivers: [
           // Video title & description
           SliverToBoxAdapter(
@@ -774,10 +807,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
               child: _UgcSeasonInfo(ugcSeason: detail.ugcSeason!),
             ),
           // Related / recommended videos
-          if (related.isNotEmpty)
-            SliverToBoxAdapter(
-              child: _RelatedVideos(videos: related),
-            ),
+          if (related.isNotEmpty) ..._buildRelatedVideoSlivers(related),
         ],
       );
     });
@@ -791,6 +821,53 @@ class _VideoDetailPageState extends State<VideoDetailPage>
       return const Center(child: CircularProgressIndicator());
     }
     return _CommentPanel(commentController: commentCtr);
+  }
+
+  List<Widget> _buildRelatedVideoSlivers(List<HotVideoItemModel> videos) {
+    final crossAxisCount = Responsive.videoGridCount(context);
+    return [
+      const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text(
+            '推荐视频',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ),
+      ),
+      if (crossAxisCount == 1)
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => CleanVideoListTile(
+              videoItem: videos[index],
+              showPubdate: true,
+            ),
+            childCount: videos.length,
+            addAutomaticKeepAlives: false,
+          ),
+        )
+      else
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisExtent: 236,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => CleanVideoCard(
+                videoItem: videos[index],
+                showPubdate: true,
+              ),
+              childCount: videos.length,
+              addAutomaticKeepAlives: false,
+            ),
+          ),
+        ),
+      SliverToBoxAdapter(
+        child: SizedBox(height: MediaQuery.of(context).padding.bottom + 10),
+      ),
+    ];
   }
 }
 
@@ -940,7 +1017,7 @@ class _ChapterCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -957,7 +1034,8 @@ class _ChapterCard extends StatelessWidget {
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.15),
+                            color: theme.colorScheme.primary
+                                .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
@@ -1014,7 +1092,7 @@ class _IntroActionBar extends StatelessWidget {
     // each button had its own Obx (three subscriptions + three rebuilds when
     // the controller toggles multiple states together, e.g. after _query).
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
       child: Obx(() {
         final liked = isLiked.value;
         final coined = isCoined.value;
@@ -1024,7 +1102,7 @@ class _IntroActionBar extends StatelessWidget {
             _buildActionButton(
               icon: liked ? Icons.thumb_up : Icons.thumb_up_outlined,
               label: '点赞',
-              color: liked ? Colors.red : null,
+              color: liked ? Theme.of(context).colorScheme.primary : null,
               onPressed: onLike,
             ),
             _buildActionButton(
@@ -1032,13 +1110,13 @@ class _IntroActionBar extends StatelessWidget {
                   ? Icons.monetization_on
                   : Icons.monetization_on_outlined,
               label: '投币',
-              color: coined ? Colors.orange : null,
+              color: coined ? Theme.of(context).colorScheme.primary : null,
               onPressed: onCoin,
             ),
             _buildActionButton(
               icon: collected ? Icons.star : Icons.star_outline,
               label: '收藏',
-              color: collected ? Colors.yellow.shade700 : null,
+              color: collected ? Theme.of(context).colorScheme.primary : null,
               onPressed: onCollect,
             ),
             _buildActionButton(
@@ -1059,14 +1137,27 @@ class _IntroActionBar extends StatelessWidget {
     VoidCallback? onPressed,
   }) {
     return Expanded(
-      child: TextButton.icon(
+      child: TextButton(
         onPressed: onPressed,
-        icon: Icon(icon, color: color, size: 20),
-        label: Text(
-          label,
-          style: TextStyle(color: color, fontSize: 13),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+          foregroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 21),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -1091,57 +1182,84 @@ class _UpMasterInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          NetworkImgLayer(
-            src: owner.face ?? '',
-            width: 40,
-            height: 40,
-            type: 'avatar',
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  owner.name ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: theme.dividerColor.withValues(alpha: 0.12),
+            ),
+            bottom: BorderSide(
+              color: theme.dividerColor.withValues(alpha: 0.12),
             ),
           ),
-          const SizedBox(width: 8),
-          Obx(() {
-            final followed = followStatusRx['attribute'] != null &&
-                followStatusRx['attribute'] != 0;
-            return SizedBox(
-              height: 32,
-              child: TextButton(
-                onPressed: onFollow,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  foregroundColor: followed
-                      ? theme.colorScheme.outline
-                      : theme.colorScheme.onPrimary,
-                  backgroundColor: followed
-                      ? theme.colorScheme.onInverseSurface
-                      : theme.colorScheme.primary,
-                ),
-                child: Text(
-                  followed ? '已关注' : '关注',
-                  style: TextStyle(
-                    fontSize: theme.textTheme.labelMedium?.fontSize ?? 12,
-                  ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            children: [
+              NetworkImgLayer(
+                src: owner.face ?? '',
+                width: 42,
+                height: 42,
+                type: 'avatar',
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      owner.name ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'UP 主',
+                      style: TextStyle(
+                        color: theme.colorScheme.outline,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }),
-        ],
+              const SizedBox(width: 8),
+              Obx(() {
+                final followed = followStatusRx['attribute'] != null &&
+                    followStatusRx['attribute'] != 0;
+                return SizedBox(
+                  height: 34,
+                  child: TextButton(
+                    onPressed: onFollow,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      foregroundColor: followed
+                          ? theme.colorScheme.outline
+                          : theme.colorScheme.onPrimary,
+                      backgroundColor: followed
+                          ? theme.colorScheme.surfaceContainerHighest
+                          : theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    child: Text(
+                      followed ? '已关注' : '关注',
+                      style: TextStyle(
+                        fontSize: theme.textTheme.labelMedium?.fontSize ?? 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1214,51 +1332,6 @@ class _UgcSeasonInfo extends StatelessWidget {
           const SizedBox(height: 16),
         ],
       ),
-    );
-  }
-}
-
-/// Related / recommended videos section.
-class _RelatedVideos extends StatelessWidget {
-  final List<HotVideoItemModel> videos;
-
-  const _RelatedVideos({required this.videos});
-
-  @override
-  Widget build(BuildContext context) {
-    final crossAxisCount = Responsive.videoGridCount(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Text(
-            '推荐视频',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-        ),
-        if (crossAxisCount == 1)
-          ...videos.map((video) => VideoCardH(
-                videoItem: video,
-                showPubdate: true,
-              ))
-        else
-          GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisExtent: 118,
-            ),
-            itemCount: videos.length,
-            itemBuilder: (context, index) => VideoCardH(
-              videoItem: videos[index],
-              showPubdate: true,
-            ),
-          ),
-        SizedBox(height: MediaQuery.of(context).padding.bottom + 10),
-      ],
     );
   }
 }
@@ -1373,9 +1446,20 @@ class _CommentPanelState extends State<_CommentPanel> {
                       final data = snapshot.data;
                       if (commentCtr.replyList.isNotEmpty ||
                           (data != null && data['status'])) {
+                        if (commentCtr.isLoadingMore &&
+                            commentCtr.replyList.isEmpty) {
+                          return SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                return const VideoReplySkeleton();
+                              },
+                              childCount: 5,
+                            ),
+                          );
+                        }
                         return Obx(() {
-                          if (commentCtr.isLoadingMore &&
-                              commentCtr.replyList.isEmpty) {
+                          final replyList = commentCtr.replyList;
+                          if (replyList.isEmpty) {
                             return SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (BuildContext context, int index) {
@@ -1390,89 +1474,79 @@ class _CommentPanelState extends State<_CommentPanel> {
                               (BuildContext context, int index) {
                                 final double bottom =
                                     MediaQuery.of(context).padding.bottom;
-                                if (index == commentCtr.replyList.length) {
-                                  return RepaintBoundary(
-                                    child: Container(
-                                      padding: EdgeInsets.only(bottom: bottom),
-                                      height: bottom + 100,
-                                      child: Center(
-                                        child: Obx(
-                                          () => Text(
-                                            commentCtr.noMore.value,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .outline,
-                                            ),
+                                if (index == replyList.length) {
+                                  return Container(
+                                    padding: EdgeInsets.only(bottom: bottom),
+                                    height: bottom + 100,
+                                    child: Center(
+                                      child: Obx(
+                                        () => Text(
+                                          commentCtr.noMore.value,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .outline,
                                           ),
                                         ),
                                       ),
                                     ),
                                   );
                                 }
-                                final replyItem = commentCtr.replyList[index];
-                                // CommentContent does heavy work (regex parse,
-                                // emote WidgetSpans, LayoutBuilder for images).
-                                // Wrap in RepaintBoundary so scrolling does not
-                                // repaint already-built items.
-                                return RepaintBoundary(
-                                  child: CommentItem(
-                                    replyItem: replyItem,
-                                    showReplyRow: true,
-                                    replyLevel: '1',
-                                    onLike: (int rpid, int action) {
-                                      commentCtr.likeReply(rpid, action);
-                                    },
-                                    onReplyTap: (replyItem) {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        backgroundColor:
-                                            Theme.of(context).colorScheme.surface,
-                                        builder: (context) => ReplyReplyPanel(
+                                final replyItem = replyList[index];
+                                return CommentItem(
+                                  key: ValueKey(replyItem.rpid),
+                                  replyItem: replyItem,
+                                  showReplyRow: true,
+                                  replyLevel: '1',
+                                  onLike: (int rpid, int action) {
+                                    commentCtr.likeReply(rpid, action);
+                                  },
+                                  onReplyTap: (replyItem) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.surface,
+                                      builder: (context) => ReplyReplyPanel(
+                                        oid: commentCtr.aid ?? 0,
+                                        rpid: replyItem.rpid ?? 0,
+                                        firstFloor: replyItem,
+                                      ),
+                                    );
+                                  },
+                                  onReply: (replyItem) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (ctx) => Padding(
+                                        padding: EdgeInsets.only(
+                                            bottom: MediaQuery.of(ctx)
+                                                .viewInsets
+                                                .bottom),
+                                        child: CommentInputDialog(
                                           oid: commentCtr.aid ?? 0,
-                                          rpid: replyItem.rpid ?? 0,
-                                          firstFloor: replyItem,
+                                          root: replyItem.rpid ?? 0,
+                                          parent: replyItem.rpid ?? 0,
+                                          replyItem: replyItem,
                                         ),
-                                      );
-                                    },
-                                    onReply: (replyItem) {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        builder: (ctx) => Padding(
-                                          padding: EdgeInsets.only(
-                                              bottom: MediaQuery.of(ctx)
-                                                  .viewInsets
-                                                  .bottom),
-                                          child: CommentInputDialog(
-                                            oid: commentCtr.aid ?? 0,
-                                            root: replyItem.rpid ?? 0,
-                                            parent: replyItem.rpid ?? 0,
-                                            replyItem: replyItem,
-                                          ),
-                                        ),
-                                      ).then((value) {
-                                        if (value != null &&
-                                            value['data'] != null) {
-                                          final idx = commentCtr.replyList
-                                              .indexOf(replyItem);
-                                          if (idx >= 0) {
-                                            commentCtr.replyList[idx].count =
-                                                (commentCtr.replyList[idx]
-                                                            .count ??
-                                                        0) +
-                                                    1;
-                                            commentCtr.replyList.refresh();
-                                          }
+                                      ),
+                                    ).then((value) {
+                                      if (value != null &&
+                                          value['data'] != null) {
+                                        final idx =
+                                            replyList.indexOf(replyItem);
+                                        if (idx >= 0) {
+                                          replyList[idx].count =
+                                              (replyList[idx].count ?? 0) + 1;
+                                          replyList.refresh();
                                         }
-                                      });
-                                    },
-                                  ),
+                                      }
+                                    });
+                                  },
                                 );
                               },
-                              childCount: commentCtr.replyList.length + 1,
+                              childCount: replyList.length + 1,
                               // Comment items are cheap to rebuild when scrolled
                               // back into view and carry no keep-alive state
                               // worth preserving; disabling keep-alive lowers

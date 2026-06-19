@@ -35,12 +35,14 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, Object? result) {
         if (didPop) return;
         Navigator.of(context).maybePop();
       },
       child: Scaffold(
         appBar: AppBar(
+          elevation: 0,
+          titleSpacing: 16,
           leading: Obx(
             () => _loginCtr.currentIndex.value == 0
                 ? IconButton(
@@ -129,7 +131,8 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Expanded(
                   child: Divider(
-                    color: Theme.of(context).dividerColor.withOpacity(0.4),
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.4),
                   ),
                 ),
                 Padding(
@@ -141,7 +144,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Expanded(
                   child: Divider(
-                    color: Theme.of(context).dividerColor.withOpacity(0.4),
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.4),
                   ),
                 ),
               ],
@@ -156,8 +160,13 @@ class _LoginPageState extends State<LoginPage> {
                   isDense: true,
                   labelText: '输入手机号码',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6.0),
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  filled: true,
+                  fillColor: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.42),
                 ),
                 validator: (v) {
                   return v!.trim().isNotEmpty ? null : "手机号码不能为空";
@@ -232,11 +241,11 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(width: 4),
               IconButton(
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
                     return Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.1);
+                        .withValues(alpha: 0.1);
                   }),
                 ),
                 onPressed: () => _loginCtr.changeLoginType(),
@@ -259,8 +268,13 @@ class _LoginPageState extends State<LoginPage> {
                     isDense: true,
                     labelText: '输入密码',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+                      borderRadius: BorderRadius.circular(16),
                     ),
+                    filled: true,
+                    fillColor: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.42),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _loginCtr.passwordVisible.value
@@ -329,11 +343,11 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(width: 4),
               IconButton(
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
                     return Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.1);
+                        .withValues(alpha: 0.1);
                   }),
                 ),
                 onPressed: () => _loginCtr.changeLoginType(),
@@ -358,8 +372,13 @@ class _LoginPageState extends State<LoginPage> {
                     isDense: true,
                     labelText: '输入验证码',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+                      borderRadius: BorderRadius.circular(16),
                     ),
+                    filled: true,
+                    fillColor: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.42),
                   ),
                   validator: (v) {
                     return v!.trim().isNotEmpty ? null : "验证码不能为空";

@@ -22,7 +22,8 @@ class _HeaderControlWidgetState extends State<HeaderControlWidget> {
   bool _expanded = false;
 
   /// Check whether the description text exceeds [maxLines] at the given [maxWidth].
-  bool _isTextOverflowing(String text, TextStyle? style, double maxWidth, int maxLines) {
+  bool _isTextOverflowing(
+      String text, TextStyle? style, double maxWidth, int maxLines) {
     if (maxWidth <= 0) return false;
     final span = TextSpan(text: text, style: style);
     final tp = TextPainter(
@@ -55,35 +56,33 @@ class _HeaderControlWidgetState extends State<HeaderControlWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
           child: Text(
             detail.title ?? '',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1.32,
             ),
-            maxLines: _expanded ? null : 2,
+            maxLines: _expanded ? null : 3,
             overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
         ),
-
-        // Stats row
         if (detail.stat != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 4,
               children: [
                 Text(
-                  Utils.numFormat(detail.stat!.view ?? 0),
+                  '${Utils.numFormat(detail.stat!.view ?? 0)}播放',
                   style: TextStyle(fontSize: 12, color: outlineColor),
                 ),
-                const SizedBox(width: 10),
                 Text(
                   '${Utils.numFormat(detail.stat!.danmaku ?? 0)}弹幕',
                   style: TextStyle(fontSize: 12, color: outlineColor),
                 ),
-                const SizedBox(width: 10),
                 if (detail.pubdate != null)
                   Text(
                     Utils.dateFormat(detail.pubdate, formatType: 'detail'),
@@ -92,8 +91,6 @@ class _HeaderControlWidgetState extends State<HeaderControlWidget> {
               ],
             ),
           ),
-
-        // Description (collapsible)
         if (detail.desc != null && detail.desc!.isNotEmpty)
           LayoutBuilder(
             builder: (context, constraints) {
@@ -138,7 +135,6 @@ class _HeaderControlWidgetState extends State<HeaderControlWidget> {
               );
             },
           ),
-
         const SizedBox(height: 8),
       ],
     );

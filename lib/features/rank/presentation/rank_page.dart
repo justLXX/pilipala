@@ -58,29 +58,39 @@ class _RankPageState extends State<RankPage>
           const _SafeAreaSpacer(),
           if (_rankController.tabs.length > 1) ...[
             const SizedBox(height: 4),
-            SizedBox(
-              width: double.infinity,
-              height: 42,
-              child: Align(
-                alignment: Alignment.center,
-                child: TabBar(
-                  controller: _rankController.tabController,
-                  tabs: [
-                    for (var tab in _rankController.tabs)
-                      Tab(text: tab['label'] as String)
-                  ],
-                  isScrollable: true,
-                  dividerColor: Colors.transparent,
-                  enableFeedback: true,
-                  splashBorderRadius: BorderRadius.circular(10),
-                  tabAlignment: TabAlignment.center,
-                  onTap: (value) {
-                    feedBack();
-                    if (_rankController.initialIndex.value == value) {
-                      _rankController.animateToTop();
-                    }
-                    _rankController.initialIndex.value = value;
-                  },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Container(
+                width: double.infinity,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.48),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: TabBar(
+                    controller: _rankController.tabController,
+                    tabs: [
+                      for (var tab in _rankController.tabs)
+                        Tab(text: tab['label'] as String)
+                    ],
+                    isScrollable: true,
+                    dividerColor: Colors.transparent,
+                    enableFeedback: true,
+                    splashBorderRadius: BorderRadius.circular(14),
+                    tabAlignment: TabAlignment.center,
+                    onTap: (value) {
+                      feedBack();
+                      if (_rankController.initialIndex.value == value) {
+                        _rankController.animateToTop();
+                      }
+                      _rankController.initialIndex.value = value;
+                    },
+                  ),
                 ),
               ),
             ),

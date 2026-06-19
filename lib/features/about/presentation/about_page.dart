@@ -32,72 +32,93 @@ class _AboutPageState extends State<AboutPage> {
         TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.outline);
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        titleSpacing: 16,
         title: Text('关于', style: Theme.of(context).textTheme.titleMedium),
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         child: Column(
           children: [
-            Image.asset(
-              'assets/images/logo/logo_android_2.png',
-              width: 150,
-            ),
-            Text(
-              'PiliPala',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 6),
-            Obx(
-              () => Badge(
-                isLabelVisible: _aboutController.isLoading.value
-                    ? false
-                    : _aboutController.isUpdate.value,
-                label: const Text('New'),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                  child: FilledButton.tonal(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                onTap: () => _aboutController.githubRelease(),
-                                title: const Text('Github下载'),
-                              ),
-                              ListTile(
-                                onTap: () => _aboutController.panDownload(),
-                                title: const Text('网盘下载'),
-                              ),
-                              ListTile(
-                                onTap: () => _aboutController.webSiteUrl(),
-                                title: const Text('官网下载'),
-                              ),
-                              ListTile(
-                                onTap: () => _aboutController.qimiao(),
-                                title: const Text('奇妙应用'),
-                              ),
-                              SizedBox(
-                                  height:
-                                      MediaQuery.of(context).padding.bottom +
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(18, 22, 18, 20),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.34),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/images/logo/logo_android_2.png',
+                    width: 116,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'PiliPala',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Obx(
+                    () => Badge(
+                      isLabelVisible: _aboutController.isLoading.value
+                          ? false
+                          : _aboutController.isUpdate.value,
+                      label: const Text('New'),
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    onTap: () =>
+                                        _aboutController.githubRelease(),
+                                    title: const Text('Github下载'),
+                                  ),
+                                  ListTile(
+                                    onTap: () => _aboutController.panDownload(),
+                                    title: const Text('网盘下载'),
+                                  ),
+                                  ListTile(
+                                    onTap: () => _aboutController.webSiteUrl(),
+                                    title: const Text('官网下载'),
+                                  ),
+                                  ListTile(
+                                    onTap: () => _aboutController.qimiao(),
+                                    title: const Text('奇妙应用'),
+                                  ),
+                                  SizedBox(
+                                      height: MediaQuery.of(context)
+                                              .padding
+                                              .bottom +
                                           20)
-                            ],
+                                ],
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                    child: Text(
-                      'V${_aboutController.currentVersion.value}',
-                      style: subTitleStyle.copyWith(
-                        color: Theme.of(context).primaryColor,
+                        child: Text(
+                          'V${_aboutController.currentVersion.value}',
+                          style: subTitleStyle.copyWith(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
-            ListTile(
+            const SizedBox(height: 12),
+            _AboutActionTile(
               onTap: () => _aboutController.githubUrl(),
               title: const Text('开源地址'),
               trailing: Text(
@@ -105,7 +126,7 @@ class _AboutPageState extends State<AboutPage> {
                 style: subTitleStyle,
               ),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () => _aboutController.webSiteUrl(),
               title: const Text('访问官网'),
               trailing: Text(
@@ -113,7 +134,7 @@ class _AboutPageState extends State<AboutPage> {
                 style: subTitleStyle,
               ),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () => _aboutController.panDownload(),
               title: const Text('网盘下载'),
               trailing: Text(
@@ -124,7 +145,7 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               ),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () => _aboutController.feedback(),
               title: const Text('问题反馈'),
               trailing: Icon(
@@ -133,7 +154,7 @@ class _AboutPageState extends State<AboutPage> {
                 color: outline,
               ),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () {
                 showModalBottomSheet(
                   context: context,
@@ -171,17 +192,17 @@ class _AboutPageState extends State<AboutPage> {
                 color: outline,
               ),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () => _aboutController.aPay(),
               title: const Text('赞助'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16, color: outline),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () => _aboutController.logs(),
               title: const Text('错误日志'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16, color: outline),
             ),
-            ListTile(
+            _AboutActionTile(
               onTap: () async {
                 var cleanStatus = await CacheManage().clearCacheAll();
                 if (cleanStatus) {
@@ -194,6 +215,39 @@ class _AboutPageState extends State<AboutPage> {
             SizedBox(height: MediaQuery.of(context).padding.bottom + 20)
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AboutActionTile extends StatelessWidget {
+  final Widget title;
+  final Widget? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  const _AboutActionTile({
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        onTap: onTap,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        tileColor: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.32),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       ),
     );
   }

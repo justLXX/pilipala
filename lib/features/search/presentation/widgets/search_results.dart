@@ -71,6 +71,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       onRefresh: widget.onRefresh ?? () async {},
       child: ListView.builder(
         controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
         itemCount: widget.results.length + 1,
         itemBuilder: (context, index) {
           // Last item: loading indicator or end of list
@@ -134,8 +135,20 @@ class _SearchResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.36),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+          ),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -153,7 +166,7 @@ class _SearchResultCard extends StatelessWidget {
   Widget _buildThumbnail(BuildContext context) {
     final String? pic = result.pic;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(12),
       child: Stack(
         children: [
           AspectRatio(
@@ -181,8 +194,8 @@ class _SearchResultCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(3),
+                  color: Colors.black.withValues(alpha: 0.68),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   _formatDuration(result.duration!),
@@ -216,8 +229,7 @@ class _SearchResultCard extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.person_outline,
-                  size: 14,
-                  color: Theme.of(context).colorScheme.outline),
+                  size: 14, color: Theme.of(context).colorScheme.outline),
               const SizedBox(width: 3),
               Expanded(
                 child: Text(
@@ -238,8 +250,7 @@ class _SearchResultCard extends StatelessWidget {
           children: [
             if (result.stat?.view != null) ...[
               Icon(Icons.play_arrow_outlined,
-                  size: 14,
-                  color: Theme.of(context).colorScheme.outline),
+                  size: 14, color: Theme.of(context).colorScheme.outline),
               const SizedBox(width: 2),
               Text(
                 Utils.numFormat(result.stat!.view),
@@ -250,11 +261,9 @@ class _SearchResultCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
-            if (result.stat?.danmaku != null &&
-                result.stat!.danmaku! > 0) ...[
+            if (result.stat?.danmaku != null && result.stat!.danmaku! > 0) ...[
               Icon(Icons.subtitles_outlined,
-                  size: 14,
-                  color: Theme.of(context).colorScheme.outline),
+                  size: 14, color: Theme.of(context).colorScheme.outline),
               const SizedBox(width: 2),
               Text(
                 Utils.numFormat(result.stat!.danmaku),
@@ -267,8 +276,7 @@ class _SearchResultCard extends StatelessWidget {
             ],
             if (result.pubdate != null && result.pubdate! > 0) ...[
               Icon(Icons.access_time,
-                  size: 12,
-                  color: Theme.of(context).colorScheme.outline),
+                  size: 12, color: Theme.of(context).colorScheme.outline),
               const SizedBox(width: 2),
               Text(
                 _formatTimestamp(result.pubdate!),
@@ -297,8 +305,7 @@ class _SearchResultCard extends StatelessWidget {
   }
 
   String _formatTimestamp(int timestamp) {
-    final DateTime date =
-        DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    final DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     final now = DateTime.now();
     final diff = now.difference(date);
 

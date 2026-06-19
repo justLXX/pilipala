@@ -49,6 +49,8 @@ class _MessageReplyPageState extends State<MessageReplyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        titleSpacing: 16,
         title: const Text('回复我的'),
       ),
       body: RefreshIndicator(
@@ -65,19 +67,12 @@ class _MessageReplyPageState extends State<MessageReplyPage> {
               if (snapshot.data['status']) {
                 final replyItems = _messageReplyCtr.replyItems;
                 return Obx(
-                  () => ListView.separated(
+                  () => ListView.builder(
                     controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
                     itemBuilder: (context, index) =>
                         ReplyItem(item: replyItems[index]),
                     itemCount: replyItems.length,
-                    separatorBuilder: (BuildContext context, int index) {
-                      return Divider(
-                        indent: 66,
-                        endIndent: 14,
-                        height: 1,
-                        color: Colors.grey.withOpacity(0.1),
-                      );
-                    },
                   ),
                 );
               } else {
@@ -118,6 +113,7 @@ class ReplyItem extends StatelessWidget {
     final String bvid = item.item!.uri!.split('/').last;
 
     return InkWell(
+      borderRadius: BorderRadius.circular(16),
       onTap: () async {
         final int cid = await SearchHttp.ab2c(bvid: bvid);
         final String heroTag = Utils.makeHeroTag(bvid);
@@ -129,8 +125,16 @@ class ReplyItem extends StatelessWidget {
           },
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.all(14),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.34),
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -207,10 +211,13 @@ class ReplyItem extends StatelessWidget {
                 ),
               ),
             if (item.item!.type! == 'video')
-              NetworkImgLayer(
-                width: 60,
-                height: 60,
-                src: item.item!.image,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: NetworkImgLayer(
+                  width: 60,
+                  height: 60,
+                  src: item.item!.image,
+                ),
               ),
           ],
         ),

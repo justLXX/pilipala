@@ -42,13 +42,14 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        elevation: 0,
         shape: Border(
           bottom: BorderSide(
-            color: Theme.of(context).dividerColor.withOpacity(0.08),
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
             width: 1,
           ),
         ),
-        titleSpacing: 0,
+        titleSpacing: 16,
         centerTitle: false,
         title: SearchTextField(
           controller: _searchController,
@@ -81,10 +82,10 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
   /// State A: Default state with search history and hot search.
   Widget _buildDefaultState() {
     return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
           // Search history
           _buildSearchHistory(),
           // Hot search
@@ -103,12 +104,12 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(10, 0, 6, 0),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(6, 0, 0, 8),
+              padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -132,17 +133,13 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
               direction: Axis.horizontal,
               textDirection: TextDirection.ltr,
               children: [
-                for (int i = 0;
-                    i < _searchController.searchHistory.length;
-                    i++)
+                for (int i = 0; i < _searchController.searchHistory.length; i++)
                   _HistoryChip(
                     text: _searchController.searchHistory[i],
-                    onTap: () =>
-                        _searchController.performSearch(
-                            _searchController.searchHistory[i]),
-                    onLongPress: () =>
-                        _searchController.removeHistory(
-                            _searchController.searchHistory[i]),
+                    onTap: () => _searchController
+                        .performSearch(_searchController.searchHistory[i]),
+                    onLongPress: () => _searchController
+                        .removeHistory(_searchController.searchHistory[i]),
                   ),
               ],
             ),
@@ -177,12 +174,12 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
       }
 
       return Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 4, 0),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(6, 0, 6, 6),
+              padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -229,21 +226,21 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
       }
 
       return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
         itemCount: suggestions.length,
         itemBuilder: (context, index) {
           final suggestion = suggestions[index];
           return InkWell(
             customBorder: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(14),
             ),
             onTap: () => _searchController.performSearch(suggestion),
             child: Padding(
-              padding: const EdgeInsets.only(left: 20, top: 12, bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               child: Row(
                 children: [
                   Icon(Icons.search,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.outline),
+                      size: 18, color: Theme.of(context).colorScheme.outline),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -265,7 +262,8 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
   /// State C: Search results.
   Widget _buildSearchResultsState() {
     return Obx(() {
-      if (_searchController.isLoading && _searchController.searchResults.isEmpty) {
+      if (_searchController.isLoading &&
+          _searchController.searchResults.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }
 
@@ -297,10 +295,15 @@ class _HistoryChip extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Chip(
+        side: BorderSide.none,
+        backgroundColor:
+            Theme.of(context).colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.58,
+                ),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        labelPadding: const EdgeInsets.only(left: 4, right: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 2),
         label: Text(
           text,
           style: TextStyle(

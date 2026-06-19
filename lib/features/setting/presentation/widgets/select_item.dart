@@ -94,26 +94,50 @@ class _SetSelectItemState extends State<SetSelectItem> {
         .textTheme
         .labelMedium!
         .copyWith(color: Theme.of(context).colorScheme.outline);
-    return ListTile(
-      onTap: () {},
-      dense: false,
-      title: Text(widget.title!),
-      subtitle: Text(
-        '当前${widget.title!} $currentVal',
-        style: subTitleStyle,
-      ),
-      trailing: PopupMenuButton(
-        initialValue: currentIndex,
-        icon: const Icon(
-          Icons.arrow_forward_rounded,
-          size: 22,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.38),
+          borderRadius: BorderRadius.circular(16),
         ),
-        onSelected: (item) {
-          currentVal = menus.firstWhere((e) => e.code == item).first;
-          setState(() {});
-        },
-        itemBuilder: (BuildContext context) =>
-            <PopupMenuEntry>[...popMenuItems],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.title!,
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 3),
+                    Text(
+                      '当前${widget.title!} $currentVal',
+                      style: subTitleStyle,
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton(
+                initialValue: currentIndex,
+                icon: const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 22,
+                ),
+                onSelected: (item) {
+                  currentVal = menus.firstWhere((e) => e.code == item).first;
+                  setState(() {});
+                },
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry>[...popMenuItems],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

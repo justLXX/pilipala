@@ -38,7 +38,8 @@ class MainController extends GetxController {
 
   MainController({
     GetUnreadDynamicUseCase? getUnreadDynamic,
-  }) : _getUnreadDynamic = getUnreadDynamic ?? Get.find<GetUnreadDynamicUseCase>();
+  }) : _getUnreadDynamic =
+            getUnreadDynamic ?? Get.find<GetUnreadDynamicUseCase>();
 
   @override
   void onInit() {
@@ -102,14 +103,23 @@ class MainController extends GetxController {
 
   void setNavBarConfig() async {
     defaultNavTabs = [...defaultNavigationBars];
-    navBarSort =
-        setting.get(SettingBoxKey.navBarSort, defaultValue: [0, 1, 2, 3]);
+    final availableIds =
+        defaultNavigationBars.map<int>((item) => item['id'] as int).toSet();
+    navBarSort = List<int>.from(
+      setting.get(SettingBoxKey.navBarSort, defaultValue: [0, 2, 3]),
+    ).where(availableIds.contains).toList();
+    if (navBarSort.isEmpty) {
+      navBarSort = [0, 2, 3];
+    }
     defaultNavTabs.retainWhere((item) => navBarSort.contains(item['id']));
     defaultNavTabs.sort((a, b) =>
         navBarSort.indexOf(a['id']).compareTo(navBarSort.indexOf(b['id'])));
     navigationBars.value = defaultNavTabs;
     int defaultHomePage =
         setting.get(SettingBoxKey.defaultHomePage, defaultValue: 0) as int;
+    if (!availableIds.contains(defaultHomePage)) {
+      defaultHomePage = 0;
+    }
     int defaultIndex =
         navigationBars.indexWhere((item) => item['id'] == defaultHomePage);
     selectedIndex = defaultIndex != -1 ? defaultIndex : 0;

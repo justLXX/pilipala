@@ -15,7 +15,7 @@ class PrivacySetting extends StatefulWidget {
 class _PrivacySettingState extends State<PrivacySetting> {
   bool userLogin = false;
   Box userInfoCache = GStrorage.userInfo;
-  var userInfo;
+  dynamic userInfo;
 
   @override
   void initState() {
@@ -33,16 +33,18 @@ class _PrivacySettingState extends State<PrivacySetting> {
         .copyWith(color: Theme.of(context).colorScheme.outline);
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: false,
-        titleSpacing: 0,
+        titleSpacing: 16,
         title: Text(
           '隐私设置',
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
         children: [
-          ListTile(
+          _PrivacyTile(
             onTap: () {
               if (!userLogin) {
                 SmartDialog.showToast('登录后查看');
@@ -50,21 +52,49 @@ class _PrivacySettingState extends State<PrivacySetting> {
               }
               Get.toNamed('/blackListPage');
             },
-            dense: false,
             title: Text('黑名单管理', style: titleStyle),
             subtitle: Text('已拉黑用户', style: subTitleStyle),
           ),
-          ListTile(
+          _PrivacyTile(
             onTap: () {
               if (!userLogin) {
                 SmartDialog.showToast('请先登录');
               }
               MemberHttp.cookieToKey();
             },
-            dense: false,
             title: Text('刷新access_key', style: titleStyle),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PrivacyTile extends StatelessWidget {
+  final Widget title;
+  final Widget? subtitle;
+  final VoidCallback? onTap;
+
+  const _PrivacyTile({
+    required this.title,
+    this.subtitle,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        onTap: onTap,
+        title: title,
+        subtitle: subtitle,
+        tileColor: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.34),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       ),
     );
   }

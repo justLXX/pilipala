@@ -59,26 +59,55 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
         .textTheme
         .labelMedium!
         .copyWith(color: Theme.of(context).colorScheme.outline);
-    return ListTile(
-      enableFeedback: true,
-      onTap: () => switchChange(null),
-      title: Text(widget.title!, style: titleStyle),
-      subtitle: widget.subTitle != null
-          ? Text(widget.subTitle!, style: subTitleStyle)
-          : null,
-      trailing: Transform.scale(
-        alignment: Alignment.centerRight, // 缩放Switch的大小后保持右侧对齐, 避免右侧空隙过大
-        scale: 0.8,
-        child: Switch(
-          thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-              (Set<WidgetState> states) {
-            if (states.isNotEmpty && states.first == WidgetState.selected) {
-              return const Icon(Icons.done);
-            }
-            return null; // All other states will use the default thumbIcon.
-          }),
-          value: val,
-          onChanged: (val) => switchChange(val),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+      child: InkWell(
+        enableFeedback: true,
+        onTap: () => switchChange(null),
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.38),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title!, style: titleStyle),
+                      if (widget.subTitle != null) ...[
+                        const SizedBox(height: 3),
+                        Text(widget.subTitle!, style: subTitleStyle),
+                      ],
+                    ],
+                  ),
+                ),
+                Transform.scale(
+                  alignment: Alignment.centerRight,
+                  scale: 0.8,
+                  child: Switch(
+                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                        (Set<WidgetState> states) {
+                      if (states.isNotEmpty &&
+                          states.first == WidgetState.selected) {
+                        return const Icon(Icons.done);
+                      }
+                      return null;
+                    }),
+                    value: val,
+                    onChanged: (val) => switchChange(val),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

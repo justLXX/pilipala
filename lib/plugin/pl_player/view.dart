@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -107,7 +106,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   // 双击播放、暂停
   void onDoubleTapCenter() {
     final PlPlayerController _ = widget.controller;
-    _.videoPlayerController!.playOrPause();
+    _.togglePlay();
   }
 
   void doubleTapFuc() {
@@ -171,8 +170,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (Platform.isMacOS) {
       // macOS 使用 media_kit 播放器内置音量控制
       try {
-        await widget.controller.videoPlayerController
-            ?.setVolume(value * 100.0);
+        await widget.controller.videoPlayerController?.setVolume(value * 100.0);
       } catch (_) {}
     } else {
       try {

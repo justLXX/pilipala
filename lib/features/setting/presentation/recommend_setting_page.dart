@@ -54,14 +54,16 @@ class _RecommendSettingState extends State<RecommendSetting> {
         .copyWith(color: Theme.of(context).colorScheme.outline);
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: false,
-        titleSpacing: 0,
+        titleSpacing: 16,
         title: Text(
           '推荐设置',
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(6, 8, 6, 24),
         children: [
           ListTile(
             dense: false,
@@ -247,10 +249,12 @@ class _RecommendSettingState extends State<RecommendSetting> {
               '* 其它（如热门视频、手动搜索、链接跳转等）均不受过滤器影响。\n'
               '* 设定较严苛的条件可导致推荐项数锐减或多次请求，请酌情选择。\n'
               '* 后续可能会增加更多过滤条件，敬请期待。',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelSmall!
-                  .copyWith(color: Theme.of(context).colorScheme.outline.withOpacity(0.7)),
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outline
+                        .withValues(alpha: 0.7),
+                  ),
             ),
           )
         ],

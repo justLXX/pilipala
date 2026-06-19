@@ -2,7 +2,6 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/skeleton/skeleton.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/utils/utils.dart';
@@ -44,6 +43,8 @@ class _WhisperPageState extends State<WhisperPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        titleSpacing: 16,
         title: const Text('消息'),
       ),
       body: RefreshIndicator(
@@ -59,14 +60,15 @@ class _WhisperPageState extends State<WhisperPage> {
                 builder: (BuildContext context, BoxConstraints constraints) {
                   // 在这里根据父级容器的约束条件构建小部件树
                   return Padding(
-                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
                     child: SizedBox(
-                      height: constraints.maxWidth / 4,
+                      height: constraints.maxWidth / 4.2,
                       child: Obx(
                         () => GridView.count(
                           primary: false,
                           crossAxisCount: 4,
-                          padding: const EdgeInsets.all(0),
+                          crossAxisSpacing: 8,
+                          padding: EdgeInsets.zero,
                           children: [
                             ..._whisperController.noticesList.map((element) {
                               return InkWell(
@@ -84,29 +86,38 @@ class _WhisperPageState extends State<WhisperPage> {
                                   _whisperController.noticesList.refresh();
                                 },
                                 onLongPress: () {},
-                                borderRadius: StyleString.mdRadius,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Badge(
-                                      isLabelVisible: element['count'] > 0,
-                                      label: Text(element['count'] > 99
-                                          ? '99+'
-                                          : element['count'].toString()),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10),
-                                        child: Icon(
-                                          element['icon'],
-                                          size: 21,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.36),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Badge(
+                                        isLabelVisible: element['count'] > 0,
+                                        label: Text(element['count'] > 99
+                                            ? '99+'
+                                            : element['count'].toString()),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Icon(
+                                            element['icon'],
+                                            size: 21,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(element['title'])
-                                  ],
+                                      const SizedBox(height: 3),
+                                      Text(element['title'])
+                                    ],
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -127,23 +138,16 @@ class _WhisperPageState extends State<WhisperPage> {
                       return Obx(
                         () => sessionList.isEmpty
                             ? const SizedBox()
-                            : ListView.separated(
+                            : ListView.builder(
                                 itemCount: sessionList.length,
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
+                                padding:
+                                    const EdgeInsets.fromLTRB(12, 0, 12, 24),
                                 itemBuilder: (_, int i) {
                                   return SessionItem(
                                     sessionItem: sessionList[i],
                                     changeFucCall: () => sessionList.refresh(),
-                                  );
-                                },
-                                separatorBuilder:
-                                    (BuildContext context, int index) {
-                                  return Divider(
-                                    indent: 72,
-                                    endIndent: 20,
-                                    height: 6,
-                                    color: Colors.grey.withOpacity(0.1),
                                   );
                                 },
                               ),
@@ -219,59 +223,68 @@ class SessionItem extends StatelessWidget {
     final msgStatus = sessionItem.lastMsg.msgStatus;
     final int msgType = sessionItem.lastMsg.msgType;
 
-    return ListTile(
-      onTap: () {
-        sessionItem.unreadCount = 0;
-        changeFucCall.call();
-        Get.toNamed(
-          '/whisperDetail',
-          parameters: {
-            'talkerId': sessionItem.talkerId.toString(),
-            'name': sessionItem.accountInfo.name,
-            'face': sessionItem.accountInfo.face,
-            'mid': (sessionItem.accountInfo?.mid ?? 0).toString(),
-            'heroTag': heroTag,
-          },
-        );
-      },
-      leading: Badge(
-        isLabelVisible: sessionItem.unreadCount > 0,
-        label: Text(sessionItem.unreadCount.toString()),
-        alignment: Alignment.topRight,
-        child: Hero(
-          tag: heroTag,
-          child: NetworkImgLayer(
-            width: 45,
-            height: 45,
-            type: 'avatar',
-            src: sessionItem.accountInfo.face,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        tileColor: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.34),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        onTap: () {
+          sessionItem.unreadCount = 0;
+          changeFucCall.call();
+          Get.toNamed(
+            '/whisperDetail',
+            parameters: {
+              'talkerId': sessionItem.talkerId.toString(),
+              'name': sessionItem.accountInfo.name,
+              'face': sessionItem.accountInfo.face,
+              'mid': (sessionItem.accountInfo?.mid ?? 0).toString(),
+              'heroTag': heroTag,
+            },
+          );
+        },
+        leading: Badge(
+          isLabelVisible: sessionItem.unreadCount > 0,
+          label: Text(sessionItem.unreadCount.toString()),
+          alignment: Alignment.topRight,
+          child: Hero(
+            tag: heroTag,
+            child: NetworkImgLayer(
+              width: 45,
+              height: 45,
+              type: 'avatar',
+              src: sessionItem.accountInfo.face,
+            ),
           ),
         ),
-      ),
-      title: Text(sessionItem.accountInfo.name),
-      subtitle: Text(
-          msgStatus == 1
-              ? '你撤回了一条消息'
-              : msgType == 2
-                  ? '[图片]'
-                  : content != null && content != ''
-                      ? (content['text'] ??
-                          content['content'] ??
-                          content['title'] ??
-                          content['reply_content'] ??
-                          '不支持的消息类型')
-                      : '不支持的消息类型',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context)
-              .textTheme
-              .labelMedium!
-              .copyWith(color: Theme.of(context).colorScheme.outline)),
-      trailing: Text(
-        Utils.dateFormat(sessionItem.lastMsg.timestamp),
-        style: TextStyle(
-          fontSize: Theme.of(context).textTheme.labelSmall!.fontSize,
-          color: Theme.of(context).colorScheme.outline,
+        title: Text(sessionItem.accountInfo.name),
+        subtitle: Text(
+            msgStatus == 1
+                ? '你撤回了一条消息'
+                : msgType == 2
+                    ? '[图片]'
+                    : content != null && content != ''
+                        ? (content['text'] ??
+                            content['content'] ??
+                            content['title'] ??
+                            content['reply_content'] ??
+                            '不支持的消息类型')
+                        : '不支持的消息类型',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context)
+                .textTheme
+                .labelMedium!
+                .copyWith(color: Theme.of(context).colorScheme.outline)),
+        trailing: Text(
+          Utils.dateFormat(sessionItem.lastMsg.timestamp),
+          style: TextStyle(
+            fontSize: Theme.of(context).textTheme.labelSmall!.fontSize,
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ),
       ),
     );

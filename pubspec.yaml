@@ -137,7 +137,7 @@ dependencies:
   gt3_flutter_plugin: ^0.1.0
   uuid: ^3.0.7
   scrollable_positioned_list: ^0.3.8
-  catcher_2: ^1.2.6
+  catcher_2: ^2.1.9
   logger: ^2.3.0
   path: ^1.9.0
   # 电池优化
@@ -177,18 +177,28 @@ dev_dependencies:
 dependency_overrides:
   win32: 5.5.4
   archive: ^3.6.0
-  media_kit:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit
-  media_kit_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/universal/media_kit_libs_video
+  floating:
+    path: third_party/floating
+  fluttertoast:
+    path: third_party/fluttertoast
+  package_info_plus:
+    path: third_party/package_info_plus
+  status_bar_control:
+    path: third_party/status_bar_control
+  webview_cookie_manager:
+    path: third_party/webview_cookie_manager
+  # media_kit:  # TEMP: 临时注释以允许 flutter pub upgrade
+  #   git:
+  #     url: https://github.com/media-kit/media-kit
+  #     path: media_kit
+  # media_kit_video:
+  #   git:
+  #     url: https://github.com/media-kit/media-kit
+  #     path: media_kit_video
+  # media_kit_libs_video:
+  #   git:
+  #     url: https://github.com/media-kit/media-kit
+  #     path: libs/universal/media_kit_libs_video
   media_kit_libs_android_video:
     path: media_kit_libs_android_video
 

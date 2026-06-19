@@ -41,7 +41,9 @@ class _FavPageState extends State<FavPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        titleSpacing: 0,
+        titleSpacing: 16,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Obx(() => Text(
               '${_favController.isOwner.value ? '我' : 'Ta'}的收藏',
               style: Theme.of(context).textTheme.titleMedium,

@@ -28,8 +28,10 @@ class _LaterPageState extends State<LaterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
+        titleSpacing: 16,
         centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Obx(
           () => _laterController.laterList.isNotEmpty
               ? Text(
@@ -69,6 +71,7 @@ class _LaterPageState extends State<LaterPage> {
       body: CustomScrollView(
         controller: _laterController.scrollController,
         slivers: [
+          const SliverToBoxAdapter(child: SizedBox(height: 4)),
           FutureBuilder(
             future: _futureBuilderFuture,
             builder: (context, snapshot) {

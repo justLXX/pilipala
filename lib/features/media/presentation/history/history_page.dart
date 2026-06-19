@@ -66,8 +66,10 @@ class _HistoryPageState extends State<HistoryPage> {
       appBar: AppBarWidget(
         visible: _historyController.enableMultiple.value,
         child1: AppBar(
-          titleSpacing: 0,
+          titleSpacing: 16,
           centerTitle: false,
+          elevation: 0,
+          scrolledUnderElevation: 0,
           title: Text(
             '观看记录',
             style: Theme.of(context).textTheme.titleMedium,
@@ -123,8 +125,10 @@ class _HistoryPageState extends State<HistoryPage> {
           ],
         ),
         child2: AppBar(
-          titleSpacing: 0,
+          titleSpacing: 16,
           centerTitle: false,
+          elevation: 0,
+          scrolledUnderElevation: 0,
           leading: IconButton(
             onPressed: () {
               _historyController.enableMultiple.value = false;
@@ -173,6 +177,7 @@ class _HistoryPageState extends State<HistoryPage> {
         child: CustomScrollView(
           controller: _historyController.scrollController,
           slivers: [
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
             FutureBuilder(
               future: _futureBuilderFuture,
               builder: (context, snapshot) {

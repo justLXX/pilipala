@@ -82,6 +82,7 @@ class _DynamicsPageState extends State<DynamicsPage>
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: SizedBox(
           height: 34,
           child: Stack(
@@ -132,44 +133,42 @@ class _DynamicsPageState extends State<DynamicsPage>
                                 initialValue:
                                     _dynamicsController.initialValue.value,
                                 children: {
-                                  0: Text(
-                                    '全部',
-                                    style: TextStyle(
-                                        fontSize: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium!
-                                            .fontSize),
+                                  0: _DynamicTypeTab(
+                                    label: '全部',
+                                    selected: _dynamicsController
+                                            .initialValue.value ==
+                                        0,
                                   ),
-                                  1: Text('投稿',
-                                      style: TextStyle(
-                                          fontSize: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!
-                                              .fontSize)),
-                                  2: Text('番剧',
-                                      style: TextStyle(
-                                          fontSize: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!
-                                              .fontSize)),
-                                  3: Text('专栏',
-                                      style: TextStyle(
-                                          fontSize: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!
-                                              .fontSize)),
+                                  1: _DynamicTypeTab(
+                                    label: '投稿',
+                                    selected: _dynamicsController
+                                            .initialValue.value ==
+                                        1,
+                                  ),
+                                  2: _DynamicTypeTab(
+                                    label: '番剧',
+                                    selected: _dynamicsController
+                                            .initialValue.value ==
+                                        2,
+                                  ),
+                                  3: _DynamicTypeTab(
+                                    label: '专栏',
+                                    selected: _dynamicsController
+                                            .initialValue.value ==
+                                        3,
+                                  ),
                                 },
-                                padding: 13.0,
+                                padding: 10.0,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .surfaceVariant
-                                      .withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(20),
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.52),
+                                  borderRadius: BorderRadius.circular(999),
                                 ),
                                 thumbDecoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(999),
                                 ),
                                 duration: const Duration(milliseconds: 300),
                                 curve: Curves.easeInOut,
@@ -309,6 +308,50 @@ class _DynamicsPageState extends State<DynamicsPage>
       child: SizedBox(
         width: Responsive.dynamicsContentWidth(context),
         child: child,
+      ),
+    );
+  }
+}
+
+class _DynamicTypeTab extends StatelessWidget {
+  const _DynamicTypeTab({
+    required this.label,
+    required this.selected,
+  });
+
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final fontSize = Theme.of(context).textTheme.labelMedium?.fontSize;
+    return SizedBox(
+      height: 30,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? colorScheme.primary : colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 3),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            width: selected ? 16 : 0,
+            height: 3,
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ],
       ),
     );
   }

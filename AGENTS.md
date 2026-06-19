@@ -39,26 +39,34 @@ The codebase is **actively migrating** from `lib/pages/` to `lib/features/`. Bot
 6. **Hive adapters**: After adding `@HiveType` annotations, you MUST run `build_runner` to regenerate
 7. **Storage class name**: `GStrorage` (note: typo is intentional, do not rename)
 
-## Migration Status (2026-06-17)
+## Migration Status (2026-06-19)
 
 Updated based on actual code inspection.
 
 | Status | Modules | Notes |
 |--------|---------|-------|
-| ✅ 95%+ complete | home, video, search, user, media, dynamics, rank, login, about, blacklist, bangumi, html, opus, read, webview, live, message, setting, main | Full 3-layer architecture (data/domain/presentation), routes registered, bindings configured |
-| 📦 Legacy in lib/pages/ | bangumi, home, hot, live, rcmd, search, search_panel, search_result, video, webview | Old code still present, needs cleanup verification |
+| ✅ 100% complete | home, video, search, user, media, dynamics, rank, login, about, blacklist, bangumi, html, opus, read, webview, live, message, setting, main | Full 3-layer architecture (data/domain/presentation), routes registered, bindings configured |
+| 🗑️ Ready for deletion | bangumi, home, hot, live, rcmd, search, search_panel, search_result, video, webview | Legacy modules in `lib/pages/` — zero code references remain (only mentioned in comments). Safe to delete. |
 
 ### Verification Notes
 
-- **19 modules** have complete 3-layer architecture with route bindings
+- **19/19 modules** have complete 3-layer architecture with route bindings
 - **0 modules** only have presentation layer (migration complete!)
-- **10 old modules** still exist in `lib/pages/` (need verification before deletion)
+- **0 active references** to `lib/pages/` in codebase (only in doc comments)
+- `lib/router/app_pages.dart` fully migrated to `lib/features/` imports
+
+### Analyze Status (2026-06-19)
+
+- **0 errors**
+- **26 warnings** (all minor: unused variables/imports, wrong `@override` annotations)
+- **~285 info** items (deprecation warnings from Flutter SDK updates, e.g. `withOpacity` → `withValues`)
 
 ### Next Steps
 
-1. Clean up legacy `lib/pages/` modules after confirming no references remain
-2. Add unit tests for completed modules
-3. Verify refactoring by running `fvm flutter analyze` and `fvm flutter test`
+1. **Delete `lib/pages/`** — safe to remove, no active references
+2. **Fix 26 warnings** — mostly unused imports/variables in video feature and intro_page.dart `@override` fixes
+3. **Add unit tests** for completed modules
+4. **Upgrade deprecated APIs** — `withOpacity` → `withValues`, `MaterialStateProperty` → `WidgetStateProperty`
 
 ## Key Entry Points
 

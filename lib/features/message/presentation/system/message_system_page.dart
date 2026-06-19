@@ -27,6 +27,8 @@ class _MessageSystemPageState extends State<MessageSystemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        titleSpacing: 16,
         title: const Text('系统通知'),
       ),
       body: RefreshIndicator(
@@ -43,22 +45,15 @@ class _MessageSystemPageState extends State<MessageSystemPage> {
               if (snapshot.data['status']) {
                 final systemItems = _messageSystemCtr.systemItems;
                 return Obx(
-                  () => ListView.separated(
+                  () => ListView.builder(
                     controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
                     itemBuilder: (context, index) => SystemItem(
                       item: systemItems[index],
                       index: index,
                       messageSystemCtr: _messageSystemCtr,
                     ),
                     itemCount: systemItems.length,
-                    separatorBuilder: (BuildContext context, int index) {
-                      return Divider(
-                        indent: 14,
-                        endIndent: 14,
-                        height: 1,
-                        color: Colors.grey.withOpacity(0.1),
-                      );
-                    },
                   ),
                 );
               } else {
@@ -101,20 +96,43 @@ class SystemItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(item.title!,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(
-            item.timeAt!,
-            style: TextStyle(color: Theme.of(context).colorScheme.outline),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.34),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title!,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.timeAt!,
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.outline),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item.content is String ? item.content : item.content!['web'],
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(item.content is String ? item.content : item.content!['web']),
         ],
       ),
     );

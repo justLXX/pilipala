@@ -105,6 +105,8 @@ class _WhisperDetailPageState extends State<WhisperDetailPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        titleSpacing: 0,
         automaticallyImplyLeading: false,
         title: SizedBox(
           width: double.infinity,
@@ -195,6 +197,8 @@ class _WhisperDetailPageState extends State<WhisperDetailPage>
                             : Align(
                                 alignment: Alignment.topCenter,
                                 child: ListView.separated(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(12, 8, 12, 20),
                                   itemCount: messageList.length,
                                   shrinkWrap: true,
                                   reverse: true,
@@ -236,10 +240,12 @@ class _WhisperDetailPageState extends State<WhisperDetailPage>
                     : 6,
               ),
               decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
                 border: Border(
                   top: BorderSide(
                     width: 1,
-                    color: Colors.grey.withOpacity(0.15),
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.08),
                   ),
                 ),
               ),
@@ -268,9 +274,9 @@ class _WhisperDetailPageState extends State<WhisperDetailPage>
                       decoration: BoxDecoration(
                         color: Theme.of(context)
                             .colorScheme
-                            .outline
-                            .withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(40.0),
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.58),
+                        borderRadius: BorderRadius.circular(18.0),
                       ),
                       child: TextField(
                         style: Theme.of(context).textTheme.titleMedium,

@@ -68,14 +68,16 @@ class _PlaySettingState extends State<PlaySetting> {
         .copyWith(color: Theme.of(context).colorScheme.outline);
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: false,
-        titleSpacing: 0,
+        titleSpacing: 16,
         title: Text(
           '播放设置',
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(6, 8, 6, 24),
         children: [
           ListTile(
             dense: false,

@@ -44,7 +44,8 @@ class _HistorySearchPageState extends State<HistorySearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
+        elevation: 0,
+        titleSpacing: 16,
         actions: [
           IconButton(
               onPressed: () => _hisCtr.submit(),
@@ -60,7 +61,17 @@ class _HistorySearchPageState extends State<HistorySearchPage> {
             onChanged: (value) => _hisCtr.onChange(value),
             decoration: InputDecoration(
               hintText: _hisCtr.hintText,
-              border: InputBorder.none,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.58),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
               suffixIcon: IconButton(
                 icon: Icon(
                   Icons.clear,

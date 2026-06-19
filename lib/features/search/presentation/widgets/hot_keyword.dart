@@ -14,29 +14,26 @@ class HotKeywordWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '热搜',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 10,
+      children: hotSearchList.map((item) {
+        final keyword = item.keyword ?? '';
+        return ActionChip(
+          side: BorderSide.none,
+          backgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.58,
+                  ),
+          labelStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
           ),
-        ),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: hotSearchList.map((item) {
-            return ActionChip(
-              label: Text(item.keyword ?? ''),
-              onPressed: () => onTap(item.keyword ?? ''),
-            );
-          }).toList(),
-        ),
-      ],
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          label: Text(keyword),
+          onPressed: () => onTap(keyword),
+        );
+      }).toList(),
     );
   }
 }

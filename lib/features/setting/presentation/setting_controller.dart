@@ -23,7 +23,7 @@ class SettingController extends GetxController {
   RxDouble toastOpacity = (1.0).obs;
   RxInt picQuality = 10.obs;
   Rx<ThemeType> themeType = ThemeType.system.obs;
-  var userInfo;
+  dynamic userInfo;
   Rx<DynamicBadgeMode> dynamicBadgeType = DynamicBadgeMode.number.obs;
   RxInt defaultHomePage = 0.obs;
 
@@ -52,7 +52,10 @@ class SettingController extends GetxController {
     picQuality.value = data['picQuality'];
     themeType.value = data['themeType'];
     dynamicBadgeType.value = data['dynamicBadgeType'];
-    defaultHomePage.value = data['defaultHomePage'];
+    final defaultHomePageValue = data['defaultHomePage'];
+    final validHomePage =
+        defaultNavigationBars.any((item) => item['id'] == defaultHomePageValue);
+    defaultHomePage.value = validHomePage ? defaultHomePageValue : 0;
   }
 
   loginOut() async {

@@ -89,28 +89,66 @@ class MediaLibraryContent extends StatelessWidget {
       children: [
         if (showTitle)
           Padding(
-            padding: const EdgeInsets.only(left: 20, top: 8, bottom: 4),
+            padding: const EdgeInsets.only(left: 16, top: 8, bottom: 10),
             child: Text(
               '媒体库',
               style: TextStyle(
-                fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+                fontSize: Theme.of(context).textTheme.titleMedium!.fontSize,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-        for (var item in mediaController.navList) ...[
-          ListTile(
-            onTap: () => item['onTap'](),
-            dense: true,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 15),
-              child: Icon(item['icon'], color: primary),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: mediaController.navList.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisExtent: 58,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
             ),
-            contentPadding: const EdgeInsets.only(left: 15, top: 2, bottom: 2),
-            minLeadingWidth: 0,
-            title: Text(item['title'], style: const TextStyle(fontSize: 15)),
+            itemBuilder: (context, index) {
+              final item = mediaController.navList[index];
+              return InkWell(
+                onTap: () => item['onTap'](),
+                borderRadius: BorderRadius.circular(14),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.54),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 13),
+                    child: Row(
+                      children: [
+                        Icon(item['icon'], color: primary, size: 21),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            item['title'],
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ],
+        ),
         Obx(() => mediaController.userLogin.value
             ? _buildFavFolderSection(context)
             : const SizedBox()),
@@ -123,8 +161,8 @@ class MediaLibraryContent extends StatelessWidget {
     return Column(
       children: [
         Divider(
-          height: 35,
-          color: Theme.of(context).dividerColor.withOpacity(0.1),
+          height: 32,
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
         ),
         ListTile(
           onTap: () => Get.toNamed('/fav'),
@@ -193,14 +231,14 @@ class MediaLibraryContent extends StatelessWidget {
                             child: Center(
                               child: IconButton(
                                 style: ButtonStyle(
-                                  padding: MaterialStateProperty.all(
-                                      EdgeInsets.zero),
+                                  padding:
+                                      WidgetStateProperty.all(EdgeInsets.zero),
                                   backgroundColor:
-                                      MaterialStateProperty.resolveWith(
+                                      WidgetStateProperty.resolveWith<Color?>(
                                     (states) => Theme.of(context)
                                         .colorScheme
                                         .primaryContainer
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                                 onPressed: () => Get.toNamed('/fav'),

@@ -14,40 +14,44 @@ class DynamicPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: source == 'detail'
-          ? const EdgeInsets.only(bottom: 12)
-          : EdgeInsets.zero,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            width: 8,
-            color: Theme.of(context).dividerColor.withOpacity(0.05),
+          ? const EdgeInsets.fromLTRB(0, 0, 0, 12)
+          : const EdgeInsets.fromLTRB(10, 6, 10, 6),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(source == 'detail' ? 0 : 16),
+          border: source == 'detail'
+              ? null
+              : Border.all(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          elevation: 0,
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(source == 'detail' ? 0 : 16),
           ),
-        ),
-      ),
-      child: Material(
-        elevation: 0,
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
-        child: InkWell(
-          onTap: () => _dynamicsController.pushDetail(item, 1),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                child: AuthorPanel(item: item),
-              ),
-              if (item.modules!.moduleDynamic!.desc != null ||
-                  item.modules!.moduleDynamic!.major != null)
-                Content(item: item, source: source),
-              forWard(item, context, _dynamicsController, source),
-              const SizedBox(height: 2),
-              if (source == null) ActionPanel(item: item),
-            ],
+          child: InkWell(
+            onTap: () => _dynamicsController.pushDetail(item, 1),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                  child: AuthorPanel(item: item),
+                ),
+                if (item.modules!.moduleDynamic!.desc != null ||
+                    item.modules!.moduleDynamic!.major != null)
+                  Content(item: item, source: source),
+                forWard(item, context, _dynamicsController, source),
+                const SizedBox(height: 2),
+                if (source == null) ActionPanel(item: item),
+              ],
+            ),
           ),
         ),
       ),

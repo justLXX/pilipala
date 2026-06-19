@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/constants.dart';
-import 'package:pilipala/common/skeleton/video_card_h.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/features/home/presentation/home_controller.dart';
 import 'package:pilipala/features/main/presentation/main_controller.dart';
 import 'package:pilipala/utils/responsive.dart';
@@ -86,7 +85,7 @@ class _RcmdPageState extends State<RcmdPage>
                           return _buildVideoSliver(
                             context,
                             _homeController.videoList.length,
-                            (index) => VideoCardH(
+                            (index) => CleanVideoCard(
                               videoItem: _homeController.videoList[index],
                               showPubdate: true,
                             ),
@@ -105,7 +104,7 @@ class _RcmdPageState extends State<RcmdPage>
                           return _buildVideoSliver(
                             context,
                             10,
-                            (_) => const VideoCardHSkeleton(),
+                            (_) => const CleanVideoCardSkeleton(),
                           );
                         }
                       },
@@ -115,7 +114,7 @@ class _RcmdPageState extends State<RcmdPage>
                     return _buildVideoSliver(
                       context,
                       10,
-                      (_) => const VideoCardHSkeleton(),
+                      (_) => const CleanVideoCardSkeleton(),
                     );
                   }
                 },
@@ -137,26 +136,33 @@ class _RcmdPageState extends State<RcmdPage>
     int childCount,
     Widget Function(int index) builder,
   ) {
-    if (!Responsive.isExpanded(context)) {
-      return SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) => builder(index),
-          childCount: childCount,
-        ),
-      );
-    }
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: Responsive.videoGridCount(context),
-          mainAxisExtent: 118,
-        ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) => builder(index),
-          childCount: childCount,
-        ),
-      ),
+    final crossAxisCount =
+        Responsive.isExpanded(context) ? Responsive.videoGridCount(context) : 2;
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        const horizontalPadding = 14.0;
+        const crossAxisSpacing = 12.0;
+        final itemWidth = (constraints.crossAxisExtent -
+                horizontalPadding * 2 -
+                crossAxisSpacing * (crossAxisCount - 1)) /
+            crossAxisCount;
+        final itemHeight = itemWidth / StyleString.aspectRatio + 104;
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: crossAxisSpacing,
+              mainAxisSpacing: 16,
+              mainAxisExtent: itemHeight,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => builder(index),
+              childCount: childCount,
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -56,7 +56,7 @@ class _BlackListPageState extends State<BlackListPage> {
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleSpacing: 0,
+        titleSpacing: 16,
         centerTitle: false,
         title: Obx(
           () => Text(
@@ -83,35 +83,51 @@ class _BlackListPageState extends State<BlackListPage> {
                         )
                       : ListView.builder(
                           controller: scrollController,
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
                           itemCount: list.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                              onTap: () {},
-                              leading: NetworkImgLayer(
-                                width: 45,
-                                height: 45,
-                                type: 'avatar',
-                                src: list[index].face,
-                              ),
-                              title: Text(
-                                list[index].uname!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              subtitle: Text(
-                                Utils.dateFormat(list[index].mtime),
-                                maxLines: 1,
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              dense: true,
-                              trailing: TextButton(
-                                onPressed: () => _blackListController
-                                    .removeBlack(list[index].mid),
-                                child: const Text('移除'),
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: ListTile(
+                                onTap: () {},
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                tileColor: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withValues(alpha: 0.34),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                leading: NetworkImgLayer(
+                                  width: 45,
+                                  height: 45,
+                                  type: 'avatar',
+                                  src: list[index].face,
+                                ),
+                                title: Text(
+                                  list[index].uname!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                subtitle: Text(
+                                  Utils.dateFormat(list[index].mtime),
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                dense: true,
+                                trailing: TextButton(
+                                  onPressed: () => _blackListController
+                                      .removeBlack(list[index].mid),
+                                  child: const Text('移除'),
+                                ),
                               ),
                             );
                           },

@@ -6,6 +6,16 @@ allprojects {
         google()
         mavenCentral()
     }
+    // 为所有子项目的 buildscript 类路径注入阿里云镜像
+    buildscript {
+        repositories {
+            maven { url 'https://maven.aliyun.com/repository/google' }
+            maven { url 'https://maven.aliyun.com/repository/public' }
+            maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+            google()
+            mavenCentral()
+        }
+    }
 }
 
 rootProject.buildDir = '../build'
@@ -18,7 +28,7 @@ subprojects {
     afterEvaluate {
         if (project.hasProperty('android')) {
             project.android {
-                compileSdkVersion 34
+                compileSdkVersion 36
                 if (namespace == null || namespace.isEmpty()) {
                     namespace project.group
                 }

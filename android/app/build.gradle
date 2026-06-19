@@ -13,8 +13,9 @@ if (localPropertiesFile.exists()) {
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
+def timestampVersionCode = (System.currentTimeMillis().intdiv(1000)).toString()
+if (flutterVersionCode == null || flutterVersionCode.toInteger() < timestampVersionCode.toInteger()) {
+    flutterVersionCode = timestampVersionCode
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
@@ -35,16 +36,16 @@ def _keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProperties["keyPassw
 
 android {
     namespace "com.guozhigq.pilipala"
-    compileSdkVersion flutter.compileSdkVersion
-    ndkVersion "25.1.8937393"
+    compileSdkVersion 36
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -59,7 +60,7 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        minSdkVersion 21
+        minSdkVersion flutter.minSdkVersion
         multiDexEnabled true
     }
 
@@ -96,7 +97,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.2.20"
     // Google Play Core - required by Flutter engine deferred components (R8 minification)
     implementation 'com.google.android.play:core:1.10.3'
 }
@@ -132,7 +133,7 @@ android.applicationVariants.all { variant ->
   variant.outputs.each { output ->
     def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
     if (abiVersionCode != null) {
-      output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
+      output.versionCodeOverride = variant.versionCode.intdiv(10) * 10 + abiVersionCode
     }
   }
 }

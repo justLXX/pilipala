@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pilipala/features/search/presentation/search_controller.dart' as search_ctrl;
+import 'package:pilipala/features/search/presentation/search_controller.dart'
+    as search_ctrl;
 
 /// SearchTextField is a custom search text field.
 class SearchTextField extends StatelessWidget {
@@ -23,7 +24,10 @@ class SearchTextField extends StatelessWidget {
       onChanged: (value) => controller.onInputChanged(value),
       decoration: InputDecoration(
         hintText: '搜索',
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: Icon(
+          Icons.search,
+          color: Theme.of(context).colorScheme.outline,
+        ),
         suffixIcon: Obx(() => controller.inputText.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.clear, size: 20),
@@ -31,11 +35,14 @@ class SearchTextField extends StatelessWidget {
               )
             : const SizedBox.shrink()),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(25.0),
+          borderRadius: BorderRadius.circular(18.0),
           borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        fillColor: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.58),
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
       ),
       onSubmitted: onSubmitted,

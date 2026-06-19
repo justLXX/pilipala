@@ -20,9 +20,14 @@ class _NavigationbarSetPageState extends State<NavigationBarSetPage> {
   @override
   void initState() {
     super.initState();
-    defaultNavTabs = defaultNavigationBars;
-    navBarSort = settingStorage
-        .get(SettingBoxKey.navBarSort, defaultValue: [0, 1, 2, 3]);
+    defaultNavTabs = [...defaultNavigationBars];
+    final availableIds = defaultNavTabs.map<int>((i) => i['id'] as int).toSet();
+    navBarSort = List<int>.from(
+      settingStorage.get(SettingBoxKey.navBarSort, defaultValue: [0, 2, 3]),
+    ).where(availableIds.contains).toList();
+    if (navBarSort.isEmpty) {
+      navBarSort = [0, 2, 3];
+    }
     // 对 tabData 进行排序
     defaultNavTabs.sort((a, b) {
       int indexA = navBarSort.indexOf(a['id']);
@@ -86,7 +91,7 @@ class _NavigationbarSetPageState extends State<NavigationBarSetPage> {
         ],
       ),
       body: ReorderableListView(
-        onReorder: onReorder,
+        onReorderItem: onReorder,
         physics: const NeverScrollableScrollPhysics(),
         footer: SizedBox(
           height: MediaQuery.of(context).padding.bottom + 30,
