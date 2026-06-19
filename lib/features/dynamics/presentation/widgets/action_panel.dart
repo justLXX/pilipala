@@ -55,7 +55,11 @@ class _ActionPanelState extends State<ActionPanel>
   }
 
   onInit() async {
-    statusHeight = await StatusBarControl.getHeight;
+    try {
+      statusHeight = await StatusBarControl.getHeight;
+    } catch (_) {
+      statusHeight = 0;
+    }
   }
 
   // 动态点赞

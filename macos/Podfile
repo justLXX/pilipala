@@ -36,5 +36,11 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
+    if target.name == 'media_kit_video'
+      target.build_configurations.each do |config|
+        config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+        config.build_settings['HEADER_SEARCH_PATHS'] << ' "$(PROJECT_DIR)/../Flutter/ephemeral/.symlinks/plugins/media_kit_native_event_loop/common/darwin/Headers"'
+      end
+    end
   end
 end
