@@ -87,9 +87,10 @@ class SearchVideoItemModel {
     aid = json['aid'];
     bvid = json['bvid'];
     mid = json['mid'];
-    title = json['title'].replaceAll(RegExp(r'<.*?>'), '');
+    final rawTitle = json['title']?.toString() ?? '';
+    title = rawTitle.replaceAll(RegExp(r'<.*?>'), '');
     // title = Em.regTitle(json['title']);
-    titleList = Em.regTitle(json['title']);
+    titleList = Em.regTitle(rawTitle);
     description = json['description'];
     pic = json['pic'] != null && json['pic'].startsWith('//')
         ? 'https:${json['pic']}'
@@ -97,7 +98,7 @@ class SearchVideoItemModel {
     videoReview = json['video_review'];
     pubdate = json['pubdate'];
     senddate = json['senddate'];
-    duration = Utils.duration(json['duration']);
+    duration = json['duration'] == null ? 0 : Utils.duration(json['duration']);
     owner = Owner.fromJson(json);
     stat = Stat.fromJson(json);
   }

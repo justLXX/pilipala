@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:pilipala/plugin/pl_player/index.dart';
 
 class PlayOrPauseButton extends StatefulWidget {
@@ -24,26 +23,34 @@ class PlayOrPauseButtonState extends State<PlayOrPauseButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController animation;
 
-  StreamSubscription<bool>? subscription;
-  late Player player;
+  StreamSubscription<PlayerStatus>? subscription;
   bool isOpacity = false;
 
   @override
   void initState() {
     super.initState();
-    player = widget.controller!.videoPlayerController!;
     animation = AnimationController(
       vsync: this,
-      value: player.state.playing ? 1 : 0,
+      value: widget.controller!.playerStatus.playing ? 1 : 0,
       duration: const Duration(milliseconds: 200),
     );
+    _subscribeStatus();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    subscription ??= player.stream.playing.listen((event) {
-      if (event) {
+  void didUpdateWidget(covariant PlayOrPauseButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      subscription?.cancel();
+      subscription = null;
+      animation.value = widget.controller!.playerStatus.playing ? 1 : 0;
+      _subscribeStatus();
+    }
+  }
+
+  void _subscribeStatus() {
+    subscription ??= widget.controller!.onPlayerStatusChanged.listen((status) {
+      if (status == PlayerStatus.playing) {
         animation.forward().then((value) => {
               isOpacity = true,
             });
@@ -70,7 +77,7 @@ class PlayOrPauseButtonState extends State<PlayOrPauseButton>
         style: ButtonStyle(
           padding: WidgetStateProperty.all(EdgeInsets.zero),
         ),
-        onPressed: player.playOrPause,
+        onPressed: widget.controller!.togglePlay,
         color: Colors.white,
         iconSize: 20,
         // iconSize: widget.iconSize ?? _theme(context).buttonBarButtonSize,

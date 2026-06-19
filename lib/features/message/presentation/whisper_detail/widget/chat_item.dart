@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
+import 'package:pilipala/features/main/presentation/main_controller.dart';
 import 'package:pilipala/plugin/pl_gallery/hero_dialog_route.dart';
 import 'package:pilipala/plugin/pl_gallery/interactiveviewer_gallery.dart';
 import 'package:pilipala/utils/route_push.dart';
@@ -141,6 +142,31 @@ class ChatItem extends StatelessWidget {
     }
 
     Widget messageContent(BuildContext context) {
+      void previewImage(String url) {
+        final int initIndex = ctr.picList.indexOf(url);
+        final MainController? mainController =
+            Get.isRegistered<MainController>()
+                ? Get.find<MainController>()
+                : null;
+        mainController?.imgPreviewStatus = true;
+        Navigator.of(context)
+            .push(
+          HeroDialogRoute<void>(
+            builder: (BuildContext context) => InteractiveviewerGallery(
+              sources: ctr.picList,
+              initIndex: initIndex < 0 ? 0 : initIndex,
+              onPageChanged: (int pageIndex) {},
+              onDismissed: (int value) {
+                mainController?.imgPreviewStatus = false;
+              },
+            ),
+          ),
+        )
+            .whenComplete(() {
+          mainController?.imgPreviewStatus = false;
+        });
+      }
+
       switch (MsgType.parse(item.msgType)) {
         case MsgType.notify_msg:
           return SystemNotice(item: item);
@@ -162,15 +188,7 @@ class ChatItem extends StatelessWidget {
         case MsgType.pic:
           return InkWell(
             onTap: () {
-              Navigator.of(context).push(
-                HeroDialogRoute<void>(
-                  builder: (BuildContext context) => InteractiveviewerGallery(
-                    sources: ctr.picList,
-                    initIndex: ctr.picList.indexOf(content['url']),
-                    onPageChanged: (int pageIndex) {},
-                  ),
-                ),
-              );
+              previewImage(content['url']);
             },
             child: NetworkImgLayer(
               width: 220,
