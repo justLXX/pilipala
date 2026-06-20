@@ -86,7 +86,9 @@ class _MemberPageState extends State<MemberPage> {
                 }
                 return CustomScrollView(
                   controller: _memberController.scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
+                  physics: const ClampingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
                   slivers: [
                     _MemberHeader(
                       info: info,
@@ -146,7 +148,7 @@ class _MemberHeader extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return SliverAppBar(
       pinned: true,
-      stretch: true,
+      stretch: false,
       expandedHeight: 450,
       backgroundColor: colorScheme.surface,
       foregroundColor: colorScheme.onSurface,

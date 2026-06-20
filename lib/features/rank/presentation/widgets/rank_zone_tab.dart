@@ -71,20 +71,21 @@ class _RankZoneTabState extends State<RankZoneTab>
         setState(() {});
         await _futureBuilderFuture;
       },
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverPadding(
-            padding:
-                const EdgeInsets.fromLTRB(0, StyleString.safeSpace - 5, 0, 0),
-            sliver: FutureBuilder(
-              future: _futureBuilderFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  final data = snapshot.data as Map;
-                  if (data['status'] == true) {
-                    return Obx(
-                      () => SliverList(
+      child: FutureBuilder(
+        future: _futureBuilderFuture,
+        builder: (context, snapshot) {
+          Widget contentSliver;
+          if (snapshot.connectionState == ConnectionState.done) {
+            final data = snapshot.data as Map;
+            if (data['status'] == true) {
+              return Obx(
+                () => CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                          0, StyleString.safeSpace - 5, 0, 0),
+                      sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             return VideoCardH(
@@ -95,37 +96,52 @@ class _RankZoneTabState extends State<RankZoneTab>
                           childCount: videoList.length,
                         ),
                       ),
-                    );
-                  } else {
-                    return HttpError(
-                      errMsg: data['msg']?.toString() ?? '加载失败',
-                      fn: () {
-                        setState(() {
-                          _futureBuilderFuture =
-                              _rankController.queryRankFeed(widget.rid);
-                        });
-                      },
-                    );
-                  }
-                } else {
-                  return SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return const VideoCardHSkeleton();
-                      },
-                      childCount: 10,
                     ),
-                  );
-                }
-              },
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery.of(context).padding.bottom + 10,
-            ),
-          )
-        ],
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).padding.bottom + 10,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              contentSliver = HttpError(
+                errMsg: data['msg']?.toString() ?? '加载失败',
+                fn: () {
+                  setState(() {
+                    _futureBuilderFuture =
+                        _rankController.queryRankFeed(widget.rid);
+                  });
+                },
+              );
+            }
+          } else {
+            contentSliver = SliverPadding(
+              padding:
+                  const EdgeInsets.fromLTRB(0, StyleString.safeSpace - 5, 0, 0),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return const VideoCardHSkeleton();
+                  },
+                  childCount: 10,
+                ),
+              ),
+            );
+          }
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              contentSliver,
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom + 10,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

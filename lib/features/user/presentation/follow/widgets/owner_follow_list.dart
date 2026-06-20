@@ -88,7 +88,9 @@ class _OwnerFollowListState extends State<OwnerFollowList>
               return Obx(
                 () => followList.isNotEmpty
                     ? ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
+                        physics: const ClampingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
                         controller: scrollController,
                         itemCount: followList.length + 1,
                         itemBuilder: (BuildContext context, int index) {

@@ -38,11 +38,10 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: NestedScrollView(
+        physics: const ClampingScrollPhysics(),
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              floating: true,
-              snap: true,
               pinned: true,
               elevation: 0,
               scrolledUnderElevation: 0,
@@ -55,7 +54,8 @@ class _HomePageState extends State<HomePage>
                   final keyword = _homeController.defaultSearch.value;
                   Get.toNamed(
                     '/search',
-                    parameters: keyword.isNotEmpty ? {'keyword': keyword} : null,
+                    parameters:
+                        keyword.isNotEmpty ? {'keyword': keyword} : null,
                   );
                 },
                 child: Container(

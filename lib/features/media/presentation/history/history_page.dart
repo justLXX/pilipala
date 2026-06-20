@@ -174,72 +174,86 @@ class _HistoryPageState extends State<HistoryPage> {
           await _historyController.onRefresh();
           return;
         },
-        child: CustomScrollView(
-          controller: _historyController.scrollController,
-          slivers: [
-            const SliverToBoxAdapter(child: SizedBox(height: 4)),
-            FutureBuilder(
-              future: _futureBuilderFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.data == null) {
-                    return const SliverToBoxAdapter(child: SizedBox());
-                  }
-                  Map? data = snapshot.data;
-                  if (data != null && data['status']) {
-                    return Obx(
-                      () => _historyController.historyList.isNotEmpty
-                          ? SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                return HistoryItem(
-                                  videoItem:
-                                      _historyController.historyList[index],
-                                  ctr: _historyController,
-                                  onChoose: () => onChoose(index),
-                                  onUpdateMultiple: () => onUpdateMultiple(),
-                                );
-                              },
-                                  childCount:
-                                      _historyController.historyList.length),
-                            )
-                          : _historyController.isLoadingMore.value
-                              ? const SliverToBoxAdapter(
-                                  child: Center(child: Text('加载中')),
-                                )
-                              : const NoData(),
-                    );
-                  } else {
-                    return HttpError(
-                      errMsg: data?['msg'] ?? '请求异常',
-                      btnText: data?['code'] == -101 ? '去登录' : null,
-                      fn: () {
-                        if (data?['code'] == -101) {
-                          RoutePush.loginRedirectPush();
-                        } else {
-                          setState(() {
-                            _futureBuilderFuture =
-                                _historyController.queryHistoryList();
-                          });
-                        }
-                      },
-                    );
-                  }
+        child: FutureBuilder(
+          future: _futureBuilderFuture,
+          builder: (context, snapshot) {
+            Widget contentSliver;
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.data == null) {
+                contentSliver = const SliverToBoxAdapter(child: SizedBox());
+              } else {
+                Map? data = snapshot.data;
+                if (data != null && data['status']) {
+                  return Obx(
+                    () => CustomScrollView(
+                      controller: _historyController.scrollController,
+                      slivers: [
+                        const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                        _historyController.historyList.isNotEmpty
+                            ? SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                  return HistoryItem(
+                                    videoItem:
+                                        _historyController.historyList[index],
+                                    ctr: _historyController,
+                                    onChoose: () => onChoose(index),
+                                    onUpdateMultiple: () => onUpdateMultiple(),
+                                  );
+                                },
+                                    childCount:
+                                        _historyController.historyList.length),
+                              )
+                            : _historyController.isLoadingMore.value
+                                ? const SliverToBoxAdapter(
+                                    child: Center(child: Text('加载中')),
+                                  )
+                                : const NoData(),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: MediaQuery.of(context).padding.bottom + 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 } else {
-                  return SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return const VideoCardHSkeleton();
-                    }, childCount: 10),
+                  contentSliver = HttpError(
+                    errMsg: data?['msg'] ?? '请求异常',
+                    btnText: data?['code'] == -101 ? '去登录' : null,
+                    fn: () {
+                      if (data?['code'] == -101) {
+                        RoutePush.loginRedirectPush();
+                      } else {
+                        setState(() {
+                          _futureBuilderFuture =
+                              _historyController.queryHistoryList();
+                        });
+                      }
+                    },
                   );
                 }
-              },
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: MediaQuery.of(context).padding.bottom + 10,
-              ),
-            )
-          ],
+              }
+            } else {
+              contentSliver = SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return const VideoCardHSkeleton();
+                }, childCount: 10),
+              );
+            }
+            return CustomScrollView(
+              controller: _historyController.scrollController,
+              slivers: [
+                const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                contentSliver,
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom + 10,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

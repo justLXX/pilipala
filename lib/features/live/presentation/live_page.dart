@@ -71,45 +71,53 @@ class _LivePageState extends State<LivePage>
         onRefresh: () async {
           return await _liveController.onRefresh();
         },
-        child: CustomScrollView(
-          controller: _liveController.scrollController,
-          slivers: [
-            buildFollowingList(),
-            SliverPadding(
-              padding:
-                  const EdgeInsets.fromLTRB(0, StyleString.safeSpace, 0, 0),
-              sliver: FutureBuilder(
-                future: _futureBuilderFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.data == null) {
-                      return const SliverToBoxAdapter(child: SizedBox());
-                    }
-                    Map data = snapshot.data as Map;
-                    if (data['status']) {
-                      return SliverLayoutBuilder(
-                          builder: (context, boxConstraints) {
+        child: FutureBuilder(
+          future: _futureBuilderFuture,
+          builder: (context, snapshot) {
+            Widget contentSliver;
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.data == null) {
+                contentSliver = const SliverToBoxAdapter(child: SizedBox());
+              } else {
+                Map data = snapshot.data as Map;
+                if (data['status']) {
+                  contentSliver = SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                        0, StyleString.safeSpace, 0, 0),
+                    sliver: SliverLayoutBuilder(
+                      builder: (context, boxConstraints) {
                         return Obx(() => contentGrid(
                             _liveController, _liveController.liveList));
+                      },
+                    ),
+                  );
+                } else {
+                  contentSliver = HttpError(
+                    errMsg: data['msg'],
+                    fn: () {
+                      setState(() {
+                        _futureBuilderFuture =
+                            _liveController.queryLiveList('init');
                       });
-                    } else {
-                      return HttpError(
-                        errMsg: data['msg'],
-                        fn: () {
-                          setState(() {
-                            _futureBuilderFuture =
-                                _liveController.queryLiveList('init');
-                          });
-                        },
-                      );
-                    }
-                  } else {
-                    return contentGrid(_liveController, []);
-                  }
-                },
-              ),
-            ),
-          ],
+                    },
+                  );
+                }
+              }
+            } else {
+              contentSliver = SliverPadding(
+                padding:
+                    const EdgeInsets.fromLTRB(0, StyleString.safeSpace, 0, 0),
+                sliver: contentGrid(_liveController, []),
+              );
+            }
+            return CustomScrollView(
+              controller: _liveController.scrollController,
+              slivers: [
+                buildFollowingList(),
+                contentSliver,
+              ],
+            );
+          },
         ),
       ),
     );

@@ -375,6 +375,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 
     return ExtendedNestedScrollView(
       controller: _extendNestCtr,
+      physics: const ClampingScrollPhysics(),
       headerSliverBuilder: (BuildContext ctx, bool innerBoxIsScrolled) {
         return <Widget>[
           Obx(() {
@@ -746,69 +747,72 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     return Obx(() {
       final related = _vdCtr.relatedVideos;
       final viewPoints = _vdCtr.viewPoints;
-      return CustomScrollView(
-        key: const PageStorageKey<String>('简介'),
-        physics: const ClampingScrollPhysics(),
-        slivers: [
-          // Video title & description
-          SliverToBoxAdapter(
-            child: HeaderControlWidget(
-              videoDetail: detail,
-              playUrl: _vdCtr.playUrl,
-            ),
-          ),
-          // Action bar (like, coin, collect, share)
-          SliverToBoxAdapter(
-            child: _IntroActionBar(
-              isLiked: _vdCtr.isLikedRx,
-              isCollected: _vdCtr.isCollectedRx,
-              isCoined: _vdCtr.isCoinedRx,
-              onLike: _vdCtr.toggleLike,
-              onCollect: _vdCtr.toggleCollect,
-              onCoin: _showCoinDialog,
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: Divider(height: 1, indent: 12, endIndent: 12),
-          ),
-          // Chapter (ViewPoints) section
-          if (viewPoints.isNotEmpty)
+      return ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+        child: CustomScrollView(
+          key: const PageStorageKey<String>('简介'),
+          physics: const ClampingScrollPhysics(),
+          slivers: [
+            // Video title & description
             SliverToBoxAdapter(
-              child: _ChapterSection(
-                viewPoints: viewPoints,
-                currentChapterIndex: _vdCtr.currentChapterIndex,
-                onChapterTap: (ViewPoint vp) {
-                  _vdCtr.playerController
-                      .seekTo(Duration(seconds: vp.from ?? 0));
-                },
+              child: HeaderControlWidget(
+                videoDetail: detail,
+                playUrl: _vdCtr.playUrl,
               ),
             ),
-          // UP master info with follow button
-          if (detail.owner != null)
+            // Action bar (like, coin, collect, share)
             SliverToBoxAdapter(
-              child: _UpMasterInfo(
-                owner: detail.owner!,
-                isFollowed: _vdCtr.isFollowed,
-                followStatusRx: _vdCtr.followStatusRx,
-                onFollow: _vdCtr.toggleFollow,
+              child: _IntroActionBar(
+                isLiked: _vdCtr.isLikedRx,
+                isCollected: _vdCtr.isCollectedRx,
+                isCoined: _vdCtr.isCoinedRx,
+                onLike: _vdCtr.toggleLike,
+                onCollect: _vdCtr.toggleCollect,
+                onCoin: _showCoinDialog,
               ),
             ),
-          // Pages (分P)
-          if (detail.pages != null && detail.pages!.isNotEmpty)
-            SliverToBoxAdapter(
-              child: _PagesList(
-                pages: detail.pages!,
-                currentCid: _vdCtr.cid,
+            const SliverToBoxAdapter(
+              child: Divider(height: 1, indent: 12, endIndent: 12),
+            ),
+            // Chapter (ViewPoints) section
+            if (viewPoints.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _ChapterSection(
+                  viewPoints: viewPoints,
+                  currentChapterIndex: _vdCtr.currentChapterIndex,
+                  onChapterTap: (ViewPoint vp) {
+                    _vdCtr.playerController
+                        .seekTo(Duration(seconds: vp.from ?? 0));
+                  },
+                ),
               ),
-            ),
-          // UGC Season (合集)
-          if (detail.ugcSeason != null)
-            SliverToBoxAdapter(
-              child: _UgcSeasonInfo(ugcSeason: detail.ugcSeason!),
-            ),
-          // Related / recommended videos
-          if (related.isNotEmpty) ..._buildRelatedVideoSlivers(related),
-        ],
+            // UP master info with follow button
+            if (detail.owner != null)
+              SliverToBoxAdapter(
+                child: _UpMasterInfo(
+                  owner: detail.owner!,
+                  isFollowed: _vdCtr.isFollowed,
+                  followStatusRx: _vdCtr.followStatusRx,
+                  onFollow: _vdCtr.toggleFollow,
+                ),
+              ),
+            // Pages (分P)
+            if (detail.pages != null && detail.pages!.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _PagesList(
+                  pages: detail.pages!,
+                  currentCid: _vdCtr.cid,
+                ),
+              ),
+            // UGC Season (合集)
+            if (detail.ugcSeason != null)
+              SliverToBoxAdapter(
+                child: _UgcSeasonInfo(ugcSeason: detail.ugcSeason!),
+              ),
+            // Related / recommended videos
+            if (related.isNotEmpty) ..._buildRelatedVideoSlivers(related),
+          ],
+        ),
       );
     });
   }
@@ -1347,6 +1351,10 @@ class _CommentPanel extends StatefulWidget {
 }
 
 class _CommentPanelState extends State<_CommentPanel> {
+  static const ScrollPhysics _commentScrollPhysics = ClampingScrollPhysics(
+    parent: AlwaysScrollableScrollPhysics(),
+  );
+
   late ScrollController _scrollController;
   Future? _futureBuilderFuture;
 
@@ -1377,6 +1385,55 @@ class _CommentPanelState extends State<_CommentPanel> {
     super.dispose();
   }
 
+  // Helper to build the sort-bar header sliver used in every comment branch.
+  Widget _buildSortHeader(BuildContext context, commentCtr) {
+    return SliverPersistentHeader(
+      pinned: false,
+      floating: true,
+      delegate: _SliverPersistentHeaderDelegate(
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.surface,
+                blurRadius: 0.0,
+                spreadRadius: 0.0,
+                offset: const Offset(2, 0),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Obx(
+                () => Text(
+                  '${commentCtr.sortTypeLabel.value}评论',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+              SizedBox(
+                height: 35,
+                child: TextButton.icon(
+                  onPressed: () => commentCtr.queryBySort(),
+                  icon: const Icon(Icons.sort, size: 16),
+                  label: Obx(
+                    () => Text(
+                      commentCtr.sortTypeLabel.value,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final commentCtr = widget.commentController;
@@ -1387,91 +1444,48 @@ class _CommentPanelState extends State<_CommentPanel> {
             onRefresh: () async {
               return await commentCtr.queryReplyList(type: 'init');
             },
-            child: CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              key: const PageStorageKey<String>('评论'),
-              slivers: <Widget>[
-                // Sort bar
-                SliverPersistentHeader(
-                  pinned: false,
-                  floating: true,
-                  delegate: _SliverPersistentHeaderDelegate(
-                    child: Container(
-                      height: 40,
-                      padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(context).colorScheme.surface,
-                            blurRadius: 0.0,
-                            spreadRadius: 0.0,
-                            offset: const Offset(2, 0),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Obx(
-                            () => Text(
-                              '${commentCtr.sortTypeLabel.value}评论',
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 35,
-                            child: TextButton.icon(
-                              onPressed: () => commentCtr.queryBySort(),
-                              icon: const Icon(Icons.sort, size: 16),
-                              label: Obx(
-                                () => Text(
-                                  commentCtr.sortTypeLabel.value,
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Comment list
-                FutureBuilder(
-                  future: _futureBuilderFuture,
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      final data = snapshot.data;
-                      if (commentCtr.replyList.isNotEmpty ||
-                          (data != null && data['status'])) {
-                        if (commentCtr.isLoadingMore &&
-                            commentCtr.replyList.isEmpty) {
-                          return SliverList(
+            child: FutureBuilder(
+              future: _futureBuilderFuture,
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  final data = snapshot.data;
+                  if (commentCtr.replyList.isNotEmpty ||
+                      (data != null && data['status'])) {
+                    if (commentCtr.isLoadingMore &&
+                        commentCtr.replyList.isEmpty) {
+                      // Loading more skeleton
+                      return CustomScrollView(
+                        controller: _scrollController,
+                        physics: _commentScrollPhysics,
+                        key: const PageStorageKey<String>('评论'),
+                        slivers: <Widget>[
+                          _buildSortHeader(context, commentCtr),
+                          SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (BuildContext context, int index) {
                                 return const VideoReplySkeleton();
                               },
                               childCount: 5,
                             ),
-                          );
-                        }
-                        return Obx(() {
-                          final replyList = commentCtr.replyList;
-                          if (replyList.isEmpty) {
-                            return SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (BuildContext context, int index) {
-                                  return const VideoReplySkeleton();
-                                },
-                                childCount: 5,
-                              ),
-                            );
-                          }
-                          return SliverList(
+                          ),
+                        ],
+                      );
+                    }
+                    // Comment list (reactive)
+                    return Obx(() {
+                      final replyList = commentCtr.replyList;
+                      return CustomScrollView(
+                        controller: _scrollController,
+                        physics: _commentScrollPhysics,
+                        key: const PageStorageKey<String>('评论'),
+                        slivers: <Widget>[
+                          _buildSortHeader(context, commentCtr),
+                          SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (BuildContext context, int index) {
+                                if (replyList.isEmpty) {
+                                  return const VideoReplySkeleton();
+                                }
                                 final double bottom =
                                     MediaQuery.of(context).padding.bottom;
                                 if (index == replyList.length) {
@@ -1546,7 +1560,8 @@ class _CommentPanelState extends State<_CommentPanel> {
                                   },
                                 );
                               },
-                              childCount: replyList.length + 1,
+                              childCount:
+                                  replyList.isEmpty ? 5 : replyList.length + 1,
                               // Comment items are cheap to rebuild when scrolled
                               // back into view and carry no keep-alive state
                               // worth preserving; disabling keep-alive lowers
@@ -1556,10 +1571,19 @@ class _CommentPanelState extends State<_CommentPanel> {
                               // keep the delegate default explicit for clarity.
                               addRepaintBoundaries: true,
                             ),
-                          );
-                        });
-                      } else {
-                        return HttpError(
+                          ),
+                        ],
+                      );
+                    });
+                  } else {
+                    // Error state
+                    return CustomScrollView(
+                      controller: _scrollController,
+                      physics: _commentScrollPhysics,
+                      key: const PageStorageKey<String>('评论'),
+                      slivers: <Widget>[
+                        _buildSortHeader(context, commentCtr),
+                        HttpError(
                           errMsg: data?['msg'],
                           fn: () {
                             setState(() {
@@ -1567,22 +1591,30 @@ class _CommentPanelState extends State<_CommentPanel> {
                                   commentCtr.queryReplyList();
                             });
                           },
-                        );
-                      }
-                    } else {
-                      // Skeleton loading
-                      return SliverList(
+                        ),
+                      ],
+                    );
+                  }
+                } else {
+                  // Skeleton loading
+                  return CustomScrollView(
+                    controller: _scrollController,
+                    physics: _commentScrollPhysics,
+                    key: const PageStorageKey<String>('评论'),
+                    slivers: <Widget>[
+                      _buildSortHeader(context, commentCtr),
+                      SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (BuildContext context, int index) {
                             return const VideoReplySkeleton();
                           },
                           childCount: 5,
                         ),
-                      );
-                    }
-                  },
-                ),
-              ],
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
           ),
         ),

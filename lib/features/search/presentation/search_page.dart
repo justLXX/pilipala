@@ -24,17 +24,44 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> with RouteAware {
   final search_ctrl.PiliSearchController _searchController =
       Get.find<search_ctrl.PiliSearchController>();
+  PageRoute<dynamic>? _route;
+  late final bool _autoFocusSearchField;
 
   @override
   void initState() {
     super.initState();
+    final routeKeyword = Get.parameters['keyword']?.trim() ?? '';
+    _autoFocusSearchField = routeKeyword.isEmpty;
+    _searchController.prepareForRoute(keyword: routeKeyword);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    SearchPage.routeObserver
-        .subscribe(this, ModalRoute.of(context) as PageRoute);
+    final route = ModalRoute.of(context);
+    if (route is PageRoute<dynamic> && route != _route) {
+      if (_route != null) {
+        SearchPage.routeObserver.unsubscribe(this);
+      }
+      _route = route;
+      SearchPage.routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    SearchPage.routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPushNext() {
+    _searchController.dismissKeyboard();
+  }
+
+  @override
+  void didPopNext() {
+    _searchController.dismissKeyboard();
   }
 
   @override
@@ -53,6 +80,7 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
         centerTitle: false,
         title: SearchTextField(
           controller: _searchController,
+          autofocus: _autoFocusSearchField,
           onSubmitted: (value) => _searchController.performSearch(value),
         ),
         actions: [
@@ -170,7 +198,10 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
             ),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        if (_searchController.isHotLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return const SizedBox.shrink();
       }
 
       return Padding(
@@ -262,7 +293,7 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
   /// State C: Search results.
   Widget _buildSearchResultsState() {
     return Obx(() {
-      if (_searchController.isLoading &&
+      if (_searchController.isSearching &&
           _searchController.searchResults.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }

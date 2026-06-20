@@ -131,55 +131,55 @@ class _ReplyReplyPanelState extends State<ReplyReplyPanel> {
               onRefresh: () async {
                 return await queryReplyList();
               },
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: <Widget>[
-                  // 一楼评论
-                  SliverToBoxAdapter(
-                    child: CommentItem(
-                      replyItem: widget.firstFloor,
-                      showReplyRow: false,
-                      replyLevel: '2',
-                      onReply: (replyItem) {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (ctx) => Padding(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(ctx).viewInsets.bottom),
-                            child: CommentInputDialog(
-                              oid: widget.oid,
-                              root: widget.rpid,
-                              parent: replyItem.rpid ?? 0,
-                              replyItem: replyItem,
+              child: FutureBuilder(
+                future: _futureBuilderFuture,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    Map? data = snapshot.data;
+                    if (data != null && data['status']) {
+                      return Obx(
+                        () => CustomScrollView(
+                          controller: scrollController,
+                          slivers: <Widget>[
+                            // 一楼评论
+                            SliverToBoxAdapter(
+                              child: CommentItem(
+                                replyItem: widget.firstFloor,
+                                showReplyRow: false,
+                                replyLevel: '2',
+                                onReply: (replyItem) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (ctx) => Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom:
+                                              MediaQuery.of(ctx).viewInsets.bottom),
+                                      child: CommentInputDialog(
+                                        oid: widget.oid,
+                                        root: widget.rpid,
+                                        parent: replyItem.rpid ?? 0,
+                                        replyItem: replyItem,
+                                      ),
+                                    ),
+                                  ).then((value) {
+                                    if (value != null && value['data'] != null) {
+                                      replyList.add(value['data']);
+                                    }
+                                  });
+                                },
+                              ),
                             ),
-                          ),
-                        ).then((value) {
-                          if (value != null && value['data'] != null) {
-                            replyList.add(value['data']);
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                  // 分割线
-                  SliverToBoxAdapter(
-                    child: Divider(
-                      height: 20,
-                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                      thickness: 6,
-                    ),
-                  ),
-                  // 二级评论列表
-                  FutureBuilder(
-                    future: _futureBuilderFuture,
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        Map? data = snapshot.data;
-                        if (data != null && data['status']) {
-                          return Obx(
-                            () => SliverList(
+                            // 分割线
+                            SliverToBoxAdapter(
+                              child: Divider(
+                                height: 20,
+                                color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                thickness: 6,
+                              ),
+                            ),
+                            // 二级评论列表
+                            SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (BuildContext context, int index) {
                                   if (index == replyList.length) {
@@ -240,26 +240,106 @@ class _ReplyReplyPanelState extends State<ReplyReplyPanel> {
                                 childCount: replyList.length + 1,
                               ),
                             ),
-                          );
-                        } else {
-                          return HttpError(
+                          ],
+                        ),
+                      );
+                    } else {
+                      return CustomScrollView(
+                        controller: scrollController,
+                        slivers: <Widget>[
+                          SliverToBoxAdapter(
+                            child: CommentItem(
+                              replyItem: widget.firstFloor,
+                              showReplyRow: false,
+                              replyLevel: '2',
+                              onReply: (replyItem) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (ctx) => Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom:
+                                            MediaQuery.of(ctx).viewInsets.bottom),
+                                    child: CommentInputDialog(
+                                      oid: widget.oid,
+                                      root: widget.rpid,
+                                      parent: replyItem.rpid ?? 0,
+                                      replyItem: replyItem,
+                                    ),
+                                  ),
+                                ).then((value) {
+                                  if (value != null && value['data'] != null) {
+                                    replyList.add(value['data']);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: Divider(
+                              height: 20,
+                              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                              thickness: 6,
+                            ),
+                          ),
+                          HttpError(
                             errMsg: data?['msg'] ?? '请求错误',
                             fn: () => setState(() {}),
-                          );
-                        }
-                      } else {
-                        return SliverList(
+                          ),
+                        ],
+                      );
+                    }
+                  } else {
+                    return CustomScrollView(
+                      controller: scrollController,
+                      slivers: <Widget>[
+                        SliverToBoxAdapter(
+                          child: CommentItem(
+                            replyItem: widget.firstFloor,
+                            showReplyRow: false,
+                            replyLevel: '2',
+                            onReply: (replyItem) {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (ctx) => Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom:
+                                          MediaQuery.of(ctx).viewInsets.bottom),
+                                  child: CommentInputDialog(
+                                    oid: widget.oid,
+                                    root: widget.rpid,
+                                    parent: replyItem.rpid ?? 0,
+                                    replyItem: replyItem,
+                                  ),
+                                ),
+                              ).then((value) {
+                                if (value != null && value['data'] != null) {
+                                  replyList.add(value['data']);
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Divider(
+                            height: 20,
+                            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                            thickness: 6,
+                          ),
+                        ),
+                        SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (BuildContext context, int index) {
                               return const VideoReplySkeleton();
                             },
                             childCount: 8,
                           ),
-                        );
-                      }
-                    },
-                  ),
-                ],
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
             ),
           ),

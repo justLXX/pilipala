@@ -68,18 +68,19 @@ class _LaterPageState extends State<LaterPage> {
           const SizedBox(width: 8),
         ],
       ),
-      body: CustomScrollView(
-        controller: _laterController.scrollController,
-        slivers: [
-          const SliverToBoxAdapter(child: SizedBox(height: 4)),
-          FutureBuilder(
-            future: _futureBuilderFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                Map? data = snapshot.data;
-                if (data != null && data['status']) {
-                  return Obx(
-                    () => _laterController.laterList.isNotEmpty &&
+      body: FutureBuilder(
+        future: _futureBuilderFuture,
+        builder: (context, snapshot) {
+          Widget contentSliver;
+          if (snapshot.connectionState == ConnectionState.done) {
+            Map? data = snapshot.data;
+            if (data != null && data['status']) {
+              return Obx(
+                () => CustomScrollView(
+                  controller: _laterController.scrollController,
+                  slivers: [
+                    const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                    _laterController.laterList.isNotEmpty &&
                             !_laterController.isLoading.value
                         ? SliverList(
                             delegate:
@@ -97,38 +98,50 @@ class _LaterPageState extends State<LaterPage> {
                                 child: Center(child: Text('加载中')),
                               )
                             : const NoData(),
-                  );
-                } else {
-                  return HttpError(
-                    errMsg: data?['msg'] ?? '请求异常',
-                    btnText: data?['code'] == -101 ? '去登录' : null,
-                    fn: () {
-                      if (data?['code'] == -101) {
-                        RoutePush.loginRedirectPush();
-                      } else {
-                        setState(() {
-                          _futureBuilderFuture =
-                              _laterController.queryLaterList();
-                        });
-                      }
-                    },
-                  );
-                }
-              } else {
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return const VideoCardHSkeleton();
-                  }, childCount: 10),
-                );
-              }
-            },
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery.of(context).padding.bottom + 10,
-            ),
-          )
-        ],
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).padding.bottom + 10,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              contentSliver = HttpError(
+                errMsg: data?['msg'] ?? '请求异常',
+                btnText: data?['code'] == -101 ? '去登录' : null,
+                fn: () {
+                  if (data?['code'] == -101) {
+                    RoutePush.loginRedirectPush();
+                  } else {
+                    setState(() {
+                      _futureBuilderFuture =
+                          _laterController.queryLaterList();
+                    });
+                  }
+                },
+              );
+            }
+          } else {
+            contentSliver = SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                return const VideoCardHSkeleton();
+              }, childCount: 10),
+            );
+          }
+          return CustomScrollView(
+            controller: _laterController.scrollController,
+            slivers: [
+              const SliverToBoxAdapter(child: SizedBox(height: 4)),
+              contentSliver,
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom + 10,
+                ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: Obx(
         () => _laterController.laterList.isNotEmpty

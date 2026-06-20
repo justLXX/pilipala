@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:hive/hive.dart';
 import 'package:pilipala/common/widgets/custom_toast.dart';
+import 'package:pilipala/common/widgets/app_scroll_behavior.dart';
 import 'package:pilipala/core/di/dependency_injection.dart';
 import 'package:pilipala/features/search/presentation/search_page.dart';
 import 'package:pilipala/features/video/presentation/video_detail_page.dart';
@@ -230,7 +231,8 @@ class BuildMainApp extends StatefulWidget {
   State<BuildMainApp> createState() => _BuildMainAppState();
 }
 
-class _BuildMainAppState extends State<BuildMainApp> with WidgetsBindingObserver {
+class _BuildMainAppState extends State<BuildMainApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -352,9 +354,10 @@ class _BuildMainAppState extends State<BuildMainApp> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme themeColorScheme = widget.currentThemeValue == ThemeType.dark
-        ? widget.darkColorScheme
-        : widget.lightColorScheme;
+    final ColorScheme themeColorScheme =
+        widget.currentThemeValue == ThemeType.dark
+            ? widget.darkColorScheme
+            : widget.lightColorScheme;
     final ColorScheme darkThemeColorScheme =
         widget.currentThemeValue == ThemeType.light
             ? widget.lightColorScheme
@@ -362,6 +365,7 @@ class _BuildMainAppState extends State<BuildMainApp> with WidgetsBindingObserver
 
     return GetMaterialApp(
       title: 'PiliPala',
+      scrollBehavior: const AppScrollBehavior(),
       theme: _buildTheme(themeColorScheme),
       darkTheme: _buildTheme(darkThemeColorScheme),
       localizationsDelegates: const [

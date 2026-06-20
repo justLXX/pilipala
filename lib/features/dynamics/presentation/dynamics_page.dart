@@ -190,106 +190,113 @@ class _DynamicsPageState extends State<DynamicsPage>
       ),
       body: RefreshIndicator(
         onRefresh: () => _dynamicsController.onRefresh(),
-        child: CustomScrollView(
-          controller: _dynamicsController.scrollController,
-          slivers: [
-            FutureBuilder(
-              future: _futureBuilderFutureUp,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.data == null) {
-                    return const SliverToBoxAdapter(child: SizedBox());
-                  }
-                  Map data = snapshot.data;
-                  if (data['status']) {
-                    return Obx(
-                      () => UpPanel(
-                        upData: _dynamicsController.upData.value,
-                        onClickUpCb: (data) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UpDynamicsPage(
-                                  ctr: _dynamicsController, upInfo: data),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  } else {
-                    return const SliverToBoxAdapter(
-                      child: SizedBox(height: 80),
-                    );
-                  }
+        child: FutureBuilder(
+          future: _futureBuilderFutureUp,
+          builder: (context, upSnapshot) {
+            Widget upSliver;
+            if (upSnapshot.connectionState == ConnectionState.done) {
+              if (upSnapshot.data == null) {
+                upSliver = const SliverToBoxAdapter(child: SizedBox());
+              } else {
+                Map data = upSnapshot.data;
+                if (data['status']) {
+                  upSliver = Obx(
+                    () => UpPanel(
+                      upData: _dynamicsController.upData.value,
+                      onClickUpCb: (data) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UpDynamicsPage(
+                                ctr: _dynamicsController, upInfo: data),
+                          ),
+                        );
+                      },
+                    ),
+                  );
                 } else {
-                  return const SliverToBoxAdapter(
-                      child: SizedBox(
-                    height: 90,
-                    child: UpPanelSkeleton(),
-                  ));
+                  upSliver = const SliverToBoxAdapter(
+                    child: SizedBox(height: 80),
+                  );
                 }
-              },
-            ),
-            FutureBuilder(
+              }
+            } else {
+              upSliver = const SliverToBoxAdapter(
+                  child: SizedBox(
+                height: 90,
+                child: UpPanelSkeleton(),
+              ));
+            }
+            return FutureBuilder(
               future: _futureBuilderFuture,
               builder: (context, snapshot) {
+                Widget contentSliver;
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.data == null) {
-                    return const SliverToBoxAdapter(child: SizedBox());
-                  }
-                  Map? data = snapshot.data;
-                  if (data != null && data['status']) {
-                    List<DynamicItemModel> list =
-                        _dynamicsController.dynamicsList;
-                    return Obx(
-                      () {
-                        if (list.isEmpty) {
-                          if (_dynamicsController.isLoadingDynamic.value) {
-                            return skeleton();
-                          } else {
-                            return const NoData();
-                          }
-                        } else {
-                          return SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return _centerContent(
-                                  context,
-                                  DynamicPanel(item: list[index]),
-                                );
-                              },
-                              childCount: list.length,
-                            ),
-                          );
-                        }
-                      },
-                    );
+                    contentSliver = const SliverToBoxAdapter(child: SizedBox());
                   } else {
-                    return HttpError(
-                      errMsg: data?['msg'] ?? '请求异常',
-                      btnText: data?['code'] == -101 ? '去登录' : null,
-                      fn: () {
-                        if (data?['code'] == -101) {
-                          RoutePush.loginRedirectPush();
-                        } else {
-                          setState(() {
-                            _futureBuilderFuture =
-                                _dynamicsController.queryFollowDynamic();
-                            _futureBuilderFutureUp =
-                                _dynamicsController.queryFollowUp();
-                          });
-                        }
-                      },
-                    );
+                    Map? data = snapshot.data;
+                    if (data != null && data['status']) {
+                      List<DynamicItemModel> list =
+                          _dynamicsController.dynamicsList;
+                      return Obx(
+                        () => CustomScrollView(
+                          controller: _dynamicsController.scrollController,
+                          slivers: [
+                            upSliver,
+                            list.isEmpty
+                                ? (_dynamicsController.isLoadingDynamic.value
+                                    ? skeleton()
+                                    : const NoData())
+                                : SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, index) {
+                                        return _centerContent(
+                                          context,
+                                          DynamicPanel(item: list[index]),
+                                        );
+                                      },
+                                      childCount: list.length,
+                                    ),
+                                  ),
+                            const SliverToBoxAdapter(
+                                child: SizedBox(height: 40)),
+                          ],
+                        ),
+                      );
+                    } else {
+                      contentSliver = HttpError(
+                        errMsg: data?['msg'] ?? '请求异常',
+                        btnText: data?['code'] == -101 ? '去登录' : null,
+                        fn: () {
+                          if (data?['code'] == -101) {
+                            RoutePush.loginRedirectPush();
+                          } else {
+                            setState(() {
+                              _futureBuilderFuture =
+                                  _dynamicsController.queryFollowDynamic();
+                              _futureBuilderFutureUp =
+                                  _dynamicsController.queryFollowUp();
+                            });
+                          }
+                        },
+                      );
+                    }
                   }
                 } else {
-                  // 骨架屏
-                  return skeleton();
+                  contentSliver = skeleton();
                 }
+                return CustomScrollView(
+                  controller: _dynamicsController.scrollController,
+                  slivers: [
+                    upSliver,
+                    contentSliver,
+                    const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                  ],
+                );
               },
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 40))
-          ],
+            );
+          },
         ),
       ),
     );

@@ -328,98 +328,102 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
         onRefresh: () async {
           await _dynamicDetailController.queryReplyList();
         },
-        child: CustomScrollView(
-          controller: scrollController,
-          slivers: [
-            if (action != 'comment')
-              SliverToBoxAdapter(
-                child: _centerContent(
-                  context,
-                  DynamicPanel(
-                    item: _dynamicDetailController.item,
-                    source: 'detail',
-                  ),
-                ),
-              ),
-            SliverPersistentHeader(
-              delegate: _MySliverPersistentHeaderDelegate(
-                child: Center(
-                  child: SizedBox(
-                    width: Responsive.dynamicsContentWidth(context),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        border: Border(
-                          top: BorderSide(
-                            width: 0.6,
-                            color: Theme.of(context)
-                                .dividerColor
-                                .withValues(alpha: 0.05),
+        child: FutureBuilder(
+          future: _futureBuilderFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              Map data = snapshot.data as Map;
+              if (snapshot.data['status']) {
+                RxList<ReplyItemModel> replyList =
+                    _dynamicDetailController.replyList;
+                return Obx(
+                  () => CustomScrollView(
+                    controller: scrollController,
+                    slivers: [
+                      if (action != 'comment')
+                        SliverToBoxAdapter(
+                          child: _centerContent(
+                            context,
+                            DynamicPanel(
+                              item: _dynamicDetailController.item,
+                              source: 'detail',
+                            ),
                           ),
                         ),
-                      ),
-                      height: 45,
-                      padding: const EdgeInsets.only(left: 12, right: 6),
-                      child: Row(
-                        children: [
-                          Obx(
-                            () => AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 400),
-                              transitionBuilder:
-                                  (Widget child, Animation<double> animation) {
-                                return ScaleTransition(
-                                    scale: animation, child: child);
-                              },
-                              child: Text(
-                                '${_dynamicDetailController.acount.value}',
-                                key: ValueKey<int>(
-                                    _dynamicDetailController.acount.value),
+                      SliverPersistentHeader(
+                        delegate: _MySliverPersistentHeaderDelegate(
+                          child: Center(
+                            child: SizedBox(
+                              width: Responsive.dynamicsContentWidth(context),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  border: Border(
+                                    top: BorderSide(
+                                      width: 0.6,
+                                      color: Theme.of(context)
+                                          .dividerColor
+                                          .withValues(alpha: 0.05),
+                                    ),
+                                  ),
+                                ),
+                                height: 45,
+                                padding:
+                                    const EdgeInsets.only(left: 12, right: 6),
+                                child: Row(
+                                  children: [
+                                    Obx(
+                                      () => AnimatedSwitcher(
+                                        duration:
+                                            const Duration(milliseconds: 400),
+                                        transitionBuilder: (Widget child,
+                                            Animation<double> animation) {
+                                          return ScaleTransition(
+                                              scale: animation, child: child);
+                                        },
+                                        child: Text(
+                                          '${_dynamicDetailController.acount.value}',
+                                          key: ValueKey<int>(
+                                              _dynamicDetailController
+                                                  .acount.value),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text('条回复'),
+                                    const Spacer(),
+                                    SizedBox(
+                                      height: 35,
+                                      child: TextButton.icon(
+                                        onPressed: () =>
+                                            _dynamicDetailController
+                                                .queryBySort(),
+                                        icon: const Icon(Icons.sort, size: 16),
+                                        label: Obx(() => Text(
+                                              _dynamicDetailController
+                                                  .sortTypeLabel.value,
+                                              style: const TextStyle(
+                                                  fontSize: 13),
+                                            )),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                          const Text('条回复'),
-                          const Spacer(),
-                          SizedBox(
-                            height: 35,
-                            child: TextButton.icon(
-                              onPressed: () =>
-                                  _dynamicDetailController.queryBySort(),
-                              icon: const Icon(Icons.sort, size: 16),
-                              label: Obx(() => Text(
-                                    _dynamicDetailController
-                                        .sortTypeLabel.value,
-                                    style: const TextStyle(fontSize: 13),
-                                  )),
-                            ),
-                          )
-                        ],
+                        ),
+                        pinned: true,
                       ),
-                    ),
-                  ),
-                ),
-              ),
-              pinned: true,
-            ),
-            FutureBuilder(
-              future: _futureBuilderFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  Map data = snapshot.data as Map;
-                  if (snapshot.data['status']) {
-                    RxList<ReplyItemModel> replyList =
-                        _dynamicDetailController.replyList;
-                    // 请求成功
-                    return Obx(
-                      () => replyList.isEmpty &&
+                      replyList.isEmpty &&
                               _dynamicDetailController.isLoadingMore
                           ? SliverList(
-                              delegate:
-                                  SliverChildBuilderDelegate((context, index) {
-                                return _centerContent(
-                                  context,
-                                  const VideoReplySkeleton(),
-                                );
-                              }, childCount: 8),
+                              delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                              return _centerContent(
+                                context,
+                                const VideoReplySkeleton(),
+                              );
+                            }, childCount: 8),
                             )
                           : SliverList(
                               delegate: SliverChildBuilderDelegate(
@@ -476,28 +480,56 @@ class _DynamicDetailPageState extends State<DynamicDetailPage>
                                 childCount: replyList.length + 1,
                               ),
                             ),
-                    );
-                  } else {
-                    // 请求错误
-                    return HttpError(
+                    ],
+                  ),
+                );
+              } else {
+                return CustomScrollView(
+                  controller: scrollController,
+                  slivers: [
+                    if (action != 'comment')
+                      SliverToBoxAdapter(
+                        child: _centerContent(
+                          context,
+                          DynamicPanel(
+                            item: _dynamicDetailController.item,
+                            source: 'detail',
+                          ),
+                        ),
+                      ),
+                    HttpError(
                       errMsg: data['msg'],
                       fn: () => setState(() {}),
-                    );
-                  }
-                } else {
-                  // 骨架屏
-                  return SliverList(
+                    ),
+                  ],
+                );
+              }
+            } else {
+              return CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  if (action != 'comment')
+                    SliverToBoxAdapter(
+                      child: _centerContent(
+                        context,
+                        DynamicPanel(
+                          item: _dynamicDetailController.item,
+                          source: 'detail',
+                        ),
+                      ),
+                    ),
+                  SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return _centerContent(
                         context,
                         const VideoReplySkeleton(),
                       );
                     }, childCount: 8),
-                  );
-                }
-              },
-            )
-          ],
+                  ),
+                ],
+              );
+            }
+          },
         ),
       ),
       floatingActionButton: SlideTransition(

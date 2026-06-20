@@ -69,63 +69,67 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
           }
           return false;
         },
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding:
-                  const EdgeInsets.fromLTRB(0, StyleString.safeSpace - 5, 0, 0),
-              sliver: FutureBuilder(
-                future: _futureBuilderFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return Obx(
-                      () {
-                        if (_homeController.hotVideoList.isNotEmpty) {
-                          return _buildVideoSliver(
-                            context,
-                            _homeController.hotVideoList.length,
-                            (index) => CleanVideoCard(
+        child: FutureBuilder(
+          future: _futureBuilderFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Obx(
+                () {
+                  if (_homeController.hotVideoList.isNotEmpty) {
+                    return _buildScrollView(
+                        context,
+                        _homeController.hotVideoList.length,
+                        (index) => CleanVideoCard(
                               videoItem: _homeController.hotVideoList[index],
                               showPubdate: true,
-                            ),
-                          );
-                        } else if (_homeController.hotError.isNotEmpty) {
-                          return HttpError(
-                            errMsg: _homeController.hotError,
-                            fn: () {
-                              setState(() {
-                                _futureBuilderFuture =
-                                    _homeController.loadHotVideos();
-                              });
-                            },
-                          );
-                        } else {
-                          return _buildVideoSliver(
-                            context,
-                            10,
-                            (_) => const CleanVideoCardSkeleton(),
-                          );
-                        }
-                      },
+                            ));
+                  } else if (_homeController.hotError.isNotEmpty) {
+                    return CustomScrollView(
+                      slivers: [
+                        HttpError(
+                          errMsg: _homeController.hotError,
+                          fn: () {
+                            setState(() {
+                              _futureBuilderFuture =
+                                  _homeController.loadHotVideos();
+                            });
+                          },
+                        ),
+                      ],
                     );
                   } else {
-                    // Skeleton screen
-                    return _buildVideoSliver(
-                      context,
-                      10,
-                      (_) => const CleanVideoCardSkeleton(),
-                    );
+                    return _buildScrollView(
+                        context, 10, (_) => const CleanVideoCardSkeleton());
                   }
                 },
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: MediaQuery.of(context).padding.bottom + 10,
-              ),
-            )
-          ],
+              );
+            } else {
+              return _buildScrollView(
+                  context, 10, (_) => const CleanVideoCardSkeleton());
+            }
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _buildScrollView(
+    BuildContext context,
+    int childCount,
+    Widget Function(int index) builder,
+  ) {
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+      child: CustomScrollView(
+        physics: const ClampingScrollPhysics(),
+        slivers: [
+          _buildVideoSliver(context, childCount, builder),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: MediaQuery.of(context).padding.bottom + 10,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -147,7 +151,12 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
             crossAxisCount;
         final itemHeight = itemWidth / StyleString.aspectRatio + 104;
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+          padding: const EdgeInsets.fromLTRB(
+            horizontalPadding,
+            StyleString.safeSpace - 5,
+            horizontalPadding,
+            0,
+          ),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,

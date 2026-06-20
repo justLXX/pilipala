@@ -216,28 +216,27 @@ class VideoDetailController extends GetxController
       unawaited(loadRelatedVideos());
       unawaited(loadViewPoints());
 
-      // Critical path (serial): login state -> play URL -> player init.
-      // login state must resolve first because interaction/follow status
-      // queries depend on it.
-      final loggedIn = await _refreshUserLoginState();
+      // 登录状态不阻塞首帧：播放地址和播放器初始化优先执行。
+      final loginFuture = _refreshUserLoginState();
+
+      // 3. Load play URL and initialize player (gates first-paint).
+      if (videoDetail.cid != null) {
+        await loadPlayUrl(
+          avid: videoDetail.aid ?? 0,
+          cid: videoDetail.cid!,
+          bvid: currentBvid,
+        );
+        await _initPlayer(bvid: currentBvid, cid: videoDetail.cid!);
+      }
 
       // 2. Query like/coin/collect status if logged in (independent of player)
+      final loggedIn = await loginFuture;
       if (loggedIn) {
         _queryInteractionStatus();
         // 7. Query follow status if logged in
         if (videoDetail.owner?.mid != null) {
           queryFollowStatus();
         }
-      }
-
-      // 3. Load play URL and initialize player (gates first-paint)
-      if (videoDetail.cid != null) {
-        await loadPlayUrl(
-          avid: videoDetail.aid ?? 0,
-          cid: videoDetail.cid!,
-          bvid: bvid,
-        );
-        await _initPlayer(bvid: bvid, cid: videoDetail.cid!);
       }
     } catch (e) {
       _error.value = e.toString();

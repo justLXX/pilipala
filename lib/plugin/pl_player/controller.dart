@@ -480,7 +480,7 @@ class PlPlayerController {
           player,
           configuration: VideoControllerConfiguration(
             enableHardwareAcceleration: enableHA,
-            androidAttachSurfaceAfterVideoParameters: false,
+            androidAttachSurfaceAfterVideoParameters: true,
           ),
         );
 
@@ -542,6 +542,7 @@ class PlPlayerController {
   List<StreamSubscription> subscriptions = [];
   final List<Function(Duration position)> _positionListeners = [];
   final List<Function(PlayerStatus status)> _statusListeners = [];
+
   /// When true, the [stream.playing] listener ignores the next state event.
   /// Used during seek-in-pause to suppress the spurious playing→paused
   /// broadcast caused by the play+pause frame-refresh trick.

@@ -7,11 +7,13 @@ import 'package:pilipala/features/search/presentation/search_controller.dart'
 class SearchTextField extends StatelessWidget {
   final search_ctrl.PiliSearchController controller;
   final Function(String) onSubmitted;
+  final bool autofocus;
 
   const SearchTextField({
     super.key,
     required this.controller,
     required this.onSubmitted,
+    this.autofocus = false,
   });
 
   @override
@@ -19,7 +21,7 @@ class SearchTextField extends StatelessWidget {
     return TextField(
       controller: controller.textEditingController,
       focusNode: controller.searchFocusNode,
-      autofocus: true,
+      autofocus: autofocus,
       textInputAction: TextInputAction.search,
       onChanged: (value) => controller.onInputChanged(value),
       decoration: InputDecoration(

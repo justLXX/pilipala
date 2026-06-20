@@ -60,7 +60,9 @@ class _UpDyanmicsPageState extends State<UpDyanmicsPage>
     super.build(context);
     return CustomScrollView(
       controller: scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: const ClampingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       slivers: [
         SliverPersistentHeader(
           pinned: true,

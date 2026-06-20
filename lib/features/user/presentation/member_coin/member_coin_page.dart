@@ -54,7 +54,9 @@ class _MemberCoinPageState extends State<MemberCoinPage> {
         onRefresh: _onRefresh,
         child: CustomScrollView(
           controller: _controller.scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const ClampingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           slivers: [
             FutureBuilder(
               future: _futureBuilderFuture,

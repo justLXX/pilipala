@@ -104,7 +104,7 @@ class SearchBinding extends Bindings {
     Get.lazyPut<SearchContentUseCase>(() => SearchContentUseCase());
     Get.lazyPut<GetSearchSuggestionsUseCase>(
         () => GetSearchSuggestionsUseCase());
-    Get.lazyPut<PiliSearchController>(() => PiliSearchController());
+    Get.lazyPut<PiliSearchController>(() => PiliSearchController(), fenix: true);
   }
 }
 

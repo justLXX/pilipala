@@ -33,7 +33,8 @@ class PiliSearchController extends GetxController {
   final RxList<String> _searchHistory = <String>[].obs;
   final RxString _keyword = ''.obs;
   final RxString _searchType = 'video'.obs;
-  final RxBool _isLoading = false.obs;
+  final RxBool _isHotLoading = false.obs;
+  final RxBool _isSearching = false.obs;
   final RxBool _isLoadingMore = false.obs;
   final RxString _error = ''.obs;
 
@@ -41,6 +42,7 @@ class PiliSearchController extends GetxController {
   final RxInt _currentPage = 1.obs;
   final RxBool _hasMore = true.obs;
   int? _numPages;
+  int _searchRequestId = 0;
 
   // Search history persistence
   final Box _historyBox = GStrorage.historyword;
@@ -56,7 +58,9 @@ class PiliSearchController extends GetxController {
   List<String> get searchHistory => _searchHistory;
   String get keyword => _keyword.value;
   String get searchType => _searchType.value;
-  bool get isLoading => _isLoading.value;
+  bool get isHotLoading => _isHotLoading.value;
+  bool get isSearching => _isSearching.value;
+  bool get isLoading => _isHotLoading.value || _isSearching.value;
   bool get isLoadingMore => _isLoadingMore.value;
   bool get hasMore => _hasMore.value;
   String get error => _error.value;
@@ -78,13 +82,6 @@ class PiliSearchController extends GetxController {
     super.onInit();
     loadHistory();
     loadHotSearch();
-
-    // Handle incoming parameters (e.g. from other pages)
-    if (Get.parameters.keys.isNotEmpty) {
-      if (Get.parameters['keyword'] != null) {
-        performSearch(Get.parameters['keyword']!);
-      }
-    }
   }
 
   @override
@@ -107,8 +104,7 @@ class PiliSearchController extends GetxController {
     if (keyword.isEmpty) return;
 
     // Remove duplicate if exists
-    _historyCacheList =
-        _historyCacheList.where((e) => e != keyword).toList();
+    _historyCacheList = _historyCacheList.where((e) => e != keyword).toList();
     // Insert at the beginning
     _historyCacheList.insert(0, keyword);
     // Limit history to 20 items
@@ -123,8 +119,7 @@ class PiliSearchController extends GetxController {
 
   /// Remove a single keyword from search history.
   void removeHistory(String keyword) {
-    _historyCacheList =
-        _historyCacheList.where((e) => e != keyword).toList();
+    _historyCacheList = _historyCacheList.where((e) => e != keyword).toList();
     _searchHistory.value = List<String>.from(_historyCacheList);
     _searchHistory.refresh();
     _historyBox.put('cacheList', _historyCacheList);
@@ -142,7 +137,7 @@ class PiliSearchController extends GetxController {
 
   /// Load hot search list.
   Future<void> loadHotSearch() async {
-    _isLoading.value = true;
+    _isHotLoading.value = true;
     _error.value = '';
 
     try {
@@ -151,7 +146,7 @@ class PiliSearchController extends GetxController {
     } catch (e) {
       _error.value = e.toString();
     } finally {
-      _isLoading.value = false;
+      _isHotLoading.value = false;
     }
   }
 
@@ -202,11 +197,45 @@ class PiliSearchController extends GetxController {
 
   // ==================== Search Execution ====================
 
+  /// 根据路由参数准备搜索页状态。
+  void prepareForRoute({String? keyword}) {
+    final routeKeyword = keyword?.trim() ?? '';
+    _error.value = '';
+    _suggestions.clear();
+
+    if (routeKeyword.isEmpty) {
+      _searchRequestId++;
+      _isSearching.value = false;
+      _isLoadingMore.value = false;
+      _keyword.value = '';
+      _inputText.value = '';
+      _searchResults.clear();
+      _currentPage.value = 1;
+      _hasMore.value = true;
+      _numPages = null;
+      textEditingController.clear();
+      return;
+    }
+
+    _keyword.value = routeKeyword;
+    _inputText.value = routeKeyword;
+    _searchResults.clear();
+    _currentPage.value = 1;
+    _hasMore.value = true;
+    _numPages = null;
+    textEditingController.text = routeKeyword;
+    textEditingController.selection = TextSelection.fromPosition(
+      TextPosition(offset: routeKeyword.length),
+    );
+    performSearch(routeKeyword);
+  }
+
   /// Perform a search with the given keyword.
   Future<void> performSearch(String keyword) async {
     if (keyword.isEmpty) return;
 
-    _isLoading.value = true;
+    final requestId = ++_searchRequestId;
+    _isSearching.value = true;
     _error.value = '';
     _keyword.value = keyword;
     _currentPage.value = 1;
@@ -232,6 +261,7 @@ class PiliSearchController extends GetxController {
         searchType: _searchType.value,
         page: 1,
       );
+      if (requestId != _searchRequestId) return;
       _searchResults.value = results.list ?? [];
       _numPages = results.numPages;
 
@@ -243,9 +273,12 @@ class PiliSearchController extends GetxController {
         _hasMore.value = false;
       }
     } catch (e) {
+      if (requestId != _searchRequestId) return;
       _error.value = e.toString();
     } finally {
-      _isLoading.value = false;
+      if (requestId == _searchRequestId) {
+        _isSearching.value = false;
+      }
     }
   }
 
@@ -290,6 +323,7 @@ class PiliSearchController extends GetxController {
   Future<void> navigateToVideoDetail(SearchVideoItemModel result) async {
     final String bvid = result.bvid ?? '';
     if (bvid.isEmpty) return;
+    dismissKeyboard();
 
     final int aid = result.aid ?? 0;
     final String heroTag = Utils.makeHeroTag(aid);
@@ -311,6 +345,11 @@ class PiliSearchController extends GetxController {
   }
 
   // ==================== State Management ====================
+
+  /// 收起搜索输入框键盘。
+  void dismissKeyboard() {
+    searchFocusNode.unfocus();
+  }
 
   /// Called when the clear button in the search field is pressed.
   void onClearInput() {

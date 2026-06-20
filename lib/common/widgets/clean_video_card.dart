@@ -48,7 +48,7 @@ class CleanVideoCard extends StatelessWidget {
     final int view = videoItem.stat?.view ?? 0;
     final int danmaku = _statCount(videoItem.stat, ['danmaku', 'danmu']);
     final int? pubdate = videoItem.pubdate;
-    final bool isFollowed = videoItem.isFollowed == 1;
+    final bool isFollowed = _checkFollowed(videoItem);
     final String? reason = _reasonText(videoItem);
 
     return InkWell(
@@ -177,6 +177,14 @@ class CleanVideoCard extends StatelessWidget {
       return reason?.content;
     } catch (_) {
       return null;
+    }
+  }
+
+  bool _checkFollowed(dynamic item) {
+    try {
+      return item.isFollowed == 1;
+    } catch (_) {
+      return false;
     }
   }
 }

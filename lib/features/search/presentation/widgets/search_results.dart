@@ -51,6 +51,10 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.results.isEmpty) {
+      if (widget.controller.isSearching) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -133,47 +137,54 @@ class _SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: 0.36),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final thumbnailWidth =
+            (constraints.maxWidth * 0.42).clamp(118.0, 150.0);
+        return InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.36),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildThumbnail(context, thumbnailWidth),
+                const SizedBox(width: 10),
+                Expanded(child: _buildInfo(context)),
+              ],
+            ),
           ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Thumbnail
-            _buildThumbnail(context),
-            const SizedBox(width: 10),
-            // Info
-            Expanded(child: _buildInfo(context)),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildThumbnail(BuildContext context) {
+  Widget _buildThumbnail(BuildContext context, double width) {
     final String? pic = result.pic;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Stack(
-        children: [
-          AspectRatio(
-            aspectRatio: 16 / 10,
-            child: Container(
-              width: 160,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    return SizedBox(
+      width: width,
+      height: width / 1.6,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
               child: pic != null && pic.isNotEmpty
                   ? Image.network(
                       pic,
@@ -185,25 +196,25 @@ class _SearchResultCard extends StatelessWidget {
                     )
                   : const Icon(Icons.play_circle_outline, color: Colors.grey),
             ),
-          ),
-          // Duration badge
-          if (result.duration != null && result.duration! > 0)
-            Positioned(
-              right: 4,
-              bottom: 4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.68),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _formatDuration(result.duration!),
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
+            if (result.duration != null && result.duration! > 0)
+              Positioned(
+                right: 4,
+                bottom: 4,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.68),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _formatDuration(result.duration!),
+                    style: const TextStyle(color: Colors.white, fontSize: 11),
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -245,47 +256,26 @@ class _SearchResultCard extends StatelessWidget {
             ],
           ),
         const SizedBox(height: 4),
-        // Stats: play count + danmaku + pubdate
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 2,
           children: [
-            if (result.stat?.view != null) ...[
-              Icon(Icons.play_arrow_outlined,
-                  size: 14, color: Theme.of(context).colorScheme.outline),
-              const SizedBox(width: 2),
-              Text(
-                Utils.numFormat(result.stat!.view),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+            if (result.stat?.view != null)
+              _MetaItem(
+                icon: Icons.play_arrow_outlined,
+                text: Utils.numFormat(result.stat!.view),
               ),
-              const SizedBox(width: 8),
-            ],
-            if (result.stat?.danmaku != null && result.stat!.danmaku! > 0) ...[
-              Icon(Icons.subtitles_outlined,
-                  size: 14, color: Theme.of(context).colorScheme.outline),
-              const SizedBox(width: 2),
-              Text(
-                Utils.numFormat(result.stat!.danmaku),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+            if (result.stat?.danmaku != null && result.stat!.danmaku! > 0)
+              _MetaItem(
+                icon: Icons.subtitles_outlined,
+                text: Utils.numFormat(result.stat!.danmaku),
               ),
-              const SizedBox(width: 8),
-            ],
-            if (result.pubdate != null && result.pubdate! > 0) ...[
-              Icon(Icons.access_time,
-                  size: 12, color: Theme.of(context).colorScheme.outline),
-              const SizedBox(width: 2),
-              Text(
-                _formatTimestamp(result.pubdate!),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+            if (result.pubdate != null && result.pubdate! > 0)
+              _MetaItem(
+                icon: Icons.access_time,
+                text: _formatTimestamp(result.pubdate!),
+                iconSize: 12,
               ),
-            ],
           ],
         ),
       ],
@@ -322,5 +312,33 @@ class _SearchResultCard extends StatelessWidget {
     } else {
       return '${date.year}-${date.month}-${date.day}';
     }
+  }
+}
+
+class _MetaItem extends StatelessWidget {
+  const _MetaItem({
+    required this.icon,
+    required this.text,
+    this.iconSize = 14,
+  });
+
+  final IconData icon;
+  final String text;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.outline;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: iconSize, color: color),
+        const SizedBox(width: 2),
+        Text(
+          text,
+          style: TextStyle(fontSize: 12, color: color),
+        ),
+      ],
+    );
   }
 }

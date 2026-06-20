@@ -56,154 +56,191 @@ class _SubDetailPageState extends State<SubDetailPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        controller: _controller,
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 260 - MediaQuery.of(context).padding.top,
-            pinned: true,
-            titleSpacing: 0,
-            title: StreamBuilder(
-              stream: titleStreamC.stream.distinct(),
-              initialData: false,
-              builder: (context, AsyncSnapshot snapshot) {
-                return AnimatedOpacity(
-                  opacity: snapshot.data ? 1 : 0,
-                  curve: Curves.easeOut,
-                  duration: const Duration(milliseconds: 500),
-                  child: Row(
+  // Helper to build the header slivers (SliverAppBar + count) used in every branch.
+  Widget _buildHeaderSlivers(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 260 - MediaQuery.of(context).padding.top,
+      pinned: true,
+      titleSpacing: 0,
+      title: StreamBuilder(
+        stream: titleStreamC.stream.distinct(),
+        initialData: false,
+        builder: (context, AsyncSnapshot snapshot) {
+          return AnimatedOpacity(
+            opacity: snapshot.data ? 1 : 0,
+            curve: Curves.easeOut,
+            duration: const Duration(milliseconds: 500),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _subDetailController.item.title!,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      '共${_subDetailController.item.mediaCount!}条视频',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    )
+                  ],
+                )
+              ],
+            ),
+          );
+        },
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+              ),
+            ),
+          ),
+          padding: EdgeInsets.only(
+              top: kTextTabBarHeight +
+                  MediaQuery.of(context).padding.top +
+                  30,
+              left: 20,
+              right: 20),
+          child: SizedBox(
+            height: 200,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Hero(
+                  tag: _subDetailController.heroTag,
+                  child: NetworkImgLayer(
+                    width: 180,
+                    height: 110,
+                    src: _subDetailController.item.cover,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _subDetailController.item.title!,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          Text(
-                            '共${_subDetailController.item.mediaCount!}条视频',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          )
-                        ],
+                      const SizedBox(height: 4),
+                      Text(
+                        _subDetailController.item.title!,
+                        style: TextStyle(
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .fontSize,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      GestureDetector(
+                        onTap: () {
+                          SubFolderItemData item =
+                              _subDetailController.item;
+                          Get.toNamed(
+                            '/member?mid=${item.upper!.mid}',
+                            arguments: {
+                              'face': item.upper!.face,
+                            },
+                          );
+                        },
+                        child: Text(
+                          _subDetailController.item.upper!.name!,
+                          style: TextStyle(
+                              color:
+                                  Theme.of(context).colorScheme.primary),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Obx(
+                        () => Text(
+                          '${Utils.numFormat(_subDetailController.subInfo.value.cntInfo?['play'])}次播放',
+                          style: TextStyle(
+                              fontSize: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall!
+                                  .fontSize,
+                              color:
+                                  Theme.of(context).colorScheme.outline),
+                        ),
                       )
                     ],
                   ),
-                );
-              },
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
-                    ),
-                  ),
                 ),
-                padding: EdgeInsets.only(
-                    top: kTextTabBarHeight +
-                        MediaQuery.of(context).padding.top +
-                        30,
-                    left: 20,
-                    right: 20),
-                child: SizedBox(
-                  height: 200,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Hero(
-                        tag: _subDetailController.heroTag,
-                        child: NetworkImgLayer(
-                          width: 180,
-                          height: 110,
-                          src: _subDetailController.item.cover,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            Text(
-                              _subDetailController.item.title!,
-                              style: TextStyle(
-                                  fontSize: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .fontSize,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            GestureDetector(
-                              onTap: () {
-                                SubFolderItemData item =
-                                    _subDetailController.item;
-                                Get.toNamed(
-                                  '/member?mid=${item.upper!.mid}',
-                                  arguments: {
-                                    'face': item.upper!.face,
-                                  },
-                                );
-                              },
-                              child: Text(
-                                _subDetailController.item.upper!.name!,
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Obx(
-                              () => Text(
-                                '${Utils.numFormat(_subDetailController.subInfo.value.cntInfo?['play'])}次播放',
-                                style: TextStyle(
-                                    fontSize: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall!
-                                        .fontSize,
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 15, bottom: 8, left: 14),
-              child: Text(
-                '共${_subDetailController.item.mediaCount}条视频',
-                style: TextStyle(
-                  fontSize: Theme.of(context).textTheme.labelMedium!.fontSize,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountSliver(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 15, bottom: 8, left: 14),
+        child: Text(
+          '共${_subDetailController.item.mediaCount}条视频',
+          style: TextStyle(
+            fontSize: Theme.of(context).textTheme.labelMedium!.fontSize,
+            color: Theme.of(context).colorScheme.outline,
+            letterSpacing: 1,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomSliver(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Container(
+        height: MediaQuery.of(context).padding.bottom + 60,
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom),
+        child: Center(
+          child: Obx(
+            () => Text(
+              _subDetailController.loadingText.value,
+              style: TextStyle(
                   color: Theme.of(context).colorScheme.outline,
-                  letterSpacing: 1,
-                ),
-              ),
+                  fontSize: 13),
             ),
           ),
-          FutureBuilder(
-            future: _futureBuilderFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                Map? data = snapshot.data;
-                if (data != null && data['status']) {
-                  if (_subDetailController.item.mediaCount == 0) {
-                    return const NoData();
-                  } else {
-                    List subList = _subDetailController.subList;
-                    return Obx(
-                      () => subList.isEmpty
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder(
+        future: _futureBuilderFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            Map? data = snapshot.data;
+            if (data != null && data['status']) {
+              if (_subDetailController.item.mediaCount == 0) {
+                return CustomScrollView(
+                  controller: _controller,
+                  slivers: [
+                    _buildHeaderSlivers(context),
+                    _buildCountSliver(context),
+                    const NoData(),
+                    _buildBottomSliver(context),
+                  ],
+                );
+              } else {
+                List subList = _subDetailController.subList;
+                return Obx(
+                  () => CustomScrollView(
+                    controller: _controller,
+                    slivers: [
+                      _buildHeaderSlivers(context),
+                      _buildCountSliver(context),
+                      subList.isEmpty
                           ? const SliverToBoxAdapter(child: SizedBox())
                           : SliverList(
                               delegate:
@@ -213,41 +250,41 @@ class _SubDetailPageState extends State<SubDetailPage> {
                                 );
                               }, childCount: subList.length),
                             ),
-                    );
-                  }
-                } else {
-                  return HttpError(
+                      _buildBottomSliver(context),
+                    ],
+                  ),
+                );
+              }
+            } else {
+              return CustomScrollView(
+                controller: _controller,
+                slivers: [
+                  _buildHeaderSlivers(context),
+                  _buildCountSliver(context),
+                  HttpError(
                     errMsg: data?['msg'] ?? '请求异常',
                     fn: () => setState(() {}),
-                  );
-                }
-              } else {
-                return SliverList(
+                  ),
+                  _buildBottomSliver(context),
+                ],
+              );
+            }
+          } else {
+            return CustomScrollView(
+              controller: _controller,
+              slivers: [
+                _buildHeaderSlivers(context),
+                _buildCountSliver(context),
+                SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     return const VideoCardHSkeleton();
                   }, childCount: 10),
-                );
-              }
-            },
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              height: MediaQuery.of(context).padding.bottom + 60,
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom),
-              child: Center(
-                child: Obx(
-                  () => Text(
-                    _subDetailController.loadingText.value,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.outline,
-                        fontSize: 13),
-                  ),
                 ),
-              ),
-            ),
-          )
-        ],
+                _buildBottomSliver(context),
+              ],
+            );
+          }
+        },
       ),
     );
   }
