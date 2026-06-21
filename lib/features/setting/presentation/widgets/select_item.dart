@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/models/video/play/quality.dart';
 import 'package:pilipala/utils/storage.dart';
 
@@ -102,7 +103,10 @@ class _SetSelectItemState extends State<SetSelectItem> {
               .colorScheme
               .surfaceContainerHighest
               .withValues(alpha: 0.38),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: StyleString.lgRadius,
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),

@@ -202,7 +202,7 @@ class ChatItem extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () async {
-                  SmartDialog.showLoading();
+                  SmartDialog.showLoading(clickMaskDismiss: true, backType: SmartBackType.normal);
                   final String bvid = content["bvid"];
                   // 16番剧 5投稿
                   final int source = content["source"];
@@ -265,7 +265,7 @@ class ChatItem extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () async {
-                  SmartDialog.showLoading();
+                  SmartDialog.showLoading(clickMaskDismiss: true, backType: SmartBackType.normal);
                   var bvid = content["bvid"];
                   final int cid = await SearchHttp.ab2c(bvid: bvid);
                   final String heroTag = Utils.makeHeroTag(bvid);
@@ -345,7 +345,7 @@ class ChatItem extends StatelessWidget {
                         Match match = matches.first;
                         String bvid = match.group(0)!;
                         try {
-                          SmartDialog.showLoading();
+                          SmartDialog.showLoading(clickMaskDismiss: true, backType: SmartBackType.normal);
                           final int cid = await SearchHttp.ab2c(bvid: bvid);
                           final String heroTag = Utils.makeHeroTag(bvid);
                           SmartDialog.dismiss<dynamic>().then(

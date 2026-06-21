@@ -108,12 +108,12 @@ Widget videoSeasonWidget(item, context, type, {floor = 1}) {
                       end: Alignment.bottomCenter,
                       colors: <Color>[
                         Colors.transparent,
-                        Colors.black54,
+                        Color(0x99000000),
                       ],
                     ),
                     borderRadius: floor == 1
                         ? null
-                        : const BorderRadius.all(Radius.circular(6))),
+                        : const BorderRadius.all(StyleString.imgRadius)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -122,7 +122,8 @@ Widget videoSeasonWidget(item, context, type, {floor = 1}) {
                       style: TextStyle(
                           fontSize:
                               Theme.of(context).textTheme.labelMedium!.fontSize,
-                          color: Colors.white),
+                          color: Colors.white,
+                          letterSpacing: 0),
                       child: Row(
                         children: [
                           Text(content.durationText ?? ''),

@@ -9,7 +9,7 @@ class RoutePush {
   // 番剧跳转
   static Future<void> bangumiPush(int? seasonId, int? epId,
       {String? heroTag}) async {
-    SmartDialog.showLoading<dynamic>(msg: '获取中...');
+    SmartDialog.showLoading<dynamic>(msg: '获取中...', clickMaskDismiss: true, backType: SmartBackType.normal);
     try {
       var result = await SearchHttp.bangumiInfo(seasonId: seasonId, epId: epId);
       await SmartDialog.dismiss();

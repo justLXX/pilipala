@@ -34,211 +34,230 @@ class HistoryItem extends StatelessWidget {
     int aid = videoItem.history.oid;
     String bvid = videoItem.history.bvid ?? IdUtils.av2bv(aid);
     String heroTag = Utils.makeHeroTag(aid);
-    return InkWell(
-      onTap: () async {
-        if (ctr!.enableMultiple.value) {
-          feedBack();
-          onChoose!();
-          return;
-        }
-        if (videoItem.history.business.contains('article')) {
-          int cid = videoItem.history.cid ??
-              videoItem.history.oid ??
-              await SearchHttp.ab2c(aid: aid, bvid: bvid);
-          if (cid == -1) {
-            return SmartDialog.showToast('无法获取文章内容');
+    return Material(
+      color: Colors.transparent,
+      borderRadius: StyleString.lgRadius,
+      child: InkWell(
+        borderRadius: StyleString.lgRadius,
+        onTap: () async {
+          if (ctr!.enableMultiple.value) {
+            feedBack();
+            onChoose!();
+            return;
           }
-          Get.toNamed(
-            '/read',
-            parameters: {
-              'title': videoItem.title,
-              'id': cid.toString(),
-              'articleType': 'read',
-            },
-          );
-        } else if (videoItem.history.business == 'live') {
-          if (videoItem.liveStatus == 1) {
-            LiveItemModel liveItem = LiveItemModel.fromJson({
-              'face': videoItem.authorFace,
-              'roomid': videoItem.history.oid,
-              'pic': videoItem.cover,
-              'title': videoItem.title,
-              'uname': videoItem.authorName,
-              'cover': videoItem.cover,
-            });
+          if (videoItem.history.business.contains('article')) {
+            int cid = videoItem.history.cid ??
+                videoItem.history.oid ??
+                await SearchHttp.ab2c(aid: aid, bvid: bvid);
+            if (cid == -1) {
+              return SmartDialog.showToast('无法获取文章内容');
+            }
             Get.toNamed(
-              '/liveRoom?roomid=${videoItem.history.oid}',
-              arguments: {'liveItem': liveItem},
+              '/read',
+              parameters: {
+                'title': videoItem.title,
+                'id': cid.toString(),
+                'articleType': 'read',
+              },
             );
-          } else {
-            SmartDialog.showToast('直播未开播');
-          }
-        } else if (videoItem.badge == '番剧' ||
-            videoItem.tagName.contains('动画')) {
-          /// hack
-          var bvid = videoItem.history.bvid;
-          if (bvid != null && bvid != '') {
-            var result = await VideoHttp.videoIntro(bvid: bvid);
-            if (result['status']) {
-              String bvid = result['data'].bvid!;
-              int cid = result['data'].cid!;
-              String pic = result['data'].pic!;
-              String heroTag = Utils.makeHeroTag(cid);
-              var epid = result['data'].epId;
-              if (epid != null) {
-                Get.toNamed(
-                  '/video?bvid=$bvid&cid=$cid&epId=${result['data'].epId}',
-                  arguments: {
-                    'pic': pic,
-                    'heroTag': heroTag,
-                    'videoType': SearchType.media_bangumi,
-                  },
+          } else if (videoItem.history.business == 'live') {
+            if (videoItem.liveStatus == 1) {
+              LiveItemModel liveItem = LiveItemModel.fromJson({
+                'face': videoItem.authorFace,
+                'roomid': videoItem.history.oid,
+                'pic': videoItem.cover,
+                'title': videoItem.title,
+                'uname': videoItem.authorName,
+                'cover': videoItem.cover,
+              });
+              Get.toNamed(
+                '/liveRoom?roomid=${videoItem.history.oid}',
+                arguments: {'liveItem': liveItem},
+              );
+            } else {
+              SmartDialog.showToast('直播未开播');
+            }
+          } else if (videoItem.badge == '番剧' ||
+              videoItem.tagName.contains('动画')) {
+            /// hack
+            var bvid = videoItem.history.bvid;
+            if (bvid != null && bvid != '') {
+              var result = await VideoHttp.videoIntro(bvid: bvid);
+              if (result['status']) {
+                String bvid = result['data'].bvid!;
+                int cid = result['data'].cid!;
+                String pic = result['data'].pic!;
+                String heroTag = Utils.makeHeroTag(cid);
+                var epid = result['data'].epId;
+                if (epid != null) {
+                  Get.toNamed(
+                    '/video?bvid=$bvid&cid=$cid&epId=${result['data'].epId}',
+                    arguments: {
+                      'pic': pic,
+                      'heroTag': heroTag,
+                      'videoType': SearchType.media_bangumi,
+                    },
+                  );
+                } else {
+                  int cid = videoItem.history.cid ??
+                      // videoItem.history.oid ??
+                      await SearchHttp.ab2c(aid: aid, bvid: bvid);
+                  Get.toNamed('/video?bvid=$bvid&cid=$cid',
+                      arguments: {'heroTag': heroTag, 'pic': videoItem.cover});
+                }
+              }
+            } else {
+              if (videoItem.history.epid != '') {
+                RoutePush.bangumiPush(
+                  null,
+                  videoItem.history.epid,
+                  heroTag: heroTag,
                 );
-              } else {
-                int cid = videoItem.history.cid ??
-                    // videoItem.history.oid ??
-                    await SearchHttp.ab2c(aid: aid, bvid: bvid);
-                Get.toNamed('/video?bvid=$bvid&cid=$cid',
-                    arguments: {'heroTag': heroTag, 'pic': videoItem.cover});
               }
             }
           } else {
-            if (videoItem.history.epid != '') {
-              RoutePush.bangumiPush(
-                null,
-                videoItem.history.epid,
-                heroTag: heroTag,
-              );
-            }
+            int cid = videoItem.history.cid ??
+                // videoItem.history.oid ??
+                await SearchHttp.ab2c(aid: aid, bvid: bvid);
+            Get.toNamed('/video?bvid=$bvid&cid=$cid',
+                arguments: {'heroTag': heroTag, 'pic': videoItem.cover});
           }
-        } else {
-          int cid = videoItem.history.cid ??
-              // videoItem.history.oid ??
-              await SearchHttp.ab2c(aid: aid, bvid: bvid);
-          Get.toNamed('/video?bvid=$bvid&cid=$cid',
-              arguments: {'heroTag': heroTag, 'pic': videoItem.cover});
-        }
-      },
-      onLongPress: () {
-        if (ctr is HistorySearchController) {
-          return;
-        }
-        if (!ctr!.enableMultiple.value) {
-          feedBack();
-          ctr!.enableMultiple.value = true;
-          onChoose!();
-          onUpdateMultiple!();
-        }
-      },
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-                StyleString.safeSpace, 5, StyleString.safeSpace, 5),
-            child: LayoutBuilder(
-              builder: (context, boxConstraints) {
-                double width =
-                    (boxConstraints.maxWidth - StyleString.cardSpace * 6) / 2;
-                return SizedBox(
-                  height: width / StyleString.aspectRatio,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        children: [
-                          AspectRatio(
-                            aspectRatio: StyleString.aspectRatio,
-                            child: LayoutBuilder(
-                              builder: (context, boxConstraints) {
-                                double maxWidth = boxConstraints.maxWidth;
-                                double maxHeight = boxConstraints.maxHeight;
-                                return Stack(
-                                  children: [
-                                    Hero(
-                                      tag: heroTag,
-                                      child: NetworkImgLayer(
-                                        src: (videoItem.cover != ''
-                                            ? videoItem.cover
-                                            : videoItem.covers.first),
-                                        width: maxWidth,
-                                        height: maxHeight,
+        },
+        onLongPress: () {
+          if (ctr is HistorySearchController) {
+            return;
+          }
+          if (!ctr!.enableMultiple.value) {
+            feedBack();
+            ctr!.enableMultiple.value = true;
+            onChoose!();
+            onUpdateMultiple!();
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            StyleString.safeSpace,
+            5,
+            StyleString.safeSpace,
+            5,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.26),
+              borderRadius: StyleString.lgRadius,
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  double width =
+                      (boxConstraints.maxWidth - StyleString.cardSpace * 6) / 2;
+                  return SizedBox(
+                    height: width / StyleString.aspectRatio,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          children: [
+                            AspectRatio(
+                              aspectRatio: StyleString.aspectRatio,
+                              child: LayoutBuilder(
+                                builder: (context, boxConstraints) {
+                                  double maxWidth = boxConstraints.maxWidth;
+                                  double maxHeight = boxConstraints.maxHeight;
+                                  return Stack(
+                                    children: [
+                                      Hero(
+                                        tag: heroTag,
+                                        child: NetworkImgLayer(
+                                          src: (videoItem.cover != ''
+                                              ? videoItem.cover
+                                              : videoItem.covers.first),
+                                          width: maxWidth,
+                                          height: maxHeight,
+                                        ),
                                       ),
-                                    ),
-                                    if (!BusinessType
-                                        .hiddenDurationType.hiddenDurationType
-                                        .contains(videoItem.history.business))
-                                      PBadge(
-                                        text: videoItem.progress == -1
-                                            ? '已看完'
-                                            : '${Utils.timeFormat(videoItem.progress!)}/${Utils.timeFormat(videoItem.duration!)}',
-                                        right: 6.0,
-                                        bottom: 8.0,
-                                        type: 'gray',
-                                      ),
-                                    // 右上角
-                                    if (BusinessType.showBadge.showBadge
-                                            .contains(
-                                                videoItem.history.business) ||
-                                        videoItem.history.business ==
-                                            BusinessType.live.type)
-                                      PBadge(
-                                        text: videoItem.badge,
-                                        top: 6.0,
-                                        right: 6.0,
-                                        bottom: null,
-                                        left: null,
-                                      ),
-                                  ],
-                                );
-                              },
+                                      if (!BusinessType
+                                          .hiddenDurationType.hiddenDurationType
+                                          .contains(videoItem.history.business))
+                                        PBadge(
+                                          text: videoItem.progress == -1
+                                              ? '已看完'
+                                              : '${Utils.timeFormat(videoItem.progress!)}/${Utils.timeFormat(videoItem.duration!)}',
+                                          right: 6.0,
+                                          bottom: 8.0,
+                                          type: 'gray',
+                                        ),
+                                      if (BusinessType.showBadge.showBadge
+                                              .contains(
+                                                  videoItem.history.business) ||
+                                          videoItem.history.business ==
+                                              BusinessType.live.type)
+                                        PBadge(
+                                          text: videoItem.badge,
+                                          top: 6.0,
+                                          right: 6.0,
+                                          bottom: null,
+                                          left: null,
+                                        ),
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                          Obx(
-                            () => Positioned.fill(
-                              child: AnimatedOpacity(
-                                opacity: ctr!.enableMultiple.value ? 1 : 0,
-                                duration: const Duration(milliseconds: 200),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                        StyleString.imgRadius.x),
-                                    color: Colors.black.withValues(
-                                        alpha: ctr!.enableMultiple.value &&
-                                                videoItem.checked
-                                            ? 0.6
-                                            : 0),
-                                  ),
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 34,
-                                      height: 34,
-                                      child: AnimatedScale(
-                                        scale: videoItem.checked ? 1 : 0,
-                                        duration:
-                                            const Duration(milliseconds: 250),
-                                        curve: Curves.easeInOut,
-                                        child: IconButton(
-                                          style: ButtonStyle(
-                                            padding: WidgetStateProperty.all(
-                                                EdgeInsets.zero),
-                                            backgroundColor:
-                                                WidgetStateProperty
-                                                    .resolveWith(
-                                              (states) {
-                                                return Colors.white
-                                                    .withValues(alpha: 0.8);
-                                              },
+                            Obx(
+                              () => Positioned.fill(
+                                child: AnimatedOpacity(
+                                  opacity: ctr!.enableMultiple.value ? 1 : 0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                        StyleString.imgRadius,
+                                      ),
+                                      color: Colors.black.withValues(
+                                          alpha: ctr!.enableMultiple.value &&
+                                                  videoItem.checked
+                                              ? 0.6
+                                              : 0),
+                                    ),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 34,
+                                        height: 34,
+                                        child: AnimatedScale(
+                                          scale: videoItem.checked ? 1 : 0,
+                                          duration:
+                                              const Duration(milliseconds: 250),
+                                          curve: Curves.easeInOut,
+                                          child: IconButton(
+                                            style: ButtonStyle(
+                                              padding: WidgetStateProperty.all(
+                                                  EdgeInsets.zero),
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .surface
+                                                    .withValues(alpha: 0.86),
+                                              ),
                                             ),
+                                            onPressed: () {
+                                              feedBack();
+                                              onChoose!();
+                                            },
+                                            icon: Icon(Icons.done_all_outlined,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary),
                                           ),
-                                          onPressed: () {
-                                            feedBack();
-                                            onChoose!();
-                                          },
-                                          icon: Icon(Icons.done_all_outlined,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
                                         ),
                                       ),
                                     ),
@@ -246,38 +265,36 @@ class HistoryItem extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
-                          videoItem.progress != 0 && videoItem.duration != 0
-                              ? Positioned(
-                                  left: 3,
-                                  right: 3,
-                                  bottom: 0,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(
-                                          StyleString.imgRadius.x),
-                                      bottomRight: Radius.circular(
-                                          StyleString.imgRadius.x),
+                            videoItem.progress != 0 && videoItem.duration != 0
+                                ? Positioned(
+                                    left: 3,
+                                    right: 3,
+                                    bottom: 0,
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        bottomLeft: StyleString.imgRadius,
+                                        bottomRight: StyleString.imgRadius,
+                                      ),
+                                      child: LinearProgressIndicator(
+                                        value: videoItem.progress == -1
+                                            ? 100
+                                            : videoItem.progress /
+                                                videoItem.duration,
+                                      ),
                                     ),
-                                    child: LinearProgressIndicator(
-                                      value: videoItem.progress == -1
-                                          ? 100
-                                          : videoItem.progress /
-                                              videoItem.duration,
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox()
-                        ],
-                      ),
-                      VideoContent(videoItem: videoItem, ctr: ctr)
-                    ],
-                  ),
-                );
-              },
+                                  )
+                                : const SizedBox()
+                          ],
+                        ),
+                        VideoContent(videoItem: videoItem, ctr: ctr)
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -299,10 +316,10 @@ class VideoContent extends StatelessWidget {
             Text(
               videoItem.title,
               textAlign: TextAlign.start,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
-              ),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0,
+                  ),
               maxLines: videoItem.videos > 1 ? 1 : 2,
               overflow: TextOverflow.ellipsis,
             ),

@@ -21,7 +21,7 @@ class _ReplySaveState extends State<ReplySave> {
   final _boundaryKey = GlobalKey();
 
   void _generatePicWidget() async {
-    SmartDialog.showLoading(msg: '保存中');
+    SmartDialog.showLoading(msg: '保存中', clickMaskDismiss: true, backType: SmartBackType.normal);
     try {
       RenderRepaintBoundary boundary = _boundaryKey.currentContext!
           .findRenderObject() as RenderRepaintBoundary;

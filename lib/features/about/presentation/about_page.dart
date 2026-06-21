@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/features/about/presentation/about_controller.dart';
 import 'package:pilipala/utils/cache_manage.dart';
 
@@ -48,7 +49,10 @@ class _AboutPageState extends State<AboutPage> {
                     .colorScheme
                     .surfaceContainerHighest
                     .withValues(alpha: 0.34),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: StyleString.lgRadius,
+                border: Border.all(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+                ),
               ),
               child: Column(
                 children: [
@@ -237,17 +241,26 @@ class _AboutActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        onTap: onTap,
-        title: title,
-        subtitle: subtitle,
-        trailing: trailing,
-        tileColor: Theme.of(context)
+      child: Material(
+        color: Theme.of(context)
             .colorScheme
             .surfaceContainerHighest
             .withValues(alpha: 0.32),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: StyleString.lgRadius,
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+          ),
+        ),
+        child: ListTile(
+          onTap: onTap,
+          title: title,
+          subtitle: subtitle,
+          trailing: trailing,
+          shape: RoundedRectangleBorder(borderRadius: StyleString.lgRadius),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        ),
       ),
     );
   }

@@ -52,118 +52,126 @@ class VideoCardH extends StatelessWidget {
       type = videoItem.type;
     } catch (_) {}
     final String heroTag = Utils.makeHeroTag(aid);
-    return InkWell(
-      onTap: () async {
-        try {
-          if (type == 'ketang') {
-            SmartDialog.showToast('课堂视频暂不支持播放');
-            return;
-          }
-          if (showCharge && videoItem?.typeid == 33) {
-            final String redirectUrl = await UrlUtils.parseRedirectUrl(
-                '${HttpString.baseUrl}/video/$bvid/');
-            final String lastPathSegment = redirectUrl.split('/').last;
-            if (lastPathSegment.contains('ss')) {
-              RoutePush.bangumiPush(
-                  Utils.matchNum(lastPathSegment).first, null);
+    return Material(
+      color: Colors.transparent,
+      borderRadius: StyleString.lgRadius,
+      child: InkWell(
+        borderRadius: StyleString.lgRadius,
+        onTap: () async {
+          try {
+            if (type == 'ketang') {
+              SmartDialog.showToast('课堂视频暂不支持播放');
+              return;
             }
-            if (lastPathSegment.contains('ep')) {
-              RoutePush.bangumiPush(
-                  null, Utils.matchNum(lastPathSegment).first);
+            if (showCharge && videoItem?.typeid == 33) {
+              final String redirectUrl = await UrlUtils.parseRedirectUrl(
+                  '${HttpString.baseUrl}/video/$bvid/');
+              final String lastPathSegment = redirectUrl.split('/').last;
+              if (lastPathSegment.contains('ss')) {
+                RoutePush.bangumiPush(
+                    Utils.matchNum(lastPathSegment).first, null);
+              }
+              if (lastPathSegment.contains('ep')) {
+                RoutePush.bangumiPush(
+                    null, Utils.matchNum(lastPathSegment).first);
+              }
+              return;
             }
-            return;
+            final rawCid = videoItem.cid;
+            final int cid = rawCid is int && rawCid > 0
+                ? rawCid
+                : await SearchHttp.ab2c(aid: aid, bvid: bvid);
+            Get.toNamed('/video?bvid=$bvid&cid=$cid',
+                arguments: {'videoItem': videoItem, 'heroTag': heroTag},
+                preventDuplicates: false);
+          } catch (err) {
+            SmartDialog.showToast(err.toString());
           }
-          final int cid =
-              videoItem.cid ?? await SearchHttp.ab2c(aid: aid, bvid: bvid);
-          Get.toNamed('/video?bvid=$bvid&cid=$cid',
-              arguments: {'videoItem': videoItem, 'heroTag': heroTag});
-        } catch (err) {
-          SmartDialog.showToast(err.toString());
-        }
-      },
-      onLongPress: () => imageSaveDialog(
-        context,
-        videoItem,
-        SmartDialog.dismiss,
-      ),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(
-            StyleString.safeSpace, 5, StyleString.safeSpace, 5),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints boxConstraints) {
-            final double width = (boxConstraints.maxWidth -
-                    StyleString.cardSpace *
-                        6 /
-                        MediaQuery.textScalerOf(context).scale(1.0)) /
-                2;
-            return Container(
-              constraints:
-                  BoxConstraints(minHeight: max(88.0, width / StyleString.aspectRatio)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(
-                    width: width,
-                    height: width / StyleString.aspectRatio,
-                    child: LayoutBuilder(
-                      builder: (BuildContext context,
-                          BoxConstraints boxConstraints) {
-                        final double maxWidth = boxConstraints.maxWidth;
-                        final double maxHeight = boxConstraints.maxHeight;
-                        return Stack(
-                          children: [
-                            Hero(
-                              tag: heroTag,
-                              child: NetworkImgLayer(
-                                src: videoItem.pic as String,
-                                width: maxWidth,
-                                height: maxHeight,
+        },
+        onLongPress: () => imageSaveDialog(
+          context,
+          videoItem,
+          SmartDialog.dismiss,
+        ),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(
+              StyleString.safeSpace, 5, StyleString.safeSpace, 5),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints boxConstraints) {
+              final double width = (boxConstraints.maxWidth -
+                      StyleString.cardSpace *
+                          6 /
+                          MediaQuery.textScalerOf(context).scale(1.0)) /
+                  2;
+              return Container(
+                constraints: BoxConstraints(
+                    minHeight: max(88.0, width / StyleString.aspectRatio)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(
+                      width: width,
+                      height: width / StyleString.aspectRatio,
+                      child: LayoutBuilder(
+                        builder: (BuildContext context,
+                            BoxConstraints boxConstraints) {
+                          final double maxWidth = boxConstraints.maxWidth;
+                          final double maxHeight = boxConstraints.maxHeight;
+                          return Stack(
+                            children: [
+                              Hero(
+                                tag: heroTag,
+                                child: NetworkImgLayer(
+                                  src: videoItem.pic as String,
+                                  width: maxWidth,
+                                  height: maxHeight,
+                                ),
                               ),
-                            ),
-                            if (videoItem.duration != 0)
-                              PBadge(
-                                text: Utils.timeFormat(videoItem.duration!),
-                                right: 6.0,
-                                bottom: 6.0,
-                                type: 'gray',
-                              ),
-                            if (type != 'video')
-                              PBadge(
-                                text: type,
-                                left: 6.0,
-                                bottom: 6.0,
-                                type: 'primary',
-                              ),
-                            // if (videoItem.rcmdReason != null &&
-                            //     videoItem.rcmdReason.content != '')
-                            //   pBadge(videoItem.rcmdReason.content, context,
-                            //       6.0, 6.0, null, null),
-                            if (showCharge && videoItem?.isChargingSrc)
-                              const PBadge(
-                                text: '充电专属',
-                                right: 6.0,
-                                top: 6.0,
-                                type: 'primary',
-                              ),
-                          ],
-                        );
-                      },
+                              if (videoItem.duration != 0)
+                                PBadge(
+                                  text: Utils.timeFormat(videoItem.duration!),
+                                  right: 6.0,
+                                  bottom: 6.0,
+                                  type: 'gray',
+                                ),
+                              if (type != 'video')
+                                PBadge(
+                                  text: type,
+                                  left: 6.0,
+                                  bottom: 6.0,
+                                  type: 'primary',
+                                ),
+                              // if (videoItem.rcmdReason != null &&
+                              //     videoItem.rcmdReason.content != '')
+                              //   pBadge(videoItem.rcmdReason.content, context,
+                              //       6.0, 6.0, null, null),
+                              if (showCharge && videoItem?.isChargingSrc)
+                                const PBadge(
+                                  text: '充电专属',
+                                  right: 6.0,
+                                  top: 6.0,
+                                  type: 'primary',
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  VideoContent(
-                    videoItem: videoItem,
-                    source: source,
-                    showOwner: showOwner,
-                    showView: showView,
-                    showDanmaku: showDanmaku,
-                    showPubdate: showPubdate,
-                    onPressedFn: onPressedFn,
-                  )
-                ],
-              ),
-            );
-          },
+                    VideoContent(
+                      videoItem: videoItem,
+                      source: source,
+                      showOwner: showOwner,
+                      showView: showView,
+                      showDanmaku: showDanmaku,
+                      showPubdate: showPubdate,
+                      onPressedFn: onPressedFn,
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

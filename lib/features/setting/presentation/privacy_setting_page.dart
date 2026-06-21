@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/http/member.dart';
 import 'package:pilipala/utils/storage.dart';
 
@@ -85,16 +86,25 @@ class _PrivacyTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        onTap: onTap,
-        title: title,
-        subtitle: subtitle,
-        tileColor: Theme.of(context)
+      child: Material(
+        color: Theme.of(context)
             .colorScheme
             .surfaceContainerHighest
             .withValues(alpha: 0.34),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: StyleString.lgRadius,
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+          ),
+        ),
+        child: ListTile(
+          onTap: onTap,
+          title: title,
+          subtitle: subtitle,
+          shape: RoundedRectangleBorder(borderRadius: StyleString.lgRadius),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        ),
       ),
     );
   }

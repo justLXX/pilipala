@@ -123,11 +123,9 @@ class _DynamicsPageState extends State<DynamicsPage>
                         ? Visibility(
                             visible: _dynamicsController.mid.value == -1,
                             child: Theme(
-                              data: ThemeData(
-                                splashColor:
-                                    Colors.transparent, // 点击时的水波纹颜色设置为透明
-                                highlightColor:
-                                    Colors.transparent, // 点击时的背景高亮颜色设置为透明
+                              data: Theme.of(context).copyWith(
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
                               ),
                               child: CustomSlidingSegmentedControl<int>(
                                 initialValue:

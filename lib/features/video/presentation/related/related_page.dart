@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/video/presentation/related/related_controller.dart';
 
 class RelatedVideoPanel extends StatefulWidget {
@@ -47,11 +47,9 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel>
                     return SizedBox(
                         height: MediaQuery.of(context).padding.bottom);
                   } else {
-                    return Material(
-                      child: VideoCardH(
-                        videoItem: relatedVideoList[index],
-                        showPubdate: true,
-                      ),
+                    return CleanVideoListTile(
+                      videoItem: relatedVideoList[index],
+                      showPubdate: true,
                     );
                   }
                 }, childCount: relatedVideoList.length + 1),

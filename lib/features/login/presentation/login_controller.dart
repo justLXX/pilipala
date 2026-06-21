@@ -148,7 +148,7 @@ class LoginController extends GetxController {
       SmartDialog.showToast('桌面端暂不支持滑块验证，请使用二维码登录');
       return;
     }
-    SmartDialog.showLoading(msg: '请求中...');
+    SmartDialog.showLoading(msg: '请求中...', clickMaskDismiss: true, backType: SmartBackType.normal);
     var result = await _getCaptcha.execute();
     SmartDialog.dismiss();
     if (result['status']) {

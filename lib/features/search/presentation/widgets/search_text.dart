@@ -25,7 +25,8 @@ class SearchTextField extends StatelessWidget {
       textInputAction: TextInputAction.search,
       onChanged: (value) => controller.onInputChanged(value),
       decoration: InputDecoration(
-        hintText: '搜索',
+        hintText:
+            controller.hintKeyword.isEmpty ? '搜索' : controller.hintKeyword,
         prefixIcon: Icon(
           Icons.search,
           color: Theme.of(context).colorScheme.outline,

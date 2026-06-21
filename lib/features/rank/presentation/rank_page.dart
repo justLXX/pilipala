@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/features/rank/presentation/rank_controller.dart';
 import 'package:pilipala/features/rank/presentation/widgets/rank_zone_tab.dart';
 import 'package:pilipala/utils/feed_back.dart';
@@ -68,7 +69,11 @@ class _RankPageState extends State<RankPage>
                       .colorScheme
                       .surfaceContainerHighest
                       .withValues(alpha: 0.48),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: StyleString.lgRadius,
+                  border: Border.all(
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.06),
+                  ),
                 ),
                 child: Align(
                   alignment: Alignment.center,
@@ -81,7 +86,7 @@ class _RankPageState extends State<RankPage>
                     isScrollable: true,
                     dividerColor: Colors.transparent,
                     enableFeedback: true,
-                    splashBorderRadius: BorderRadius.circular(14),
+                    splashBorderRadius: StyleString.mdRadius,
                     tabAlignment: TabAlignment.center,
                     onTap: (value) {
                       feedBack();

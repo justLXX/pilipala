@@ -2,6 +2,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/search.dart';
@@ -122,199 +123,208 @@ class LikeItem extends StatelessWidget {
     int usersLen = item.users!.length > 3 ? 3 : item.users!.length;
     final String bvid = item.item!.uri!.split('/').last;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () async {
-        try {
-          final int cid = await SearchHttp.ab2c(bvid: bvid);
-          final String heroTag = Utils.makeHeroTag(bvid);
-          Get.toNamed<dynamic>(
-            '/video?bvid=$bvid&cid=$cid',
-            arguments: <String, String?>{
-              'pic': '',
-              'heroTag': heroTag,
-            },
-          );
-        } catch (_) {
-          SmartDialog.showToast('视频可能失效了');
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: 0.34),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      if (usersLen == 1) {
-                        final String heroTag =
-                            Utils.makeHeroTag(item.users!.first.mid);
-                        Get.toNamed('/member?mid=${item.users!.first.mid}',
-                            arguments: {
-                              'face': item.users!.first.avatar,
-                              'heroTag': heroTag
-                            });
-                      } else {
-                        messageLikeCtr.expandedUsersAvatar(index);
-                      }
-                    },
-                    // 多个头像层叠
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: Stack(
+    return Material(
+      color: Colors.transparent,
+      borderRadius: StyleString.lgRadius,
+      child: InkWell(
+        borderRadius: StyleString.lgRadius,
+        onTap: () async {
+          try {
+            final int cid = await SearchHttp.ab2c(bvid: bvid);
+            final String heroTag = Utils.makeHeroTag(bvid);
+            Get.toNamed<dynamic>(
+              '/video?bvid=$bvid&cid=$cid',
+              arguments: <String, String?>{
+                'pic': '',
+                'heroTag': heroTag,
+              },
+            );
+          } catch (_) {
+            SmartDialog.showToast('视频可能失效了');
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.34),
+            borderRadius: StyleString.lgRadius,
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        if (usersLen == 1) {
+                          final String heroTag =
+                              Utils.makeHeroTag(item.users!.first.mid);
+                          Get.toNamed('/member?mid=${item.users!.first.mid}',
+                              arguments: {
+                                'face': item.users!.first.avatar,
+                                'heroTag': heroTag
+                              });
+                        } else {
+                          messageLikeCtr.expandedUsersAvatar(index);
+                        }
+                      },
+                      // 多个头像层叠
+                      child: SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: Stack(
+                          children: [
+                            for (var i = 0; i < usersLen; i++)
+                              Positioned(
+                                top: i % 2 * (50 / (usersLen >= 2 ? 2 : 1)),
+                                left: i / 2 * (50 / (usersLen >= 2 ? 2 : 1)),
+                                child: NetworkImgLayer(
+                                  width: 50 / (usersLen >= 2 ? 2 : 1),
+                                  height: 50 / (usersLen >= 2 ? 2 : 1),
+                                  type: 'avatar',
+                                  src: item.users![i].avatar,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          for (var i = 0; i < usersLen; i++)
-                            Positioned(
-                              top: i % 2 * (50 / (usersLen >= 2 ? 2 : 1)),
-                              left: i / 2 * (50 / (usersLen >= 2 ? 2 : 1)),
+                          Text.rich(TextSpan(children: [
+                            TextSpan(text: nickNameList.join('、')),
+                            const TextSpan(text: ' '),
+                            if (item.counts! > 1)
+                              TextSpan(
+                                text: '等总计${item.counts}人',
+                                style: TextStyle(color: outline),
+                              ),
+                            TextSpan(
+                              text: '赞了我的${item.item!.business}',
+                              style: TextStyle(color: outline),
+                            ),
+                          ])),
+                          const SizedBox(height: 4),
+                          Text(
+                            Utils.dateFormat(item.likeTime!,
+                                formatType: 'detail'),
+                            style: TextStyle(color: outline),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 25),
+                    if (item.item!.type! == 'reply')
+                      Container(
+                        width: 60,
+                        height: 60,
+                        padding: const EdgeInsets.all(4),
+                        child: Text(
+                          item.item!.title!,
+                          maxLines: 4,
+                          style:
+                              const TextStyle(fontSize: 12, letterSpacing: 0),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    if (item.item!.type! == 'video')
+                      ClipRRect(
+                        borderRadius: const BorderRadius.all(
+                          StyleString.imgRadius,
+                        ),
+                        child: NetworkImgLayer(
+                          width: 60,
+                          height: 60,
+                          src: item.item!.image,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                bottom: 0,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: item.isExpand ? Get.size.width - 74 : 0,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: ListView.builder(
+                    itemCount: item.users!.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (BuildContext context, int i) {
+                      return Padding(
+                        padding: EdgeInsets.fromLTRB(i == 0 ? 12 : 4, 8, 4, 0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                final String heroTag =
+                                    Utils.makeHeroTag(item.users![i].mid);
+                                Get.toNamed(
+                                  '/member?mid=${item.users![i].mid}',
+                                  arguments: {
+                                    'face': item.users![i].avatar,
+                                    'heroTag': heroTag
+                                  },
+                                );
+                              },
                               child: NetworkImgLayer(
-                                width: 50 / (usersLen >= 2 ? 2 : 1),
-                                height: 50 / (usersLen >= 2 ? 2 : 1),
+                                width: 42,
+                                height: 42,
                                 type: 'avatar',
                                 src: item.users![i].avatar,
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(TextSpan(children: [
-                          TextSpan(text: nickNameList.join('、')),
-                          const TextSpan(text: ' '),
-                          if (item.counts! > 1)
-                            TextSpan(
-                              text: '等总计${item.counts}人',
-                              style: TextStyle(color: outline),
+                            const SizedBox(height: 6),
+                            SizedBox(
+                              width: 68,
+                              child: Text(
+                                textAlign: TextAlign.center,
+                                item.users![i].nickname!,
+                                maxLines: 1,
+                                overflow: TextOverflow.clip,
+                                style: TextStyle(color: outline),
+                              ),
                             ),
-                          TextSpan(
-                            text: '赞了我的${item.item!.business}',
-                            style: TextStyle(color: outline),
-                          ),
-                        ])),
-                        const SizedBox(height: 4),
-                        Text(
-                          Utils.dateFormat(item.likeTime!,
-                              formatType: 'detail'),
-                          style: TextStyle(color: outline),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                  const SizedBox(width: 25),
-                  if (item.item!.type! == 'reply')
-                    Container(
-                      width: 60,
-                      height: 60,
-                      padding: const EdgeInsets.all(4),
-                      child: Text(
-                        item.item!.title!,
-                        maxLines: 4,
-                        style:
-                            const TextStyle(fontSize: 12, letterSpacing: 0.3),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  if (item.item!.type! == 'video')
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: NetworkImgLayer(
-                        width: 60,
-                        height: 60,
-                        src: item.item!.image,
-                      ),
-                    ),
-                ],
+                ),
               ),
-            ),
-            Positioned(
-              top: 0,
-              right: 0,
-              bottom: 0,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: item.isExpand ? Get.size.width - 74 : 0,
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                child: ListView.builder(
-                  itemCount: item.users!.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (BuildContext context, int i) {
-                    return Padding(
-                      padding: EdgeInsets.fromLTRB(i == 0 ? 12 : 4, 8, 4, 0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              final String heroTag =
-                                  Utils.makeHeroTag(item.users![i].mid);
-                              Get.toNamed(
-                                '/member?mid=${item.users![i].mid}',
-                                arguments: {
-                                  'face': item.users![i].avatar,
-                                  'heroTag': heroTag
-                                },
-                              );
-                            },
-                            child: NetworkImgLayer(
-                              width: 42,
-                              height: 42,
-                              type: 'avatar',
-                              src: item.users![i].avatar,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          SizedBox(
-                            width: 68,
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              item.users![i].nickname!,
-                              maxLines: 1,
-                              overflow: TextOverflow.clip,
-                              style: TextStyle(color: outline),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+              Positioned(
+                top: 0,
+                left: 0,
+                bottom: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    messageLikeCtr.expandedUsersAvatar(index);
                   },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: item.isExpand ? 74 : 0,
+                    color: Colors.black.withValues(alpha: 0.3),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              bottom: 0,
-              child: GestureDetector(
-                onTap: () {
-                  messageLikeCtr.expandedUsersAvatar(index);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: item.isExpand ? 74 : 0,
-                  color: Colors.black.withValues(alpha: 0.3),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

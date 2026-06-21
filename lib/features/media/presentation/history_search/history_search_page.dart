@@ -1,6 +1,7 @@
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
 import 'package:pilipala/features/media/presentation/history_search/history_search_controller.dart';
@@ -62,7 +63,7 @@ class _HistorySearchPageState extends State<HistorySearchPage> {
             decoration: InputDecoration(
               hintText: _hisCtr.hintText,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: StyleString.lgRadius,
                 borderSide: BorderSide.none,
               ),
               filled: true,

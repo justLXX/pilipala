@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/rank/presentation/rank_controller.dart';
 import 'package:pilipala/utils/main_stream.dart';
 
@@ -88,7 +88,7 @@ class _RankZoneTabState extends State<RankZoneTab>
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            return VideoCardH(
+                            return CleanVideoListTile(
                               videoItem: videoList[index],
                               showPubdate: true,
                             );

@@ -3,9 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/user/presentation/member_search/member_search_controller.dart';
 
 class MemberSearchPage extends StatefulWidget {
@@ -36,7 +36,6 @@ class _MemberSearchPageState extends State<MemberSearchPage>
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +124,10 @@ class _MemberSearchPageState extends State<MemberSearchPage>
                                             ),
                                           );
                                         } else {
-                                          return VideoCardH(
-                                              videoItem: _memberSearchCtr
-                                                  .archiveList[index]);
+                                          return CleanVideoListTile(
+                                            videoItem: _memberSearchCtr
+                                                .archiveList[index],
+                                          );
                                         }
                                       },
                                     )

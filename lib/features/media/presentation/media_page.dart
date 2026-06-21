@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/features/media/presentation/media_controller.dart';
 import 'package:pilipala/models/user/fav_folder.dart';
@@ -113,35 +114,44 @@ class MediaLibraryContent extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final item = mediaController.navList[index];
-              return InkWell(
-                onTap: () => item['onTap'](),
-                borderRadius: BorderRadius.circular(14),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withValues(alpha: 0.54),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 13),
-                    child: Row(
-                      children: [
-                        Icon(item['icon'], color: primary, size: 21),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            item['title'],
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+              return Material(
+                color: Colors.transparent,
+                borderRadius: StyleString.lgRadius,
+                child: InkWell(
+                  onTap: () => item['onTap'](),
+                  borderRadius: StyleString.lgRadius,
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.54),
+                      borderRadius: StyleString.lgRadius,
+                      border: Border.all(
+                        color: Theme.of(context)
+                            .dividerColor
+                            .withValues(alpha: 0.06),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 13),
+                      child: Row(
+                        children: [
+                          Icon(item['icon'], color: primary, size: 21),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              item['title'],
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -307,7 +317,7 @@ class FavFolderItem extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 8),
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: const BorderRadius.all(StyleString.imgRadius),
                 color: Theme.of(context).colorScheme.onInverseSurface,
                 boxShadow: [
                   BoxShadow(

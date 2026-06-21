@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:hive/hive.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:pilipala/utils/utils.dart';
 
@@ -61,51 +62,58 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
         .copyWith(color: Theme.of(context).colorScheme.outline);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      child: InkWell(
-        enableFeedback: true,
-        onTap: () => switchChange(null),
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.38),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.title!, style: titleStyle),
-                      if (widget.subTitle != null) ...[
-                        const SizedBox(height: 3),
-                        Text(widget.subTitle!, style: subTitleStyle),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: StyleString.lgRadius,
+        child: InkWell(
+          enableFeedback: true,
+          onTap: () => switchChange(null),
+          borderRadius: StyleString.lgRadius,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.38),
+              borderRadius: StyleString.lgRadius,
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.title!, style: titleStyle),
+                        if (widget.subTitle != null) ...[
+                          const SizedBox(height: 3),
+                          Text(widget.subTitle!, style: subTitleStyle),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                Transform.scale(
-                  alignment: Alignment.centerRight,
-                  scale: 0.8,
-                  child: Switch(
-                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-                        (Set<WidgetState> states) {
-                      if (states.isNotEmpty &&
-                          states.first == WidgetState.selected) {
-                        return const Icon(Icons.done);
-                      }
-                      return null;
-                    }),
-                    value: val,
-                    onChanged: (val) => switchChange(val),
+                  Transform.scale(
+                    alignment: Alignment.centerRight,
+                    scale: 0.8,
+                    child: Switch(
+                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                          (Set<WidgetState> states) {
+                        if (states.isNotEmpty &&
+                            states.first == WidgetState.selected) {
+                          return const Icon(Icons.done);
+                        }
+                        return null;
+                      }),
+                      value: val,
+                      onChanged: (val) => switchChange(val),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

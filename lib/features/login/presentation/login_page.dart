@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import 'login_controller.dart';
@@ -166,7 +167,7 @@ class _QrCodeCard extends StatelessWidget {
             .colorScheme
             .surfaceContainerHighest
             .withValues(alpha: 0.42),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: StyleString.lgRadius,
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
@@ -176,9 +177,9 @@ class _QrCodeCard extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1,
           child: DecoratedBox(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.all(StyleString.imgRadius),
             ),
             child: Padding(
               padding: const EdgeInsets.all(14),
@@ -234,7 +235,7 @@ class _QrError extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.black87),
+            style: const TextStyle(color: Color(0xDD000000)),
           ),
           const SizedBox(height: 10),
           TextButton.icon(

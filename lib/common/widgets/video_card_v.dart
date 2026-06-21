@@ -6,6 +6,7 @@ import 'package:pilipala/utils/image_save.dart';
 import 'package:pilipala/utils/route_push.dart';
 import 'package:pilipala/utils/navigation_helper.dart';
 import '../../models/model_rec_video_item.dart';
+import '../../http/search.dart';
 import 'stat/danmu.dart';
 import 'stat/view.dart';
 import '../../http/dynamics.dart';
@@ -52,11 +53,17 @@ class VideoCardV extends StatelessWidget {
         break;
       case 'av':
         String bvid = videoItem.bvid ?? IdUtils.av2bv(videoItem.aid);
-        Get.toNamed('/video?bvid=$bvid&cid=${videoItem.cid}', arguments: {
-          // 'videoItem': videoItem,
-          'pic': videoItem.pic,
-          'heroTag': heroTag,
-        });
+        final rawCid = videoItem.cid;
+        final int cid = rawCid is int && rawCid > 0
+            ? rawCid
+            : await SearchHttp.ab2c(aid: videoItem.aid, bvid: bvid);
+        Get.toNamed('/video?bvid=$bvid&cid=$cid',
+            arguments: {
+              // 'videoItem': videoItem,
+              'pic': videoItem.pic,
+              'heroTag': heroTag,
+            },
+            preventDuplicates: false);
         break;
       // 动态
       case 'picture':
@@ -110,57 +117,61 @@ class VideoCardV extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String heroTag = Utils.makeHeroTag(videoItem.id);
-    return InkWell(
-      onTap: () async => onPushDetail(heroTag),
-      onLongPress: () => imageSaveDialog(
-        context,
-        videoItem,
-        SmartDialog.dismiss,
-      ),
-      borderRadius: BorderRadius.circular(16),
-      child: Column(
-        children: [
-          AspectRatio(
-            aspectRatio: StyleString.aspectRatio,
-            child: LayoutBuilder(builder: (context, boxConstraints) {
-              double maxWidth = boxConstraints.maxWidth;
-              double maxHeight = boxConstraints.maxHeight;
-              return Stack(
-                children: [
-                  Hero(
-                    tag: heroTag,
-                    child: NetworkImgLayer(
-                      src: videoItem.pic,
-                      width: maxWidth,
-                      height: maxHeight,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: StyleString.lgRadius,
+      child: InkWell(
+        onTap: () async => onPushDetail(heroTag),
+        onLongPress: () => imageSaveDialog(
+          context,
+          videoItem,
+          SmartDialog.dismiss,
+        ),
+        borderRadius: StyleString.lgRadius,
+        child: Column(
+          children: [
+            AspectRatio(
+              aspectRatio: StyleString.aspectRatio,
+              child: LayoutBuilder(builder: (context, boxConstraints) {
+                double maxWidth = boxConstraints.maxWidth;
+                double maxHeight = boxConstraints.maxHeight;
+                return Stack(
+                  children: [
+                    Hero(
+                      tag: heroTag,
+                      child: NetworkImgLayer(
+                        src: videoItem.pic,
+                        width: maxWidth,
+                        height: maxHeight,
+                      ),
                     ),
-                  ),
-                  if (videoItem.duration > 0)
-                    if (crossAxisCount == 1) ...[
-                      PBadge(
-                        bottom: 10,
-                        right: 10,
-                        text: Utils.timeFormat(videoItem.duration),
-                      )
-                    ] else ...[
-                      PBadge(
-                        bottom: 6,
-                        right: 7,
-                        size: 'small',
-                        type: 'gray',
-                        text: Utils.timeFormat(videoItem.duration),
-                      )
-                    ],
-                ],
-              );
-            }),
-          ),
-          VideoContent(
-            videoItem: videoItem,
-            crossAxisCount: crossAxisCount,
-            blockUserCb: blockUserCb,
-          )
-        ],
+                    if (videoItem.duration > 0)
+                      if (crossAxisCount == 1) ...[
+                        PBadge(
+                          bottom: 10,
+                          right: 10,
+                          text: Utils.timeFormat(videoItem.duration),
+                        )
+                      ] else ...[
+                        PBadge(
+                          bottom: 6,
+                          right: 7,
+                          size: 'small',
+                          type: 'gray',
+                          text: Utils.timeFormat(videoItem.duration),
+                        )
+                      ],
+                  ],
+                );
+              }),
+            ),
+            VideoContent(
+              videoItem: videoItem,
+              crossAxisCount: crossAxisCount,
+              blockUserCb: blockUserCb,
+            )
+          ],
+        ),
       ),
     );
   }

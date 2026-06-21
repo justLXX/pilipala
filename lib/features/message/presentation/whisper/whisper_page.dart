@@ -2,6 +2,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/skeleton/skeleton.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/utils/utils.dart';
@@ -71,52 +72,62 @@ class _WhisperPageState extends State<WhisperPage> {
                           padding: EdgeInsets.zero,
                           children: [
                             ..._whisperController.noticesList.map((element) {
-                              return InkWell(
-                                onTap: () {
-                                  if (['/messageAt']
-                                      .contains(element['path'])) {
-                                    SmartDialog.showToast('功能开发中');
-                                    return;
-                                  }
-                                  Get.toNamed(element['path']);
+                              return Material(
+                                color: Colors.transparent,
+                                borderRadius: StyleString.lgRadius,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (['/messageAt']
+                                        .contains(element['path'])) {
+                                      SmartDialog.showToast('功能开发中');
+                                      return;
+                                    }
+                                    Get.toNamed(element['path']);
 
-                                  if (element['count'] > 0) {
-                                    element['count'] = 0;
-                                  }
-                                  _whisperController.noticesList.refresh();
-                                },
-                                onLongPress: () {},
-                                borderRadius: BorderRadius.circular(16),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                        .withValues(alpha: 0.36),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Badge(
-                                        isLabelVisible: element['count'] > 0,
-                                        label: Text(element['count'] > 99
-                                            ? '99+'
-                                            : element['count'].toString()),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8),
-                                          child: Icon(
-                                            element['icon'],
-                                            size: 21,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
+                                    if (element['count'] > 0) {
+                                      element['count'] = 0;
+                                    }
+                                    _whisperController.noticesList.refresh();
+                                  },
+                                  onLongPress: () {},
+                                  borderRadius: StyleString.lgRadius,
+                                  child: Ink(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withValues(alpha: 0.36),
+                                      borderRadius: StyleString.lgRadius,
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .dividerColor
+                                            .withValues(alpha: 0.06),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Badge(
+                                          isLabelVisible: element['count'] > 0,
+                                          label: Text(element['count'] > 99
+                                              ? '99+'
+                                              : element['count'].toString()),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8),
+                                            child: Icon(
+                                              element['icon'],
+                                              size: 21,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(element['title'])
-                                    ],
+                                        const SizedBox(height: 3),
+                                        Text(element['title'])
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -225,65 +236,74 @@ class SessionItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        tileColor: Theme.of(context)
+      child: Material(
+        color: Theme.of(context)
             .colorScheme
             .surfaceContainerHighest
             .withValues(alpha: 0.34),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        onTap: () {
-          sessionItem.unreadCount = 0;
-          changeFucCall.call();
-          Get.toNamed(
-            '/whisperDetail',
-            parameters: {
-              'talkerId': sessionItem.talkerId.toString(),
-              'name': sessionItem.accountInfo.name,
-              'face': sessionItem.accountInfo.face,
-              'mid': (sessionItem.accountInfo?.mid ?? 0).toString(),
-              'heroTag': heroTag,
-            },
-          );
-        },
-        leading: Badge(
-          isLabelVisible: sessionItem.unreadCount > 0,
-          label: Text(sessionItem.unreadCount.toString()),
-          alignment: Alignment.topRight,
-          child: Hero(
-            tag: heroTag,
-            child: NetworkImgLayer(
-              width: 45,
-              height: 45,
-              type: 'avatar',
-              src: sessionItem.accountInfo.face,
-            ),
+        shape: RoundedRectangleBorder(
+          borderRadius: StyleString.lgRadius,
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
           ),
         ),
-        title: Text(sessionItem.accountInfo.name),
-        subtitle: Text(
-            msgStatus == 1
-                ? '你撤回了一条消息'
-                : msgType == 2
-                    ? '[图片]'
-                    : content != null && content != ''
-                        ? (content['text'] ??
-                            content['content'] ??
-                            content['title'] ??
-                            content['reply_content'] ??
-                            '不支持的消息类型')
-                        : '不支持的消息类型',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
-                .textTheme
-                .labelMedium!
-                .copyWith(color: Theme.of(context).colorScheme.outline)),
-        trailing: Text(
-          Utils.dateFormat(sessionItem.lastMsg.timestamp),
-          style: TextStyle(
-            fontSize: Theme.of(context).textTheme.labelSmall!.fontSize,
-            color: Theme.of(context).colorScheme.outline,
+        child: ListTile(
+          shape: RoundedRectangleBorder(borderRadius: StyleString.lgRadius),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          onTap: () {
+            sessionItem.unreadCount = 0;
+            changeFucCall.call();
+            Get.toNamed(
+              '/whisperDetail',
+              parameters: {
+                'talkerId': sessionItem.talkerId.toString(),
+                'name': sessionItem.accountInfo.name,
+                'face': sessionItem.accountInfo.face,
+                'mid': (sessionItem.accountInfo?.mid ?? 0).toString(),
+                'heroTag': heroTag,
+              },
+            );
+          },
+          leading: Badge(
+            isLabelVisible: sessionItem.unreadCount > 0,
+            label: Text(sessionItem.unreadCount.toString()),
+            alignment: Alignment.topRight,
+            child: Hero(
+              tag: heroTag,
+              child: NetworkImgLayer(
+                width: 45,
+                height: 45,
+                type: 'avatar',
+                src: sessionItem.accountInfo.face,
+              ),
+            ),
+          ),
+          title: Text(sessionItem.accountInfo.name),
+          subtitle: Text(
+              msgStatus == 1
+                  ? '你撤回了一条消息'
+                  : msgType == 2
+                      ? '[图片]'
+                      : content != null && content != ''
+                          ? (content['text'] ??
+                              content['content'] ??
+                              content['title'] ??
+                              content['reply_content'] ??
+                              '不支持的消息类型')
+                          : '不支持的消息类型',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(color: Theme.of(context).colorScheme.outline)),
+          trailing: Text(
+            Utils.dateFormat(sessionItem.lastMsg.timestamp),
+            style: TextStyle(
+              fontSize: Theme.of(context).textTheme.labelSmall!.fontSize,
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ),
       ),

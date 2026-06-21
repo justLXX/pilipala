@@ -1,12 +1,13 @@
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
+import 'package:pilipala/common/widgets/media_overlay_badge.dart';
 import 'package:pilipala/features/search/presentation/search_controller.dart'
     as search_ctrl;
 import 'package:pilipala/models/search/result.dart';
 import 'package:pilipala/utils/utils.dart';
 
-/// SearchResultsWidget displays search results with pagination and navigation.
 class SearchResultsWidget extends StatefulWidget {
   final List<SearchVideoItemModel> results;
   final search_ctrl.PiliSearchController controller;
@@ -78,7 +79,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
         itemCount: widget.results.length + 1,
         itemBuilder: (context, index) {
-          // Last item: loading indicator or end of list
           if (index == widget.results.length) {
             return Obx(() {
               if (widget.controller.isLoadingMore) {
@@ -123,7 +123,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   }
 }
 
-/// A single search result card displaying video information.
 class _SearchResultCard extends StatelessWidget {
   final SearchVideoItemModel result;
   final String keyword;
@@ -141,29 +140,36 @@ class _SearchResultCard extends StatelessWidget {
       builder: (context, constraints) {
         final thumbnailWidth =
             (constraints.maxWidth * 0.42).clamp(118.0, 150.0);
-        return InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
-                  .withValues(alpha: 0.36),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: StyleString.lgRadius,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: StyleString.lgRadius,
+              child: Ink(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.36),
+                  borderRadius: StyleString.lgRadius,
+                  border: Border.all(
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.06),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildThumbnail(context, thumbnailWidth),
+                    const SizedBox(width: 10),
+                    Expanded(child: _buildInfo(context)),
+                  ],
+                ),
               ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildThumbnail(context, thumbnailWidth),
-                const SizedBox(width: 10),
-                Expanded(child: _buildInfo(context)),
-              ],
             ),
           ),
         );
@@ -173,11 +179,13 @@ class _SearchResultCard extends StatelessWidget {
 
   Widget _buildThumbnail(BuildContext context, double width) {
     final String? pic = result.pic;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SizedBox(
       width: width,
       height: width / 1.6,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: const BorderRadius.all(StyleString.imgRadius),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -189,28 +197,22 @@ class _SearchResultCard extends StatelessWidget {
                   ? Image.network(
                       pic,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (_, __, ___) => Icon(
                         Icons.broken_image_outlined,
-                        color: Colors.grey,
+                        color: colorScheme.outline,
                       ),
                     )
-                  : const Icon(Icons.play_circle_outline, color: Colors.grey),
+                  : Icon(
+                      Icons.play_circle_outline,
+                      color: colorScheme.outline,
+                    ),
             ),
             if (result.duration != null && result.duration! > 0)
               Positioned(
                 right: 4,
                 bottom: 4,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.68),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _formatDuration(result.duration!),
-                    style: const TextStyle(color: Colors.white, fontSize: 11),
-                  ),
+                child: MediaOverlayBadge(
+                  text: _formatDuration(result.duration!),
                 ),
               ),
           ],

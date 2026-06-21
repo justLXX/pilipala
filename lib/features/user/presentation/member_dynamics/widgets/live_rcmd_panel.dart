@@ -106,12 +106,12 @@ Widget liveRcmdPanel(item, context, {floor = 1}) {
                         end: Alignment.bottomCenter,
                         colors: <Color>[
                           Colors.transparent,
-                          Colors.black45,
+                          Color(0x99000000),
                         ],
                       ),
                       borderRadius: floor == 1
                           ? null
-                          : const BorderRadius.all(Radius.circular(6))),
+                          : const BorderRadius.all(StyleString.imgRadius)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -122,7 +122,8 @@ Widget liveRcmdPanel(item, context, {floor = 1}) {
                                 .textTheme
                                 .labelMedium!
                                 .fontSize,
-                            color: Colors.white),
+                            color: Colors.white,
+                            letterSpacing: 0),
                         child: Row(
                           children: [
                             Text(item.modules.moduleDynamic.major.liveRcmd

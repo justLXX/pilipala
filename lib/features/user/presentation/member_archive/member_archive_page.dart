@@ -2,9 +2,9 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/user/presentation/member_archive/member_archive_controller.dart';
 import 'package:pilipala/utils/utils.dart';
 
@@ -90,9 +90,8 @@ class _MemberArchivePageState extends State<MemberArchivePage> {
                           ? SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (BuildContext context, index) {
-                                  return VideoCardH(
+                                  return CleanVideoListTile(
                                     videoItem: list[index],
-                                    showOwner: false,
                                     showPubdate: true,
                                     showCharge: true,
                                   );

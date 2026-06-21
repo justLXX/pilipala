@@ -89,7 +89,7 @@ class HistoryController extends GetxController {
                 child: const Text('取消')),
             TextButton(
               onPressed: () async {
-                SmartDialog.showLoading(msg: '请求中');
+                SmartDialog.showLoading(msg: '请求中', clickMaskDismiss: true, backType: SmartBackType.normal);
                 try {
                   await _pauseHistory.execute(pause: !pauseStatus.value);
                   SmartDialog.showToast(
@@ -133,7 +133,7 @@ class HistoryController extends GetxController {
                 child: const Text('取消')),
             TextButton(
               onPressed: () async {
-                SmartDialog.showLoading(msg: '请求中');
+                SmartDialog.showLoading(msg: '请求中', clickMaskDismiss: true, backType: SmartBackType.normal);
                 try {
                   await _clearHistory.execute();
                   SmartDialog.showToast('清空观看历史');
@@ -204,7 +204,7 @@ class HistoryController extends GetxController {
             TextButton(
               onPressed: () async {
                 await SmartDialog.dismiss();
-                SmartDialog.showLoading(msg: '请求中');
+                SmartDialog.showLoading(msg: '请求中', clickMaskDismiss: true, backType: SmartBackType.normal);
                 List<HisListItem> result =
                     historyList.where((e) => e.checked!).toList();
                 for (HisListItem i in result) {

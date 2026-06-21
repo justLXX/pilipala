@@ -392,7 +392,7 @@ class MemberHttp {
 
   // 获取TV authCode
   static Future getTVCode() async {
-    SmartDialog.showLoading();
+    SmartDialog.showLoading(clickMaskDismiss: true, backType: SmartBackType.normal);
     var params = {
       'appkey': Constants.appKey,
       'local_id': '0',

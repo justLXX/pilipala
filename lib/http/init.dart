@@ -224,7 +224,7 @@ class Request {
       } catch (e) {
         // 处理请求错误
         buvid = '';
-        print("Error fetching buvid: $e");
+        // print("Error fetching buvid: $e");
       }
     }
 
@@ -324,7 +324,7 @@ class Request {
     dio.interceptors.add(ApiInterceptor());
 
     // API 日志拦截器 输出每个接口的请求结果
-    dio.interceptors.add(ApiLogInterceptor());
+    // dio.interceptors.add(ApiLogInterceptor());
 
     dio.transformer = BackgroundTransformer();
     dio.options.validateStatus = (int? status) {
@@ -411,11 +411,11 @@ class Request {
         //进度
         // print("$count $total");
       });
-      print('downloadFile success: ${response.data}');
+      // print('downloadFile success: ${response.data}');
 
       return response.data;
     } on DioException catch (e) {
-      print('downloadFile error: $e');
+      // print('downloadFile error: $e');
       return Future.error(ApiInterceptor.dioError(e));
     }
   }

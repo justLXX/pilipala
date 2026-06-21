@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/features/search/presentation/search_controller.dart'
     as search_ctrl;
 import 'package:pilipala/features/search/presentation/widgets/hot_keyword.dart';
@@ -25,14 +26,21 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
   final search_ctrl.PiliSearchController _searchController =
       Get.find<search_ctrl.PiliSearchController>();
   PageRoute<dynamic>? _route;
-  late final bool _autoFocusSearchField;
 
   @override
   void initState() {
     super.initState();
     final routeKeyword = Get.parameters['keyword']?.trim() ?? '';
-    _autoFocusSearchField = routeKeyword.isEmpty;
-    _searchController.prepareForRoute(keyword: routeKeyword);
+    final routeHintKeyword = Get.parameters['hintKeyword']?.trim() ?? '';
+    _searchController.prepareForRoute(
+      keyword: routeKeyword,
+      hintKeyword: routeHintKeyword,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _searchController.searchFocusNode.requestFocus();
+      }
+    });
   }
 
   @override
@@ -80,10 +88,17 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
         centerTitle: false,
         title: SearchTextField(
           controller: _searchController,
-          autofocus: _autoFocusSearchField,
-          onSubmitted: (value) => _searchController.performSearch(value),
+          autofocus: true,
+          onSubmitted: (value) => _searchController.searchFromInput(value),
         ),
         actions: [
+          TextButton(
+            onPressed: () => _searchController.searchFromInput(),
+            child: Text(
+              '搜索',
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
+          ),
           TextButton(
             onPressed: () => safeBack(),
             child: Text('取消',
@@ -263,7 +278,7 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
           final suggestion = suggestions[index];
           return InkWell(
             customBorder: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: StyleString.mdRadius,
             ),
             onTap: () => _searchController.performSearch(suggestion),
             child: Padding(

@@ -31,7 +31,7 @@ class DynamicsHttp {
           'data': DynamicsDataModel.fromJson(res.data['data']),
         };
       } catch (err) {
-        debugPrint('$err');
+        // debugPrint('$err');
         return {
           'status': false,
           'data': [],

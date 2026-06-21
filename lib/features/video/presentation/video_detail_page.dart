@@ -1,8 +1,10 @@
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/skeleton/video_reply.dart';
 import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
@@ -46,11 +48,14 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   // 保存离开页面时的播放进度，返回时恢复
   Duration _lastPosition = Duration.zero;
   bool _didPushImagePreview = false;
+  bool _coveredByVideoRoute = false;
   int _lastChapterCheckSecond = -1;
   PageRoute<dynamic>? _subscribedRoute;
   // Tracks current system-UI mode to avoid redundant SystemChrome calls on
   // each Obx rebuild. True == immersive requested.
   bool _systemImmersive = false;
+  DataStatus? _lastLoggedPlayerDataStatus;
+  String? _lastLoggedPlayerKey;
 
   @override
   void initState() {
@@ -59,15 +64,20 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     final bvid = Get.parameters['bvid'] ?? '';
     final cid = Get.parameters['cid'] ?? '0';
     _heroTag = Get.arguments?['heroTag'] ?? '${bvid}_$cid';
+    _log(
+        'initState bvid=$bvid cid=$cid heroTag=$_heroTag route=${Get.currentRoute}');
     _vdCtr = Get.put(VideoDetailController(), tag: _heroTag);
     _vdCtr.playerController.addStatusLister(_playerStatusListener);
     _vdCtr.playerController.addPositionListener(_playerPositionListener);
-    _vdCtr.loadVideoDetail(
-      bvid: bvid,
-      aid: Get.parameters['aid'] != null
-          ? int.parse(Get.parameters['aid']!)
-          : null,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _vdCtr.loadVideoDetail(
+        bvid: bvid,
+        aid: Get.parameters['aid'] != null
+            ? int.parse(Get.parameters['aid']!)
+            : null,
+      );
+    });
   }
 
   void _playerPositionListener(Duration position) {
@@ -78,6 +88,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   }
 
   void _playerStatusListener(PlayerStatus status) {
+    _log('播放器状态回调 status=$status');
     if (status == PlayerStatus.completed) {
       if (_vdCtr.playerController.isFullScreen.value) {
         _vdCtr.playerController.triggerFullScreen(status: false);
@@ -91,6 +102,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 
   @override
   void dispose() {
+    _log('dispose heroTag=$_heroTag');
     VideoDetailPage.routeObserver.unsubscribe(this);
     _vdCtr.playerController.removeStatusLister(_playerStatusListener);
     _vdCtr.playerController.removePositionListener(_playerPositionListener);
@@ -121,6 +133,7 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 
   @override
   void didPushNext() {
+    _log('didPushNext currentRoute=${Get.currentRoute}');
     final bool isImagePreview = Get.isRegistered<MainController>() &&
         Get.find<MainController>().imgPreviewStatus;
     if (isImagePreview) {
@@ -128,10 +141,23 @@ class _VideoDetailPageState extends State<VideoDetailPage>
       super.didPushNext();
       return;
     }
+    if (Get.currentRoute.startsWith('/video')) {
+      _setCoveredByVideoRoute(true);
+      if (_vdCtr.playerController.videoPlayerController != null) {
+        _lastPosition = _vdCtr.playerController.position.value;
+        _log('跳到新视频页，摘除当前页监听 lastPosition=$_lastPosition');
+        _vdCtr.playerController.removeStatusLister(_playerStatusListener);
+        _vdCtr.playerController.removePositionListener(_playerPositionListener);
+      }
+      super.didPushNext();
+      return;
+    }
     // 离开页面：保存进度，移除监听，暂停播放
     if (_vdCtr.playerController.videoPlayerController != null) {
       _lastPosition = _vdCtr.playerController.position.value;
+      _log('跳到非视频页，暂停播放器 lastPosition=$_lastPosition');
       _vdCtr.playerController.removeStatusLister(_playerStatusListener);
+      _vdCtr.playerController.removePositionListener(_playerPositionListener);
       _vdCtr.playerController.pause();
     }
     super.didPushNext();
@@ -139,6 +165,8 @@ class _VideoDetailPageState extends State<VideoDetailPage>
 
   @override
   void didPopNext() {
+    _log('didPopNext currentRoute=${Get.currentRoute}');
+    _setCoveredByVideoRoute(false);
     if (_didPushImagePreview) {
       _didPushImagePreview = false;
       super.didPopNext();
@@ -147,13 +175,28 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     // 返回页面：重新初始化播放器，恢复进度
     if (_vdCtr.playerController.videoPlayerController != null &&
         _vdCtr.playUrl != null) {
+      _log('返回详情页，reinitPlayer seekTo=$_lastPosition');
       _vdCtr.reinitPlayer(seekTo: _lastPosition).then((_) {
         _vdCtr.playerController.addStatusLister(_playerStatusListener);
+        _vdCtr.playerController.addPositionListener(_playerPositionListener);
       });
     } else {
+      _log('返回详情页，仅恢复监听');
       _vdCtr.playerController.addStatusLister(_playerStatusListener);
+      _vdCtr.playerController.addPositionListener(_playerPositionListener);
     }
     super.didPopNext();
+  }
+
+  void _setCoveredByVideoRoute(bool value) {
+    if (_coveredByVideoRoute == value) return;
+    if (!mounted) {
+      _coveredByVideoRoute = value;
+      return;
+    }
+    setState(() {
+      _coveredByVideoRoute = value;
+    });
   }
 
   void _showCoinDialog() {
@@ -322,6 +365,27 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     );
   }
 
+  /// 页面级加载/错误状态下的顶部返回按钮，确保任何情况下都能退出
+  Widget _buildTopBackButton() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      child: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Get.back(),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Compute the pinned header height for ExtendedNestedScrollView.
   /// When playing, return the full pinned height so the video area
   /// does NOT collapse on scroll (same as legacy behavior).
@@ -358,9 +422,24 @@ class _VideoDetailPageState extends State<VideoDetailPage>
         if (_vdCtr.videoDetail != null) {
           return _buildContent(context);
         } else if (_vdCtr.error.isNotEmpty) {
-          return _buildError();
+          return Stack(
+            children: [
+              _buildError(),
+              _buildTopBackButton(),
+            ],
+          );
         } else {
-          return const Center(child: CircularProgressIndicator());
+          return Stack(
+            children: [
+              Container(
+                color: Colors.black,
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              ),
+              _buildTopBackButton(),
+            ],
+          );
         }
       }),
     );
@@ -605,55 +684,103 @@ class _VideoDetailPageState extends State<VideoDetailPage>
   }
 
   Widget _buildPlayer(BuildContext context) {
-    final dataStatus = _vdCtr.playerController.dataStatus.status.value;
-    if (dataStatus == DataStatus.loaded) {
-      return PLVideoPlayer(
-        controller: _vdCtr.playerController,
-        headerControl: _buildPlayerHeader(),
-        danmuWidget: PlDanmaku(
-          key: Key(_vdCtr.cid.toString()),
-          cid: _vdCtr.cid,
-          playerController: _vdCtr.playerController,
-        ),
-        bottomList: _vdCtr.bottomList,
-        fullScreenCb: (bool status) {
-          // 高度由上层 Obx 重建处理
-        },
-      );
-    } else if (dataStatus == DataStatus.loading) {
-      return Container(
-        color: Colors.black,
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    } else if (dataStatus == DataStatus.error) {
-      return Container(
-        color: Colors.black,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, color: Colors.white, size: 48),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  _vdCtr.loadVideoDetail(
-                    bvid: Get.parameters['bvid'],
-                    aid: Get.parameters['aid'] != null
-                        ? int.parse(Get.parameters['aid']!)
-                        : null,
-                  );
-                },
-                child: const Text('重试', style: TextStyle(color: Colors.white)),
-              ),
-            ],
+    return Obx(() {
+      if (_coveredByVideoRoute) {
+        return const ColoredBox(color: Colors.black);
+      }
+      final dataStatus = _vdCtr.playerController.dataStatus.status.value;
+      final textureKey = _vdCtr.playerController.videoTextureKey.value;
+      final playerKey = '${_vdCtr.bvid}_${_vdCtr.cid}_$textureKey';
+      if (_lastLoggedPlayerDataStatus != dataStatus ||
+          _lastLoggedPlayerKey != playerKey) {
+        _lastLoggedPlayerDataStatus = dataStatus;
+        _lastLoggedPlayerKey = playerKey;
+        _log(
+          '_buildPlayer dataStatus=$dataStatus key=$playerKey '
+          'videoDetail=${_vdCtr.videoDetail != null} '
+          'playUrl=${_vdCtr.playUrl != null} '
+          'playerStatus=${_vdCtr.playerController.playerStatus.status.value} '
+          'buffering=${_vdCtr.playerController.isBuffering.value} '
+          'position=${_vdCtr.playerController.position.value} '
+          'hasPlaybackStarted=${_vdCtr.playerController.hasPlaybackStarted.value}',
+        );
+      }
+      if (dataStatus == DataStatus.loaded) {
+        return PLVideoPlayer(
+          key: ValueKey(playerKey),
+          controller: _vdCtr.playerController,
+          headerControl: _buildPlayerHeader(),
+          danmuWidget: PlDanmaku(
+            key: Key(_vdCtr.cid.toString()),
+            cid: _vdCtr.cid,
+            playerController: _vdCtr.playerController,
           ),
-        ),
-      );
-    } else {
-      return Container(color: Colors.black);
-    }
+          bottomList: _vdCtr.bottomList,
+          fullScreenCb: (bool status) {
+            // 高度由上层 Obx 重建处理
+          },
+        );
+      } else if (dataStatus == DataStatus.loading) {
+        return Stack(
+          children: [
+            Container(
+              color: Colors.black,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildPlayerHeader(),
+            ),
+          ],
+        );
+      } else if (dataStatus == DataStatus.error) {
+        return Stack(
+          children: [
+            Container(
+              color: Colors.black,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, color: Colors.white, size: 48),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        _vdCtr.loadVideoDetail(
+                          bvid: Get.parameters['bvid'],
+                          aid: Get.parameters['aid'] != null
+                              ? int.parse(Get.parameters['aid']!)
+                              : null,
+                        );
+                      },
+                      child: const Text('重试',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildPlayerHeader(),
+            ),
+          ],
+        );
+      } else {
+        return Container(color: Colors.black);
+      }
+    });
+  }
+
+  void _log(String message) {
+    if (!kDebugMode) return;
+    debugPrint('[播放器链路][VideoDetailPage ${identityHashCode(this)}] $message');
   }
 
   Widget _buildError() {
@@ -851,22 +978,37 @@ class _VideoDetailPageState extends State<VideoDetailPage>
           ),
         )
       else
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisExtent: 236,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => CleanVideoCard(
-                videoItem: videos[index],
-                showPubdate: true,
+        SliverLayoutBuilder(
+          builder: (context, constraints) {
+            final bool isDesktop = constraints.crossAxisExtent >= 720;
+            final double horizontalPadding = isDesktop ? 24.0 : 12.0;
+            final double crossAxisSpacing = isDesktop ? 24.0 : 12.0;
+            final double mainAxisSpacing = isDesktop ? 24.0 : 16.0;
+            final itemWidth = (constraints.crossAxisExtent -
+                    horizontalPadding * 2 -
+                    crossAxisSpacing * (crossAxisCount - 1)) /
+                crossAxisCount;
+            final itemHeight = itemWidth / StyleString.aspectRatio + 118;
+            return SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: crossAxisSpacing,
+                  mainAxisSpacing: mainAxisSpacing,
+                  mainAxisExtent: itemHeight,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => CleanVideoCard(
+                    videoItem: videos[index],
+                    showPubdate: true,
+                  ),
+                  childCount: videos.length,
+                  addAutomaticKeepAlives: false,
+                ),
               ),
-              childCount: videos.length,
-              addAutomaticKeepAlives: false,
-            ),
-          ),
+            );
+          },
         ),
       SliverToBoxAdapter(
         child: SizedBox(height: MediaQuery.of(context).padding.bottom + 10),
@@ -1147,7 +1289,7 @@ class _IntroActionBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
           foregroundColor: color,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: StyleString.mdRadius,
           ),
         ),
         child: Column(
@@ -1659,7 +1801,7 @@ class _CommentPanelState extends State<_CommentPanel> {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: StyleString.lgRadius,
           ),
           alignment: Alignment.centerLeft,
           child: Text(

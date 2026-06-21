@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:lottie/lottie.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:pilipala/models/common/gesture_mode.dart';
@@ -75,6 +75,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   final RxDouble _brightnessValue = 0.0.obs;
   final RxBool _brightnessIndicator = false.obs;
   Timer? _brightnessTimer;
+  StreamSubscription<double>? _brightnessSubscription;
 
   final RxDouble _volumeValue = 0.0.obs;
   final RxBool _volumeIndicator = false.obs;
@@ -94,6 +95,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   // 用于记录上一次全屏切换手势触发时间，避免误触
   DateTime? lastFullScreenToggleTime;
+  String? _lastVideoWidgetKey;
 
   void onDoubleTapSeekBackward() {
     _mountSeekBackwardButton.value = true;
@@ -116,6 +118,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   @override
   void initState() {
     super.initState();
+    _log(
+      'initState controller=${identityHashCode(widget.controller)} '
+      'videoController=${identityHashCode(widget.controller.videoController)}',
+    );
     screenWidth = Get.size.width;
     animationController = AnimationController(
       vsync: this,
@@ -157,7 +163,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     Future.microtask(() async {
       try {
         _brightnessValue.value = await ScreenBrightness().current;
-        ScreenBrightness().onCurrentBrightnessChanged.listen((double value) {
+        _brightnessSubscription = ScreenBrightness()
+            .onCurrentBrightnessChanged
+            .listen((double value) {
           if (mounted) {
             _brightnessValue.value = value;
           }
@@ -206,9 +214,37 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   @override
   void dispose() {
+    _log('dispose');
+    _brightnessTimer?.cancel();
+    _volumeTimer?.cancel();
+    _brightnessSubscription?.cancel();
     animationController.dispose();
     FlutterVolumeController.removeListener();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant PLVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextVideoController = widget.controller.videoController;
+    if (nextVideoController != null && nextVideoController != videoController) {
+      _log(
+        'didUpdateWidget 切换 videoController '
+        '${identityHashCode(videoController)} -> ${identityHashCode(nextVideoController)}',
+      );
+      videoController = nextVideoController;
+    }
+    if (oldWidget.key != widget.key) {
+      _log('didUpdateWidget key ${oldWidget.key} -> ${widget.key}');
+    }
+    widget.controller.headerControl = widget.headerControl;
+    widget.controller.bottomControl = widget.bottomControl;
+    widget.controller.danmuWidget = widget.danmuWidget;
+  }
+
+  void _log(String message) {
+    if (!kDebugMode) return;
+    debugPrint('[播放器链路][PLVideoPlayer ${identityHashCode(this)}] $message');
   }
 
   // 动态构建底部控制条
@@ -413,19 +449,32 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       fit: StackFit.passthrough,
       children: <Widget>[
         Obx(
-          () => Video(
-            key: ValueKey(_.videoFit.value),
-            controller: videoController,
-            controls: NoVideoControls,
-            alignment: widget.alignment!,
-            pauseUponEnteringBackgroundMode: !enableBackgroundPlay,
-            resumeUponEnteringForegroundMode: true,
-            subtitleViewConfiguration: const SubtitleViewConfiguration(
-              style: subTitleStyle,
-              padding: EdgeInsets.all(24.0),
-            ),
-            fit: _.videoFit.value,
-          ),
+          () {
+            final videoWidgetKey =
+                '${_.videoTextureKey.value}_${_.videoFit.value}';
+            if (_lastVideoWidgetKey != videoWidgetKey) {
+              _lastVideoWidgetKey = videoWidgetKey;
+              _log(
+                '构建 Video key=$videoWidgetKey dataStatus=${_.dataStatus.status.value} '
+                'playing=${_.playerStatus.status.value} buffering=${_.isBuffering.value} '
+                'position=${_.position.value} hasPlaybackStarted=${_.hasPlaybackStarted.value} '
+                'videoController=${identityHashCode(videoController)}',
+              );
+            }
+            return Video(
+              key: ValueKey(videoWidgetKey),
+              controller: videoController,
+              controls: NoVideoControls,
+              alignment: widget.alignment!,
+              pauseUponEnteringBackgroundMode: !enableBackgroundPlay,
+              resumeUponEnteringForegroundMode: true,
+              subtitleViewConfiguration: const SubtitleViewConfiguration(
+                style: subTitleStyle,
+                padding: EdgeInsets.all(24.0),
+              ),
+              fit: _.videoFit.value,
+            );
+          },
         ),
 
         /// 长按倍速 toast
@@ -597,11 +646,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
         /// 手势
         Positioned.fill(
-          left: 16,
-          top: 25,
-          right: 15,
-          bottom: 15,
           child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
             onTap: () {
               _.controls = !_.showControls.value;
             },
@@ -783,8 +829,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 total: Duration(seconds: max),
                 progressBarColor: colorTheme,
                 baseBarColor: Colors.white.withValues(alpha: 0.2),
-                bufferedBarColor:
-                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                bufferedBarColor: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.4),
                 timeLabelLocation: TimeLabelLocation.none,
                 thumbColor: colorTheme,
                 barHeight: 3,
@@ -842,28 +890,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             ),
           ),
         ),
-        //
-        Obx(() {
-          if (_.dataStatus.loading || _.isBuffering.value) {
-            return Center(
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [Colors.black26, Colors.transparent],
-                  ),
-                ),
-                child: Lottie.asset(
-                  'assets/loading.json',
-                  width: 200,
-                ),
-              ),
-            );
-          } else {
-            return const SizedBox();
-          }
-        }),
 
         /// 点击 快进/快退
         Obx(

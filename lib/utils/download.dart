@@ -51,7 +51,7 @@ class DownloadUtils {
         }
       }
 
-      SmartDialog.showLoading(msg: '保存中');
+      SmartDialog.showLoading(msg: '保存中', clickMaskDismiss: true, backType: SmartBackType.normal);
       var response = await Dio()
           .get(imgUrl, options: Options(responseType: ResponseType.bytes));
       final String imgSuffix = imgUrl.split('.').last;

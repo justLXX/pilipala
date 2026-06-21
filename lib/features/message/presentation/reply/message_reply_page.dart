@@ -2,6 +2,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/http/search.dart';
@@ -112,114 +113,125 @@ class ReplyItem extends StatelessWidget {
     final String heroTag = Utils.makeHeroTag(item.user!.mid);
     final String bvid = item.item!.uri!.split('/').last;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () async {
-        final int cid = await SearchHttp.ab2c(bvid: bvid);
-        final String heroTag = Utils.makeHeroTag(bvid);
-        Get.toNamed<dynamic>(
-          '/video?bvid=$bvid&cid=$cid',
-          arguments: <String, String?>{
-            'pic': '',
-            'heroTag': heroTag,
-          },
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: 0.34),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Get.toNamed('/member?mid=${item.user!.mid}',
-                    arguments: {'face': item.user!.avatar, 'heroTag': heroTag});
-              },
-              child: Hero(
-                tag: heroTag,
-                child: NetworkImgLayer(
-                  width: 42,
-                  height: 42,
-                  type: 'avatar',
-                  src: item.user!.avatar,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: StyleString.lgRadius,
+      child: InkWell(
+        borderRadius: StyleString.lgRadius,
+        onTap: () async {
+          final int cid = await SearchHttp.ab2c(bvid: bvid);
+          final String heroTag = Utils.makeHeroTag(bvid);
+          Get.toNamed<dynamic>(
+            '/video?bvid=$bvid&cid=$cid',
+            arguments: <String, String?>{
+              'pic': '',
+              'heroTag': heroTag,
+            },
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.34),
+            borderRadius: StyleString.lgRadius,
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Get.toNamed('/member?mid=${item.user!.mid}', arguments: {
+                    'face': item.user!.avatar,
+                    'heroTag': heroTag
+                  });
+                },
+                child: Hero(
+                  tag: heroTag,
+                  child: NetworkImgLayer(
+                    width: 42,
+                    height: 42,
+                    type: 'avatar',
+                    src: item.user!.avatar,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text.rich(TextSpan(children: [
-                    TextSpan(text: item.user!.nickname!),
-                    const TextSpan(text: ' '),
-                    if (item.item!.type! == 'video')
-                      TextSpan(
-                          text: '对我的视频发表了评论', style: TextStyle(color: outline)),
-                    if (item.item!.type! == 'reply')
-                      TextSpan(
-                        text: '回复了我的评论',
-                        style: TextStyle(color: outline),
-                      ),
-                  ])),
-                  const SizedBox(height: 6),
-                  Text.rich(
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(letterSpacing: 0.3),
-                      buildContent(context, item.item)),
-                  if (item.item!.targetReplyContent != '') ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      item.item!.targetReplyContent!,
-                      style: TextStyle(color: outline),
-                    ),
-                  ],
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text.rich(TextSpan(children: [
+                      TextSpan(text: item.user!.nickname!),
+                      const TextSpan(text: ' '),
+                      if (item.item!.type! == 'video')
+                        TextSpan(
+                            text: '对我的视频发表了评论',
+                            style: TextStyle(color: outline)),
+                      if (item.item!.type! == 'reply')
+                        TextSpan(
+                          text: '回复了我的评论',
+                          style: TextStyle(color: outline),
+                        ),
+                    ])),
+                    const SizedBox(height: 6),
+                    Text.rich(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(letterSpacing: 0.3),
+                        buildContent(context, item.item)),
+                    if (item.item!.targetReplyContent != '') ...[
+                      const SizedBox(height: 2),
                       Text(
-                        Utils.dateFormat(item.replyTime!, formatType: 'detail'),
+                        item.item!.targetReplyContent!,
                         style: TextStyle(color: outline),
                       ),
-                      const SizedBox(width: 16),
-                      // Text('回复', style: TextStyle(color: outline)),
                     ],
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(width: 25),
-            if (item.item!.type! == 'reply')
-              Container(
-                width: 60,
-                height: 80,
-                padding: const EdgeInsets.all(4),
-                child: Text(
-                  item.item!.rootReplyContent!,
-                  maxLines: 4,
-                  style: const TextStyle(fontSize: 12, letterSpacing: 0.3),
-                  overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          Utils.dateFormat(item.replyTime!,
+                              formatType: 'detail'),
+                          style: TextStyle(color: outline),
+                        ),
+                        const SizedBox(width: 16),
+                        // Text('回复', style: TextStyle(color: outline)),
+                      ],
+                    )
+                  ],
                 ),
               ),
-            if (item.item!.type! == 'video')
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: NetworkImgLayer(
+              const SizedBox(width: 25),
+              if (item.item!.type! == 'reply')
+                Container(
                   width: 60,
-                  height: 60,
-                  src: item.item!.image,
+                  height: 80,
+                  padding: const EdgeInsets.all(4),
+                  child: Text(
+                    item.item!.rootReplyContent!,
+                    maxLines: 4,
+                    style: const TextStyle(fontSize: 12, letterSpacing: 0),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-          ],
+              if (item.item!.type! == 'video')
+                ClipRRect(
+                  borderRadius: const BorderRadius.all(StyleString.imgRadius),
+                  child: NetworkImgLayer(
+                    width: 60,
+                    height: 60,
+                    src: item.item!.image,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

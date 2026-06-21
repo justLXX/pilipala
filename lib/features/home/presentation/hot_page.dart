@@ -7,7 +7,6 @@ import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/features/home/presentation/home_controller.dart';
 import 'package:pilipala/features/main/presentation/main_controller.dart';
-import 'package:pilipala/utils/responsive.dart';
 
 /// HotPage displays the hot video list.
 ///
@@ -139,8 +138,7 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
     int childCount,
     Widget Function(int index) builder,
   ) {
-    final crossAxisCount =
-        Responsive.isExpanded(context) ? Responsive.videoGridCount(context) : 2;
+    final crossAxisCount = _homeVideoGridCount(context);
     return SliverLayoutBuilder(
       builder: (context, constraints) {
         const horizontalPadding = 14.0;
@@ -172,5 +170,16 @@ class _HotPageState extends State<HotPage> with AutomaticKeepAliveClientMixin {
         );
       },
     );
+  }
+
+  int _homeVideoGridCount(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width >= 1400) {
+      return 4;
+    }
+    if (width >= 1000) {
+      return 3;
+    }
+    return 2;
   }
 }

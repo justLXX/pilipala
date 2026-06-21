@@ -40,7 +40,9 @@ class FavItem extends StatelessWidget {
                   AspectRatio(
                     aspectRatio: StyleString.aspectRatio,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: const BorderRadius.all(
+                        StyleString.imgRadius,
+                      ),
                       child: LayoutBuilder(
                         builder: (context, boxConstraints) {
                           double maxWidth = boxConstraints.maxWidth;

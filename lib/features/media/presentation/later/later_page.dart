@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/skeleton/video_card_h.dart';
+import 'package:pilipala/common/widgets/clean_video_card.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/no_data.dart';
-import 'package:pilipala/common/widgets/video_card_h.dart';
 import 'package:pilipala/features/media/presentation/later/later_controller.dart';
 import 'package:pilipala/utils/route_push.dart';
 
@@ -86,11 +86,14 @@ class _LaterPageState extends State<LaterPage> {
                             delegate:
                                 SliverChildBuilderDelegate((context, index) {
                               var videoItem = _laterController.laterList[index];
-                              return VideoCardH(
-                                  videoItem: videoItem,
-                                  source: 'later',
-                                  onPressedFn: () => _laterController.toViewDel(
-                                      bvid: videoItem.bvid));
+                              return CleanVideoListTile(
+                                videoItem: videoItem,
+                                trailingIcon: Icons.clear_outlined,
+                                onTrailingPressed: () =>
+                                    _laterController.toViewDel(
+                                  bvid: videoItem.bvid,
+                                ),
+                              );
                             }, childCount: _laterController.laterList.length),
                           )
                         : _laterController.isLoading.value
@@ -115,8 +118,7 @@ class _LaterPageState extends State<LaterPage> {
                     RoutePush.loginRedirectPush();
                   } else {
                     setState(() {
-                      _futureBuilderFuture =
-                          _laterController.queryLaterList();
+                      _futureBuilderFuture = _laterController.queryLaterList();
                     });
                   }
                 },

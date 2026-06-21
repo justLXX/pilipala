@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage>
                   Get.toNamed(
                     '/search',
                     parameters:
-                        keyword.isNotEmpty ? {'keyword': keyword} : null,
+                        keyword.isNotEmpty ? {'hintKeyword': keyword} : null,
                   );
                 },
                 child: Container(

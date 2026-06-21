@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/common/widgets/network_img_layer.dart';
 import 'package:pilipala/features/blacklist/presentation/blacklist_controller.dart';
@@ -88,45 +89,55 @@ class _BlackListPageState extends State<BlackListPage> {
                           itemBuilder: (BuildContext context, int index) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 10),
-                              child: ListTile(
-                                onTap: () {},
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                tileColor: Theme.of(context)
+                              child: Material(
+                                color: Theme.of(context)
                                     .colorScheme
                                     .surfaceContainerHighest
                                     .withValues(alpha: 0.34),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: StyleString.lgRadius,
+                                  side: BorderSide(
+                                    color: Theme.of(context)
+                                        .dividerColor
+                                        .withValues(alpha: 0.06),
+                                  ),
                                 ),
-                                leading: NetworkImgLayer(
-                                  width: 45,
-                                  height: 45,
-                                  type: 'avatar',
-                                  src: list[index].face,
-                                ),
-                                title: Text(
-                                  list[index].uname!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                subtitle: Text(
-                                  Utils.dateFormat(list[index].mtime),
-                                  maxLines: 1,
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outline),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                dense: true,
-                                trailing: TextButton(
-                                  onPressed: () => _blackListController
-                                      .removeBlack(list[index].mid),
-                                  child: const Text('移除'),
+                                child: ListTile(
+                                  onTap: () {},
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: StyleString.lgRadius,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  leading: NetworkImgLayer(
+                                    width: 45,
+                                    height: 45,
+                                    type: 'avatar',
+                                    src: list[index].face,
+                                  ),
+                                  title: Text(
+                                    list[index].uname!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  subtitle: Text(
+                                    Utils.dateFormat(list[index].mtime),
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  dense: true,
+                                  trailing: TextButton(
+                                    onPressed: () => _blackListController
+                                        .removeBlack(list[index].mid),
+                                    child: const Text('移除'),
+                                  ),
                                 ),
                               ),
                             );

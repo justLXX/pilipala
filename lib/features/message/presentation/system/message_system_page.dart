@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pilipala/common/constants.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
 import 'package:pilipala/models/msg/system.dart';
 import 'message_system_controller.dart';
@@ -108,7 +109,10 @@ class SystemItem extends StatelessWidget {
                   .colorScheme
                   .surfaceContainerHighest
                   .withValues(alpha: 0.34),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: StyleString.lgRadius,
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.06),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

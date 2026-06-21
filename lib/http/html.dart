@@ -62,7 +62,7 @@ class HtmlHttp {
         'commentId': int.parse(commentId)
       };
     } catch (err) {
-      print('err: $err');
+      // print('err: $err');
     }
   }
 

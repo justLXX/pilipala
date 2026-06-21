@@ -95,7 +95,7 @@ class CacheManage {
             TextButton(
               onPressed: () async {
                 SmartDialog.dismiss();
-                SmartDialog.showLoading(msg: '正在清除...');
+                SmartDialog.showLoading(msg: '正在清除...', clickMaskDismiss: true, backType: SmartBackType.normal);
                 try {
                   // 清除缓存 图片缓存
                   await clearLibraryCache();

@@ -20,7 +20,7 @@ class LiveCard extends StatelessWidget {
       elevation: 0,
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
+        borderRadius: StyleString.mdRadius,
         side: BorderSide(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
@@ -28,6 +28,7 @@ class LiveCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: () {},
+        borderRadius: StyleString.mdRadius,
         child: Column(
           children: [
             AspectRatio(
@@ -129,7 +130,7 @@ class LiveStat extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: <Color>[
             Colors.transparent,
-            Colors.black54,
+            Color(0x99000000),
           ],
           tileMode: TileMode.mirror,
         ),

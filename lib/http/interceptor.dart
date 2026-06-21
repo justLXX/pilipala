@@ -35,7 +35,7 @@ class ApiInterceptor extends Interceptor {
         }
       }
     } catch (err) {
-      print('ApiInterceptor: $err');
+      // print('ApiInterceptor: $err');
     }
 
     handler.next(response);

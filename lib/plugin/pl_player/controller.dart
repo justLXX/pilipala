@@ -2,9 +2,9 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:easy_debounce/easy_throttle.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
@@ -98,12 +98,25 @@ class PlPlayerController {
   final Rx<BoxFit> _videoFit = Rx(BoxFit.contain);
   final Rx<String> _videoFitDesc = Rx('包含');
 
+  /// 每次 media 打开后递增，触发 Video widget 重建以刷新 texture
+  final RxInt _videoTextureKey = 0.obs;
+  Rx<int> get videoTextureKey => _videoTextureKey;
+
+  /// 当前媒体是否已经进入可展示播放状态。
+  ///
+  /// Android 上偶发出现音频已开始、纹理首帧未主动刷新，
+  /// buffering 状态又短暂抖动的情况。这里用单独状态给 UI 一个
+  /// 稳定的“可以撤掉启动 loading”信号。
+  final RxBool hasPlaybackStarted = false.obs;
+  bool _didRefreshTextureForPlayback = false;
+
   ///
   // ignore: prefer_final_fields
   Rx<bool> _isSliderMoving = false.obs;
   PlaylistMode _looping = PlaylistMode.none;
   bool _autoPlay = false;
-  final bool _listenersInitialized = false;
+  bool _listenersInitialized = false;
+  int _lastDebugPositionSecond = -1;
 
   // 记录历史记录
   String _bvid = '';
@@ -317,6 +330,7 @@ class PlPlayerController {
     // 如果实例尚未创建，则创建一个新实例
     _instance ??= PlPlayerController._internal(videoType);
     if (videoType != 'none') {
+      _instance!.videoType = videoType;
       _instance!._playerCount.value += 1;
       _videoType.value = videoType;
     }
@@ -351,12 +365,22 @@ class PlPlayerController {
     bool enableSubTitle = false,
   }) async {
     try {
+      _log(
+        'setDataSource 开始 bvid=$bvid cid=$cid autoplay=$autoplay '
+        'playerCount=${_playerCount.value} oldDataStatus=${dataStatus.status.value} '
+        'oldPlaying=${_videoPlayerController?.state.playing} oldPosition=${_videoPlayerController?.state.position}',
+      );
       _autoPlay = autoplay;
       _looping = looping;
       // 初始化视频倍速
       // _playbackSpeed.value = speed;
       // 初始化数据加载状态
       dataStatus.status.value = DataStatus.loading;
+      hasPlaybackStarted.value = false;
+      _didRefreshTextureForPlayback = false;
+      isBuffering.value = true;
+      playerStatus.status.value = PlayerStatus.paused;
+      _log('dataStatus -> loading, hasPlaybackStarted=false, buffering=true');
       // 初始化全屏方向
       _direction.value = direction ?? 'horizontal';
       _bvid = bvid;
@@ -368,10 +392,12 @@ class PlPlayerController {
       subtitleContent.value = '';
       if (_videoPlayerController != null &&
           _videoPlayerController!.state.playing) {
+        _log('旧播放器仍在播放，先 pause');
         await pause(notify: false);
       }
 
       if (_playerCount.value == 0) {
+        _log('playerCount=0，setDataSource 提前返回');
         return;
       }
       // 配置Player 音轨、字幕等等
@@ -382,12 +408,22 @@ class PlPlayerController {
       updateDurationSecond();
       // 数据加载完成
       dataStatus.status.value = DataStatus.loaded;
+      _log(
+        'dataStatus -> loaded duration=${_duration.value} '
+        'textureKey=${_videoTextureKey.value} videoController=${identityHashCode(_videoController)}',
+      );
 
       // listen the video player events
       if (!_listenersInitialized) {
         startListeners();
+      } else {
+        _log('监听已存在，跳过 startListeners');
       }
       await _initializePlayer(duration: _duration.value);
+      _log(
+        'initialize 完成 status=${playerStatus.status.value} '
+        'playing=${_videoPlayerController?.state.playing} buffering=${isBuffering.value}',
+      );
       bool autoEnterFullcreen =
           setting.get(SettingBoxKey.enableAutoEnter, defaultValue: false);
       if (autoEnterFullcreen && _isFirstTime) {
@@ -396,7 +432,7 @@ class PlPlayerController {
       }
     } catch (err) {
       dataStatus.status.value = DataStatus.error;
-      print('plPlayer err:  $err');
+      _log('setDataSource 异常: $err');
     }
   }
 
@@ -409,9 +445,15 @@ class PlPlayerController {
     double? height,
     Duration seekTo,
   ) async {
+    _log(
+      '_createVideoController 开始 reusePlayer=${_videoPlayerController != null} '
+      'reuseVideoController=${_videoController != null} seekTo=$seekTo',
+    );
     // 每次配置时先移除监听
     removeListeners();
     isBuffering.value = false;
+    hasPlaybackStarted.value = false;
+    _didRefreshTextureForPlayback = false;
     buffered.value = Duration.zero;
     _heartDuration = 0;
     _position.value = Duration.zero;
@@ -483,8 +525,19 @@ class PlPlayerController {
             androidAttachSurfaceAfterVideoParameters: true,
           ),
         );
+    _log(
+      'VideoController 准备完成 player=${identityHashCode(player)} '
+      'videoController=${identityHashCode(_videoController)}',
+    );
 
     player.setPlaylistMode(looping);
+
+    // 切换视频前确保播放器已完全暂停，避免在播放状态过渡期间
+    // 调用 open() 导致卡住（底层 mpv 可能仍在清理前一个媒体流）
+    if (player.state.playing) {
+      _log('open 前 player.state.playing=true，执行 pause');
+      await player.pause();
+    }
 
     if (dataSource.type == DataSourceType.asset) {
       final assetUrl = dataSource.videoSource!.startsWith("asset://")
@@ -495,11 +548,18 @@ class PlPlayerController {
         play: false,
       );
     }
+    _log(
+      'player.open 开始 source=${dataSource.videoSource?.substring(0, dataSource.videoSource!.length > 64 ? 64 : dataSource.videoSource!.length)} '
+      'audio=${dataSource.audioSource != null}',
+    );
     await player.open(
       Media(dataSource.videoSource!,
           httpHeaders: dataSource.httpHeaders, start: seekTo),
       play: false,
     );
+    // media 打开后递增 key，触发 Video widget 重建以刷新 texture
+    _videoTextureKey.value++;
+    _log('player.open 完成 textureKey=${_videoTextureKey.value}');
     // 音轨
     // player.setAudioTrack(
     //   AudioTrack.uri(dataSource.audioSource!),
@@ -550,6 +610,7 @@ class PlPlayerController {
 
   /// 播放事件监听
   void startListeners() {
+    _log('startListeners');
     subscriptions.addAll(
       [
         videoPlayerController!.stream.playing.listen((event) {
@@ -557,10 +618,13 @@ class PlPlayerController {
           // frame-refresh (play→pause). Keep the status as paused.
           if (_suppressPlayingBroadcast) {
             _suppressPlayingBroadcast = false;
+            _log('playing=$event 被 suppress');
             return;
           }
+          _log('stream.playing=$event position=${_position.value}');
           if (event) {
             playerStatus.status.value = PlayerStatus.playing;
+            _markPlaybackStarted();
           } else {
             playerStatus.status.value = PlayerStatus.paused;
           }
@@ -576,6 +640,7 @@ class PlPlayerController {
           }
         }),
         videoPlayerController!.stream.completed.listen((event) {
+          _log('stream.completed=$event');
           if (event) {
             playerStatus.status.value = PlayerStatus.completed;
 
@@ -591,6 +656,19 @@ class PlPlayerController {
         videoPlayerController!.stream.position.listen((event) {
           _position.value = event;
           updatePositionSecond();
+          final second = event.inSeconds;
+          if (second != _lastDebugPositionSecond &&
+              (second <= 3 || second % 5 == 0)) {
+            _lastDebugPositionSecond = second;
+            _log(
+              'stream.position=$event dataStatus=${dataStatus.status.value} '
+              'playing=${playerStatus.status.value} buffering=${isBuffering.value} '
+              'hasPlaybackStarted=${hasPlaybackStarted.value}',
+            );
+          }
+          if (event > Duration.zero) {
+            _markPlaybackStarted();
+          }
           if (!isSliderMoving.value) {
             _sliderPosition.value = event;
             updateSliderPositionSecond();
@@ -607,6 +685,7 @@ class PlPlayerController {
         videoPlayerController!.stream.duration.listen((event) {
           if (event > Duration.zero) {
             duration.value = event;
+            _log('stream.duration=$event');
           }
         }),
         videoPlayerController!.stream.buffer.listen((event) {
@@ -615,6 +694,13 @@ class PlPlayerController {
         }),
         videoPlayerController!.stream.buffering.listen((event) {
           isBuffering.value = event;
+          _log(
+            'stream.buffering=$event dataStatus=${dataStatus.status.value} '
+            'playing=${playerStatus.status.value} hasPlaybackStarted=${hasPlaybackStarted.value}',
+          );
+          if (!event && playerStatus.playing) {
+            _markPlaybackStarted();
+          }
           videoPlayerServiceHandler.onStatusChange(
               playerStatus.status.value, event);
         }),
@@ -635,13 +721,51 @@ class PlPlayerController {
         }),
       ],
     );
+    _listenersInitialized = true;
+    _log('startListeners 完成 subscriptions=${subscriptions.length}');
+  }
+
+  void _markPlaybackStarted() {
+    final wasStarted = hasPlaybackStarted.value;
+    final hadBuffering = isBuffering.value;
+    final hadRefreshedTexture = _didRefreshTextureForPlayback;
+    if (!hasPlaybackStarted.value) {
+      hasPlaybackStarted.value = true;
+    }
+    if (isBuffering.value) {
+      isBuffering.value = false;
+      videoPlayerServiceHandler.onStatusChange(
+          playerStatus.status.value, false);
+    }
+    if (!_didRefreshTextureForPlayback) {
+      _didRefreshTextureForPlayback = true;
+      _videoTextureKey.value++;
+    }
+    if (!wasStarted || hadBuffering || !hadRefreshedTexture) {
+      _log(
+        '_markPlaybackStarted wasStarted=$wasStarted '
+        'buffering $hadBuffering -> ${isBuffering.value} '
+        'textureRefreshed=$hadRefreshedTexture textureKey=${_videoTextureKey.value} '
+        'dataStatus=${dataStatus.status.value}',
+      );
+    }
   }
 
   /// 移除事件监听
   void removeListeners() {
+    if (subscriptions.isNotEmpty || _listenersInitialized) {
+      _log('removeListeners count=${subscriptions.length}');
+    }
     for (final s in subscriptions) {
       s.cancel();
     }
+    subscriptions.clear();
+    _listenersInitialized = false;
+  }
+
+  void _log(String message) {
+    if (!kDebugMode) return;
+    debugPrint('[播放器链路][PlPlayer ${identityHashCode(this)}] $message');
   }
 
   /// 跳转至指定位置
@@ -672,7 +796,7 @@ class PlPlayerController {
         _timerForSeek ??= _startSeekTimer(position);
       }
     } catch (err) {
-      print('Error while seeking: $err');
+      _log('seekTo 异常: $err');
     }
   }
 
@@ -817,7 +941,7 @@ class PlPlayerController {
       FlutterVolumeController.updateShowSystemUI(false);
       await FlutterVolumeController.setVolume(volumeNew);
     } catch (err) {
-      print(err);
+      _log('setVolume 异常: $err');
     }
   }
 
@@ -947,7 +1071,7 @@ class PlPlayerController {
       setPlaybackSpeed(
           enableAutoLongPressSpeed ? playbackSpeed * 2 : longPressSpeed);
     } else {
-      print(playbackSpeed);
+      _log('恢复倍速 playbackSpeed=$playbackSpeed');
       setPlaybackSpeed(playbackSpeed);
     }
   }
@@ -1002,12 +1126,20 @@ class PlPlayerController {
     }
   }
 
-  void addPositionListener(Function(Duration position) listener) =>
+  void addPositionListener(Function(Duration position) listener) {
+    if (!_positionListeners.contains(listener)) {
       _positionListeners.add(listener);
+    }
+  }
+
   void removePositionListener(Function(Duration position) listener) =>
       _positionListeners.remove(listener);
-  void addStatusLister(Function(PlayerStatus status) listener) =>
+  void addStatusLister(Function(PlayerStatus status) listener) {
+    if (!_statusListeners.contains(listener)) {
       _statusListeners.add(listener);
+    }
+  }
+
   void removeStatusLister(Function(PlayerStatus status) listener) =>
       _statusListeners.remove(listener);
 
@@ -1102,7 +1234,7 @@ class PlPlayerController {
     if (type == 'single' && playerCount.value > 1) {
       _playerCount.value -= 1;
       _heartDuration = 0;
-      pause();
+      _log('dispose(single) 仅释放页面引用，剩余 playerCount=${_playerCount.value}');
       return;
     }
     _playerCount.value = 0;
@@ -1134,12 +1266,13 @@ class PlPlayerController {
         await _videoPlayerController?.dispose();
         _videoPlayerController = null;
       }
+      _videoController = null;
       _instance = null;
       // 关闭所有视频页面恢复亮度
       resetBrightness();
       videoPlayerServiceHandler.clear();
     } catch (err) {
-      print(err);
+      _log('dispose 异常: $err');
     }
   }
 }

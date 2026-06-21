@@ -123,7 +123,7 @@ class PiliSchame {
 
   // 投稿跳转
   static Future<void> _videoPush(int? aidVal, String? bvidVal) async {
-    SmartDialog.showLoading<dynamic>(msg: '获取中...');
+    SmartDialog.showLoading<dynamic>(msg: '获取中...', clickMaskDismiss: true, backType: SmartBackType.normal);
     try {
       int? aid = aidVal;
       String? bvid = bvidVal;

@@ -67,11 +67,11 @@ class DioApiClient implements ApiClient {
 
   DioApiClient({Dio? dio}) : _dio = dio ?? Request.dio {
     // 为 ApiClient 实例也添加日志拦截器（如果尚未添加）
-    final hasLogInterceptor =
-        _dio.interceptors.any((i) => i is ApiLogInterceptor);
-    if (!hasLogInterceptor) {
-      _dio.interceptors.add(ApiLogInterceptor());
-    }
+    // final hasLogInterceptor =
+    //     _dio.interceptors.any((i) => i is ApiLogInterceptor);
+    // if (!hasLogInterceptor) {
+    //   _dio.interceptors.add(ApiLogInterceptor());
+    // }
   }
 
   @override

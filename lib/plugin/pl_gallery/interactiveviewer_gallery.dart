@@ -333,7 +333,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
 
   // 图片分享
   void onShareImg(String imgUrl) async {
-    SmartDialog.showLoading();
+    SmartDialog.showLoading(clickMaskDismiss: true, backType: SmartBackType.normal);
     var response = await Dio()
         .get(imgUrl, options: Options(responseType: ResponseType.bytes));
     final temp = await getTemporaryDirectory();

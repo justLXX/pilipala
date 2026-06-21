@@ -21,56 +21,60 @@ class LiveCardV extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String heroTag = Utils.makeHeroTag(liveItem.roomId);
-    return InkWell(
-      onLongPress: () => imageSaveDialog(
-        context,
-        liveItem,
-        SmartDialog.dismiss,
-      ),
-      borderRadius: BorderRadius.circular(16),
-      onTap: () async {
-        Get.toNamed('/liveRoom?roomid=${liveItem.roomId}',
-            arguments: {'liveItem': liveItem, 'heroTag': heroTag});
-      },
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.all(StyleString.imgRadius),
-            child: AspectRatio(
-              aspectRatio: StyleString.aspectRatio,
-              child: LayoutBuilder(builder: (context, boxConstraints) {
-                double maxWidth = boxConstraints.maxWidth;
-                double maxHeight = boxConstraints.maxHeight;
-                return Stack(
-                  children: [
-                    Hero(
-                      tag: heroTag,
-                      child: NetworkImgLayer(
-                        src: liveItem.cover!,
-                        width: maxWidth,
-                        height: maxHeight,
-                      ),
-                    ),
-                    if (crossAxisCount != 1)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: AnimatedOpacity(
-                          opacity: 1,
-                          duration: const Duration(milliseconds: 200),
-                          child: VideoStat(
-                            liveItem: liveItem,
-                          ),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: StyleString.lgRadius,
+      child: InkWell(
+        onLongPress: () => imageSaveDialog(
+          context,
+          liveItem,
+          SmartDialog.dismiss,
+        ),
+        borderRadius: StyleString.lgRadius,
+        onTap: () async {
+          Get.toNamed('/liveRoom?roomid=${liveItem.roomId}',
+              arguments: {'liveItem': liveItem, 'heroTag': heroTag});
+        },
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.all(StyleString.imgRadius),
+              child: AspectRatio(
+                aspectRatio: StyleString.aspectRatio,
+                child: LayoutBuilder(builder: (context, boxConstraints) {
+                  double maxWidth = boxConstraints.maxWidth;
+                  double maxHeight = boxConstraints.maxHeight;
+                  return Stack(
+                    children: [
+                      Hero(
+                        tag: heroTag,
+                        child: NetworkImgLayer(
+                          src: liveItem.cover!,
+                          width: maxWidth,
+                          height: maxHeight,
                         ),
                       ),
-                  ],
-                );
-              }),
+                      if (crossAxisCount != 1)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: AnimatedOpacity(
+                            opacity: 1,
+                            duration: const Duration(milliseconds: 200),
+                            child: VideoStat(
+                              liveItem: liveItem,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }),
+              ),
             ),
-          ),
-          LiveContent(liveItem: liveItem, crossAxisCount: crossAxisCount)
-        ],
+            LiveContent(liveItem: liveItem, crossAxisCount: crossAxisCount)
+          ],
+        ),
       ),
     );
   }
@@ -99,7 +103,7 @@ class LiveContent extends StatelessWidget {
               textAlign: TextAlign.start,
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
+                letterSpacing: 0,
               ),
               maxLines: crossAxisCount == 1 ? 1 : 2,
               overflow: TextOverflow.ellipsis,
@@ -166,7 +170,7 @@ class VideoStat extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: <Color>[
             Colors.transparent,
-            Colors.black54,
+            Color(0x99000000),
           ],
           tileMode: TileMode.mirror,
         ),

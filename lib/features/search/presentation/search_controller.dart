@@ -32,6 +32,7 @@ class PiliSearchController extends GetxController {
   final RxList<String> _suggestions = <String>[].obs;
   final RxList<String> _searchHistory = <String>[].obs;
   final RxString _keyword = ''.obs;
+  final RxString _hintKeyword = ''.obs;
   final RxString _searchType = 'video'.obs;
   final RxBool _isHotLoading = false.obs;
   final RxBool _isSearching = false.obs;
@@ -57,6 +58,7 @@ class PiliSearchController extends GetxController {
   List<String> get suggestions => _suggestions;
   List<String> get searchHistory => _searchHistory;
   String get keyword => _keyword.value;
+  String get hintKeyword => _hintKeyword.value;
   String get searchType => _searchType.value;
   bool get isHotLoading => _isHotLoading.value;
   bool get isSearching => _isSearching.value;
@@ -198,10 +200,12 @@ class PiliSearchController extends GetxController {
   // ==================== Search Execution ====================
 
   /// 根据路由参数准备搜索页状态。
-  void prepareForRoute({String? keyword}) {
+  void prepareForRoute({String? keyword, String? hintKeyword}) {
     final routeKeyword = keyword?.trim() ?? '';
+    final routeHintKeyword = hintKeyword?.trim() ?? '';
     _error.value = '';
     _suggestions.clear();
+    _hintKeyword.value = routeHintKeyword;
 
     if (routeKeyword.isEmpty) {
       _searchRequestId++;
@@ -230,26 +234,36 @@ class PiliSearchController extends GetxController {
     performSearch(routeKeyword);
   }
 
+  /// 使用输入内容发起搜索；输入为空时使用首页带入的提示词。
+  Future<void> searchFromInput([String? value]) async {
+    final inputKeyword = (value ?? textEditingController.text).trim();
+    final nextKeyword =
+        inputKeyword.isNotEmpty ? inputKeyword : _hintKeyword.value;
+    if (nextKeyword.isEmpty) return;
+    await performSearch(nextKeyword);
+  }
+
   /// Perform a search with the given keyword.
   Future<void> performSearch(String keyword) async {
-    if (keyword.isEmpty) return;
+    final searchKeyword = keyword.trim();
+    if (searchKeyword.isEmpty) return;
 
     final requestId = ++_searchRequestId;
     _isSearching.value = true;
     _error.value = '';
-    _keyword.value = keyword;
+    _keyword.value = searchKeyword;
     _currentPage.value = 1;
     _hasMore.value = true;
     _suggestions.clear();
-    _inputText.value = keyword;
+    _inputText.value = searchKeyword;
 
     // Save to search history
-    saveToHistory(keyword);
+    saveToHistory(searchKeyword);
 
     // Update text field
-    textEditingController.text = keyword;
+    textEditingController.text = searchKeyword;
     textEditingController.selection = TextSelection.fromPosition(
-      TextPosition(offset: keyword.length),
+      TextPosition(offset: searchKeyword.length),
     );
 
     // Unfocus the search field
@@ -257,7 +271,7 @@ class PiliSearchController extends GetxController {
 
     try {
       final results = await _searchContent.execute(
-        keyword: keyword,
+        keyword: searchKeyword,
         searchType: _searchType.value,
         page: 1,
       );

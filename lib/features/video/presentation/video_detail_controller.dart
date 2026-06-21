@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -163,6 +164,7 @@ class VideoDetailController extends GetxController
     final playUrl = _playUrl.value;
     if (playUrl == null) return;
 
+    _log('reinitPlayer bvid=$bvid cid=$cid seekTo=$seekTo');
     await _setPlayerSource(
       autoplay: true,
       seekTo: seekTo,
@@ -173,26 +175,45 @@ class VideoDetailController extends GetxController
 
   /// Load video detail.
   Future<void> loadVideoDetail({String? bvid, int? aid}) async {
+    _log(
+        'loadVideoDetail 开始 paramBvid=$bvid aid=$aid oldBvid=${this.bvid} oldCid=$cid');
     _isLoading.value = true;
     _error.value = '';
+    // PlPlayerController is a singleton and may still hold the previous
+    // video's loaded frame. Hide it immediately while the new source loads.
+    playerController.dataStatus.status.value = DataStatus.loading;
+    _log('player dataStatus -> loading');
 
     try {
       // 1. Get video detail
       final currentBvid = bvid ?? this.bvid;
       if (currentBvid.isEmpty) {
         _error.value = '缺少视频参数';
+        _log('loadVideoDetail 失败：缺少视频参数');
         return;
       }
+      this.bvid = currentBvid;
+      _videoDetail.value = null;
+      _playUrl.value = null;
+      _relatedVideos.clear();
+      viewPoints.clear();
+      currentChapterIndex.value = -1;
+      commentController = null;
       final result = await VideoHttp.videoIntro(bvid: currentBvid);
       if (!result['status'] || result['data'] == null) {
         _error.value = result['msg'] ?? '加载视频详情失败';
+        _log('videoIntro 失败 msg=${_error.value}');
         return;
       }
       final videoDetail = result['data'] as VideoDetailData;
       _videoDetail.value = videoDetail;
+      _log(
+        'videoIntro 成功 bvid=${videoDetail.bvid} aid=${videoDetail.aid} '
+        'detailCid=${videoDetail.cid} currentCid=$cid',
+      );
 
-      // Update cid from video detail if route param is missing
-      if (videoDetail.cid != null && cid == 0) {
+      // Update cid from video detail if route param is missing or invalid.
+      if (videoDetail.cid != null && cid <= 0) {
         cid = videoDetail.cid!;
       }
 
@@ -220,13 +241,26 @@ class VideoDetailController extends GetxController
       final loginFuture = _refreshUserLoginState();
 
       // 3. Load play URL and initialize player (gates first-paint).
-      if (videoDetail.cid != null) {
+      final playCid = cid > 0 ? cid : videoDetail.cid;
+      if (playCid != null && playCid > 0) {
+        cid = playCid;
+        _log(
+            '准备 loadPlayUrl avid=${videoDetail.aid ?? 0} cid=$playCid bvid=$currentBvid');
         await loadPlayUrl(
           avid: videoDetail.aid ?? 0,
-          cid: videoDetail.cid!,
+          cid: playCid,
           bvid: currentBvid,
         );
-        await _initPlayer(bvid: currentBvid, cid: videoDetail.cid!);
+        _log(
+            'loadPlayUrl 完成 playUrl=${_playUrl.value != null} error=${_error.value}');
+        await _initPlayer(bvid: currentBvid, cid: playCid);
+        _log(
+          '_initPlayer 完成 playerDataStatus=${playerController.dataStatus.status.value} '
+          'playerStatus=${playerController.playerStatus.status.value}',
+        );
+      } else {
+        _error.value = '缺少视频播放参数';
+        _log('loadVideoDetail 失败：缺少视频播放参数');
       }
 
       // 2. Query like/coin/collect status if logged in (independent of player)
@@ -240,8 +274,10 @@ class VideoDetailController extends GetxController
       }
     } catch (e) {
       _error.value = e.toString();
+      _log('loadVideoDetail 异常: $e');
     } finally {
       _isLoading.value = false;
+      _log('loadVideoDetail 结束 isLoading=false error=${_error.value}');
     }
   }
 
@@ -404,6 +440,7 @@ class VideoDetailController extends GetxController
 
   /// Initialize player with play URL.
   Future<void> _initPlayer({String? bvid, required int cid}) async {
+    _log('_initPlayer bvid=$bvid cid=$cid');
     await _setPlayerSource(autoplay: true, bvid: bvid ?? '', cid: cid);
   }
 
@@ -414,7 +451,11 @@ class VideoDetailController extends GetxController
     Duration seekTo = Duration.zero,
   }) async {
     final playUrl = _playUrl.value;
-    if (playUrl == null) return;
+    if (playUrl == null) {
+      playerController.dataStatus.status.value = DataStatus.error;
+      _log('_setPlayerSource 失败：playUrl=null');
+      return;
+    }
 
     String videoUrl = '';
     String audioUrl = '';
@@ -447,8 +488,15 @@ class VideoDetailController extends GetxController
 
     if (videoUrl.isEmpty) {
       _error.value = '无法获取视频播放地址';
+      playerController.dataStatus.status.value = DataStatus.error;
+      _log('_setPlayerSource 失败：videoUrl 为空');
       return;
     }
+    _log(
+      '_setPlayerSource 调用 setDataSource bvid=$bvid cid=$cid '
+      'autoplay=$autoplay seekTo=$seekTo hasAudio=${audioUrl.isNotEmpty} '
+      'durationMs=${playUrl.timeLength}',
+    );
 
     final dataSource = DataSource(
       videoSource: videoUrl,
@@ -468,6 +516,11 @@ class VideoDetailController extends GetxController
       bvid: bvid,
       cid: cid,
       duration: Duration(milliseconds: playUrl.timeLength ?? 0),
+    );
+    _log(
+      'setDataSource 返回 dataStatus=${playerController.dataStatus.status.value} '
+      'playerStatus=${playerController.playerStatus.status.value} '
+      'hasPlaybackStarted=${playerController.hasPlaybackStarted.value}',
     );
   }
 
@@ -493,7 +546,10 @@ class VideoDetailController extends GetxController
     final hasDashTarget = dashVideos.any((item) => item.id == qualityCode);
 
     try {
-      SmartDialog.showLoading(msg: '正在切换清晰度');
+      SmartDialog.showLoading(
+          msg: '正在切换清晰度',
+          clickMaskDismiss: true,
+          backType: SmartBackType.normal);
       _currentVideoQuality.value = targetQuality;
       if (!hasDashTarget) {
         await loadPlayUrl(
@@ -526,6 +582,7 @@ class VideoDetailController extends GetxController
     int qn = 80,
   }) async {
     try {
+      _log('loadPlayUrl 开始 avid=$avid cid=$cid bvid=$bvid qn=$qn');
       final result = await VideoHttp.videoUrl(
         avid: avid,
         bvid: bvid,
@@ -545,9 +602,14 @@ class VideoDetailController extends GetxController
               : null;
           _currentVideoQuality.value = firstDashQuality;
         }
+        _log('loadPlayUrl 成功 quality=${_currentVideoQuality.value}');
+      } else {
+        _error.value = result['msg'] ?? '获取播放地址失败';
+        _log('loadPlayUrl 失败 msg=${_error.value}');
       }
     } catch (e) {
       _error.value = e.toString();
+      _log('loadPlayUrl 异常: $e');
     }
   }
 
@@ -656,5 +718,11 @@ class VideoDetailController extends GetxController
     } else {
       SmartDialog.showToast(result['msg'] ?? '投币失败');
     }
+  }
+
+  void _log(String message) {
+    if (!kDebugMode) return;
+    debugPrint(
+        '[播放器链路][VideoDetailController ${identityHashCode(this)}] $message');
   }
 }
